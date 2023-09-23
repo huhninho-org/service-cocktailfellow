@@ -35,8 +35,7 @@ class ApiGatewayResponse(
 
       if (rawBody != null) {
         body = rawBody as String
-      }
-      else if (objectBody != null) {
+      } else if (objectBody != null) {
         try {
           body = objectMapper.writeValueAsString(objectBody)
         } catch (e: JsonProcessingException) {
