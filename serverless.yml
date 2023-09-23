@@ -1,0 +1,58 @@
+org: lhoerhan
+app: cocktail-fellow
+service: backend
+
+frameworkVersion: "3.35.2"
+
+custom:
+  teamPrefix: cocktail-fellow
+  stage: ${opt:stage, self:provider.stage}
+  region: eu-central-1
+  tables:
+    user: ${self:custom.teamPrefix}_${self:custom.stage}_user_table
+
+provider:
+  name: aws
+  snapStart: true
+  runtime: java11
+  region: ${self:custom.region}
+  stage: dev
+  environment:
+    REGION: ${self:custom.region}
+    USER_TABLE: ${self:custom.tables.user}
+
+package:
+  artifact: build/libs/cocktail-fellow-dev-all.jar
+
+functions:
+  user:
+    handler: com.cocktailfellow.user.CreateUser
+    events:
+      - http:
+          path: user
+          method: post
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
+
+resources:
+  Resources:
+    users:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tables.user}
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-offline
