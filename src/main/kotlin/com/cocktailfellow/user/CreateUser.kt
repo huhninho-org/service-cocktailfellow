@@ -8,6 +8,7 @@ import com.cocktailfellow.common.ValidationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.apache.logging.log4j.LogManager
+import org.mindrot.jbcrypt.BCrypt
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
@@ -28,9 +29,11 @@ class CreateUser : AbstractRequestHandler() {
       throw ValidationException("Invalid JSON.")
     }
 
+    val hashedPassword = BCrypt.hashpw(user.password, BCrypt.gensalt())
+
     val item = mapOf(
       "username" to AttributeValue.builder().s(user.username).build(),
-      "password" to AttributeValue.builder().s(user.password).build()
+      "password" to AttributeValue.builder().s(hashedPassword).build()
     )
 
     val putItemRequest = PutItemRequest.builder()
