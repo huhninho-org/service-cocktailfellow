@@ -18,10 +18,23 @@ class CreateUser : AbstractRequestHandler() {
 
   private val dynamoDb = DynamoDbClient.create()
   private val userTableName: String = System.getenv("USER_TABLE")
+  private val rquiredApiKey: String = "V8mjtjn1Kv9TofGELg7ZZL0lHODIlnLl" // todo: replace
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
+    var headers = input["headers"] as Map<*, *>?
+    val apiKey = headers?.get("x-api-key")
+
+
     val body = input["body"] as String?
     val user: User
+
+    if (apiKey == null || apiKey != rquiredApiKey) {
+      return ApiGatewayResponse.build {
+        statusCode = HttpStatusCode.FORBIDDEN.code
+        headers = mapOf("Content-Type" to "application/json")
+      }
+    }
+
     try {
       user = body?.let { Json.decodeFromString(it) }
         ?: throw ValidationException("No user found in the request body.")

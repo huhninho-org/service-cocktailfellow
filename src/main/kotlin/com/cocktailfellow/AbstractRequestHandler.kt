@@ -5,6 +5,9 @@ import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.cocktailfellow.common.CustomException
 import com.cocktailfellow.common.ErrorResponse
 import com.cocktailfellow.common.ErrorType
+import com.cocktailfellow.common.HttpStatusCode
+import com.fasterxml.jackson.databind.ObjectMapper
+
 
 abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGatewayResponse> {
 
@@ -17,7 +20,7 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
       val errorResponse = getErrorResponse(e)
       ApiGatewayResponse.build {
         statusCode = errorResponse.code
-        objectBody = errorResponse.message
+        objectBody = objectMapper.writeValueAsString(errorResponse) // serialize the ErrorResponse object
         headers = mapOf("X-Powered-By" to "AWS Lambda & serverless", "Content-Type" to "application/json")
       }
     }
@@ -26,14 +29,17 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
   private fun getErrorResponse(e: Throwable): ErrorResponse {
     return if (e is CustomException) {
       ErrorResponse(
-        code = e.statusCode.code, type = e.errorType.toLowerCase(), message = e.message
+        code = e.statusCode.code,
+        type = e.errorType.toLowerCase(),
+        message = e.message ?: "An error occurred."
       )
     } else {
       ErrorResponse(
-        code = 500,
+        code = HttpStatusCode.INTERNAL_SERVER_ERROR.code,
         type = ErrorType.UNKNOWN_EXCEPTION.toLowerCase(),
         message = e.message ?: "An error occurred."
       )
     }
   }
 }
+

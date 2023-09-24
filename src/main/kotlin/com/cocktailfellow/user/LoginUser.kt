@@ -63,7 +63,6 @@ class LoginUser : RequestHandler<Map<String, Any>, ApiGatewayResponse> {
     } else {
       return ApiGatewayResponse.build {
         statusCode = HttpStatusCode.UNAUTHORIZED.code
-        objectBody = objectMapper.writeValueAsString(mapOf("message" to "Unauthorized"))
         headers = mapOf("X-Powered-By" to "AWS Lambda & serverless", "Content-Type" to "application/json")
       }
     }
