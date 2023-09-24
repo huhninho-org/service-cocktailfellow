@@ -17,7 +17,7 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
       val errorResponse = getErrorResponse(e)
       ApiGatewayResponse.build {
         statusCode = errorResponse.code
-        objectBody = errorResponse
+        objectBody = errorResponse.message
         headers = mapOf("X-Powered-By" to "AWS Lambda & serverless", "Content-Type" to "application/json")
       }
     }

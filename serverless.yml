@@ -37,6 +37,18 @@ functions:
           - dynamodb:PutItem
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
+  login:
+    handler: com.cocktailfellow.user.LoginUser
+    events:
+      - http:
+          path: login
+          method: post
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
 
 resources:
   Resources:

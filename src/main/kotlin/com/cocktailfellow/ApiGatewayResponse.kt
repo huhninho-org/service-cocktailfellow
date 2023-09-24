@@ -1,6 +1,5 @@
 package com.cocktailfellow
 
-import com.cocktailfellow.common.ErrorResponse
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.logging.log4j.LogManager
@@ -26,7 +25,7 @@ class ApiGatewayResponse(
     var statusCode: Int = 200
     var rawBody: String? = null
     var headers: Map<String, String>? = Collections.emptyMap()
-    var objectBody: ErrorResponse? = null
+    var objectBody: String? = null
     var binaryBody: ByteArray? = null
     var base64Encoded: Boolean = false
 
@@ -37,7 +36,7 @@ class ApiGatewayResponse(
         body = rawBody as String
       } else if (objectBody != null) {
         try {
-          body = objectMapper.writeValueAsString(objectBody)
+          body = objectBody
         } catch (e: JsonProcessingException) {
           LOG.error("failed to serialize object", e)
           throw RuntimeException(e)
