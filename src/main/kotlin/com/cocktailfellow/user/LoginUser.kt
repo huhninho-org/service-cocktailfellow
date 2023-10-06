@@ -4,9 +4,11 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.token.TokenManagement
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.mindrot.jbcrypt.BCrypt
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
@@ -14,12 +16,13 @@ import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
 
 class LoginUser : RequestHandler<Map<String, Any>, ApiGatewayResponse> {
 
+  private var LOG: Logger = LogManager.getLogger(LoginUser::class.java)
   private val dynamoDb = DynamoDbClient.create()
   private val userTableName: String = System.getenv("USER_TABLE")
 
   override fun handleRequest(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val body = input["body"] as String
-    val loginRequest = Json.decodeFromString<LoginRequest>(body)
+    val loginRequest = JsonConfig.instance.decodeFromString<LoginRequest>(body)
 
     val itemRequest = GetItemRequest.builder()
       .tableName(userTableName)

@@ -4,9 +4,9 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.apache.logging.log4j.LogManager
 import org.mindrot.jbcrypt.BCrypt
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
@@ -24,7 +24,6 @@ class CreateUser : AbstractRequestHandler() {
     var headers = input["headers"] as Map<*, *>?
     val apiKey = headers?.get("x-api-key")
 
-
     val body = input["body"] as String?
     val user: User
 
@@ -36,17 +35,18 @@ class CreateUser : AbstractRequestHandler() {
     }
 
     try {
-      user = body?.let { Json.decodeFromString(it) }
+      user = body?.let { JsonConfig.instance.decodeFromString(it) }
         ?: throw ValidationException("No user found in the request body.")
     } catch (e: Exception) {
-      throw ValidationException("Invalid JSON.")
+      throw ValidationException("Invalid JSON")
     }
 
     val hashedPassword = BCrypt.hashpw(user.password, BCrypt.gensalt())
 
     val item = mapOf(
       "username" to AttributeValue.builder().s(user.username).build(),
-      "password" to AttributeValue.builder().s(hashedPassword).build()
+      "password" to AttributeValue.builder().s(hashedPassword).build(),
+      "groups" to AttributeValue.builder().s("").build()
     )
 
     val putItemRequest = PutItemRequest.builder()

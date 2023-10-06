@@ -10,6 +10,7 @@ custom:
   region: eu-central-1
   tables:
     user: ${self:custom.teamPrefix}_${self:custom.stage}_user_table
+    group: ${self:custom.teamPrefix}_${self:custom.stage}_group_table
 
 provider:
   name: aws
@@ -20,6 +21,7 @@ provider:
   environment:
     REGION: ${self:custom.region}
     USER_TABLE: ${self:custom.tables.user}
+    GROUP_TABLE: ${self:custom.tables.group}
 
 package:
   artifact: build/libs/cocktail-fellow-dev-all.jar
@@ -37,6 +39,19 @@ functions:
           - dynamodb:PutItem
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
+  group:
+    handler: com.cocktailfellow.group.CreateGroup
+    events:
+      - http:
+          path: group
+          method: post
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
   login:
     handler: com.cocktailfellow.user.LoginUser
     events:
@@ -61,6 +76,19 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: username
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    groups:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tables.group}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
