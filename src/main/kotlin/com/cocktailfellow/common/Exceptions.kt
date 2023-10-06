@@ -3,7 +3,12 @@ package com.cocktailfellow.common
 import kotlinx.serialization.Serializable
 
 enum class ErrorType {
-  VALIDATION_EXCEPTION, BAD_REQUEST, UNKNOWN_EXCEPTION;
+  VALIDATION_EXCEPTION,
+  BAD_REQUEST,
+  JWT_EXPIRED_EXCEPTION,
+  JWT_INVALID_SIGNATURE_EXCEPTION,
+  JWT_INVALID_EXCEPTION,
+  UNKNOWN_EXCEPTION;
 
   open fun toLowerCase(): String {
     return name.lowercase().replace('_', '-')
@@ -21,4 +26,11 @@ class ValidationException(
   message: String
 ) : CustomException(
   message = message, statusCode = HttpStatusCode.BAD_REQUEST, errorType = ErrorType.VALIDATION_EXCEPTION
+)
+
+class JwtTokenException(
+  message: String,
+  errorType: ErrorType
+) : CustomException(
+  message = message, statusCode = HttpStatusCode.BAD_REQUEST, errorType = errorType
 )
