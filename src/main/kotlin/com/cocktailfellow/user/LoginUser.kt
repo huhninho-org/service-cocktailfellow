@@ -6,6 +6,7 @@ import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.token.TokenManagement
+import com.cocktailfellow.user.model.LoginRequest
 import kotlinx.serialization.decodeFromString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger

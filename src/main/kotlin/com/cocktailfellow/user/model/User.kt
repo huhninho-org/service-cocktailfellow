@@ -1,4 +1,4 @@
-package com.cocktailfellow.user
+package com.cocktailfellow.user.model
 
 import kotlinx.serialization.Serializable
 

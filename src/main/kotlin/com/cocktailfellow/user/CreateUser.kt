@@ -6,6 +6,7 @@ import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.user.model.User
 import kotlinx.serialization.decodeFromString
 import org.apache.logging.log4j.LogManager
 import org.mindrot.jbcrypt.BCrypt
