@@ -1,9 +1,11 @@
 package com.cocktailfellow.group.database
 
+import com.cocktailfellow.common.ValidationException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 
 class GroupRepository {
@@ -15,9 +17,8 @@ class GroupRepository {
 
     fun createGroup(groupId: String, groupname: String) {
       val item = mapOf(
-        "id" to AttributeValue.builder().s(groupId).build(),
-        "groupname" to AttributeValue.builder().s(groupname).build(),
-        "isPreferred" to AttributeValue.builder().bool(true).build()
+        "groupId" to AttributeValue.builder().s(groupId).build(),
+        "groupname" to AttributeValue.builder().s(groupname).build()
       )
 
       val putGroupRequest = PutItemRequest.builder()
@@ -27,6 +28,19 @@ class GroupRepository {
 
       dynamoDb.putItem(putGroupRequest)
       LOG.info("Group '${groupname}' created.")
+    }
+
+    fun getGroupName(groupId: String): String {
+      val itemRequest = GetItemRequest.builder()
+        .tableName(groupTable)
+        .key(mapOf("groupId" to AttributeValue.builder().s(groupId).build()))
+        .build()
+
+      val response = dynamoDb.getItem(itemRequest)
+      val groupItem = response.item()
+
+      val groupName = groupItem["groupname"]?.s()
+      return groupName ?: throw ValidationException("No group id found.") // todo: refactor exception
     }
   }
 }

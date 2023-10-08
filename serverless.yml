@@ -9,8 +9,9 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   region: eu-central-1
   tables:
-    user: ${self:custom.teamPrefix}_${self:custom.stage}_user_table
-    group: ${self:custom.teamPrefix}_${self:custom.stage}_group_table
+    user: ${self:custom.teamPrefix}_${self:custom.stage}_user
+    group: ${self:custom.teamPrefix}_${self:custom.stage}_group
+    userGroupLink: ${self:custom.teamPrefix}_${self:custom.stage}_userGroupLink
 
 provider:
   name: aws
@@ -22,16 +23,17 @@ provider:
     REGION: ${self:custom.region}
     USER_TABLE: ${self:custom.tables.user}
     GROUP_TABLE: ${self:custom.tables.group}
+    USER_GROUP_LINK_TABLE: ${self:custom.tables.userGroupLink}
 
 package:
   artifact: build/libs/cocktail-fellow-dev-all.jar
 
 functions:
-  user:
+  createUser:
     handler: com.cocktailfellow.user.CreateUser
     events:
       - http:
-          path: user
+          path: users
           method: post
     iamRoleStatements:
       - Effect: "Allow"
@@ -39,19 +41,35 @@ functions:
           - dynamodb:PutItem
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
-  group:
+  createGroup:
     handler: com.cocktailfellow.group.CreateGroup
     events:
       - http:
-          path: group
+          path: groups
           method: post
     iamRoleStatements:
       - Effect: "Allow"
         Action:
           - dynamodb:PutItem
           - dynamodb:GetItem
+          - dynamodb:Query
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
+  getGroups:
+    handler: com.cocktailfellow.group.GetGroups
+    events:
+      - http:
+          path: groups
+          method: get
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:Query
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
   login:
     handler: com.cocktailfellow.user.LoginUser
     events:
@@ -62,6 +80,7 @@ functions:
       - Effect: "Allow"
         Action:
           - dynamodb:GetItem
+          - dynamodb:Scan
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
 
@@ -72,10 +91,10 @@ resources:
       Properties:
         TableName: ${self:custom.tables.user}
         AttributeDefinitions:
-          - AttributeName: username
+          - AttributeName: userId
             AttributeType: S
         KeySchema:
-          - AttributeName: username
+          - AttributeName: userId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
@@ -84,6 +103,19 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tables.group}
+        AttributeDefinitions:
+          - AttributeName: groupId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: groupId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    userGroupLinks:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tables.userGroupLink}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S

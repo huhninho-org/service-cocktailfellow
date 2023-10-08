@@ -6,6 +6,7 @@ import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.token.TokenManagement
+import com.cocktailfellow.user.database.UserRepository
 import com.cocktailfellow.user.model.LoginRequest
 import kotlinx.serialization.decodeFromString
 import org.apache.logging.log4j.LogManager
@@ -17,25 +18,28 @@ import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
 
 class LoginUser : RequestHandler<Map<String, Any>, ApiGatewayResponse> {
 
-  private var LOG: Logger = LogManager.getLogger(LoginUser::class.java)
+  private var log: Logger = LogManager.getLogger(LoginUser::class.java)
   private val dynamoDb = DynamoDbClient.create()
   private val userTableName: String = System.getenv("USER_TABLE")
 
   override fun handleRequest(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val body = input["body"] as String
     val loginRequest = JsonConfig.instance.decodeFromString<LoginRequest>(body)
+    val username = loginRequest.username
+
+    val userId = UserRepository.getUserId(username)
 
     val itemRequest = GetItemRequest.builder()
       .tableName(userTableName)
-      .key(mapOf("username" to AttributeValue.builder().s(loginRequest.username).build()))
+      .key(mapOf("userId" to AttributeValue.builder().s(userId).build()))
       .build()
 
     val response = dynamoDb.getItem(itemRequest)
     val item = response.item()
 
     return if (item != null && BCrypt.checkpw(loginRequest.password, item["password"]?.s())) {
-      val loginToken = TokenManagement.createLoginToken(loginRequest.username)
-      val refreshToken = TokenManagement.createRefreshToken(loginRequest.username)
+      val loginToken = TokenManagement.createLoginToken(username)
+      val refreshToken = TokenManagement.createRefreshToken(username)
 
       ApiGatewayResponse.build {
         statusCode = HttpStatusCode.OK.code
