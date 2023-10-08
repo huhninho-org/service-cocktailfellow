@@ -5,12 +5,10 @@ import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
+import com.cocktailfellow.common.database.UserGroupLinkRepository
 import com.cocktailfellow.group.database.GroupRepository
-import com.cocktailfellow.group.model.CreateGroupRequest
-import com.cocktailfellow.group.model.Group
 import com.cocktailfellow.token.TokenManagement
-import com.cocktailfellow.user.database.UserRepository
-import com.cocktailfellow.user.database.UserRepository.Companion.updateGroups
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import java.util.*
 
@@ -30,9 +28,7 @@ class CreateGroup : AbstractRequestHandler() {
     val groupId = UUID.randomUUID().toString()
     GroupRepository.createGroup(groupId, groupname)
 
-    val groups = UserRepository.getGroupsByUsername(username)
-    groups.groups.add(Group(groupId))
-    updateGroups(groups, username)
+    UserGroupLinkRepository.linkUserToGroup(username, groupId)
 
     val response = CreateGroupResponse(
       groupId = groupId,
@@ -47,6 +43,11 @@ class CreateGroup : AbstractRequestHandler() {
     }
   }
 }
+
+@Serializable
+data class CreateGroupRequest(
+  val groupname: String
+)
 
 data class CreateGroupResponse(
   val groupId: String,
