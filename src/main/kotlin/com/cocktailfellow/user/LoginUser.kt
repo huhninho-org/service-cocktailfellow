@@ -7,7 +7,6 @@ import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.token.TokenManagement
 import com.cocktailfellow.user.database.UserRepository
-import com.cocktailfellow.user.model.LoginRequest
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import org.mindrot.jbcrypt.BCrypt
@@ -45,6 +44,12 @@ class LoginUser : AbstractRequestHandler() {
 @Serializable
 data class CustomApiResponse<LoginResponse>(
   val result: LoginResponse,
+)
+
+@Serializable
+data class LoginRequest(
+  val username: String,
+  val password: String
 )
 
 @Serializable

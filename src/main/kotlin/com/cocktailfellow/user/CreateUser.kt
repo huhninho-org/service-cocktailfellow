@@ -8,7 +8,7 @@ import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.user.database.UserRepository
 import com.cocktailfellow.user.model.UserCreate
-import com.cocktailfellow.user.model.UserCreateRequest
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -26,7 +26,7 @@ class CreateUser : AbstractRequestHandler() {
     val apiKey = headers?.get("x-api-key")
 
     val body = input["body"] as String?
-    val user: UserCreateRequest
+    val user: CreateUserRequest
 
     if (apiKey == null || apiKey != rquiredApiKey) return generateError(HttpStatusCode.FORBIDDEN.code, "Forbidden.")
 
@@ -52,3 +52,9 @@ class CreateUser : AbstractRequestHandler() {
     return generateResponse(HttpStatusCode.CREATED.code)
   }
 }
+
+@Serializable
+data class CreateUserRequest(
+  val username: String,
+  val password: String
+)
