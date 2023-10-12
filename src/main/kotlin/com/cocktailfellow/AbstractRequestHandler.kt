@@ -6,6 +6,7 @@ import com.cocktailfellow.common.CustomException
 import com.cocktailfellow.common.ErrorResponse
 import com.cocktailfellow.common.ErrorType
 import com.cocktailfellow.common.HttpStatusCode
+import kotlinx.serialization.Serializable
 
 abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGatewayResponse> {
 
@@ -16,12 +17,21 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
       handleBusinessLogic(input, context)
     } catch (e: Exception) {
       val errorResponse = getErrorResponse(e)
-      ApiGatewayResponse.build {
-        statusCode = errorResponse.code
-        objectBody = objectMapper.writeValueAsString(errorResponse)
-        headers = mapOf("X-Powered-By" to "AWS Lambda & serverless", "Content-Type" to "application/json")
-      }
+      generateError(errorResponse.code, errorResponse.message)
     }
+  }
+
+  fun generateResponse(status: Int): ApiGatewayResponse {
+    return ApiGatewayResponse.withoutBody(status)
+  }
+
+  inline fun <reified T> generateResponse(status: Int, result: T, loginToken: String? = null): ApiGatewayResponse {
+    val response = ApiResponse(result, loginToken)
+    return ApiGatewayResponse.withBody(status, response)
+  }
+
+  fun generateError(status: Int, message: String): ApiGatewayResponse {
+    return ApiGatewayResponse.error(status, message)
   }
 
   private fun getErrorResponse(e: Throwable): ErrorResponse {
@@ -41,3 +51,8 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
   }
 }
 
+@Serializable
+data class ApiResponse<T>(
+  val result: T?,
+  val loginToken: String?
+)

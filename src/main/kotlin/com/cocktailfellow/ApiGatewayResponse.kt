@@ -1,10 +1,7 @@
 package com.cocktailfellow
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
-import java.nio.charset.StandardCharsets
+import com.cocktailfellow.common.JsonConfig
+import kotlinx.serialization.encodeToString
 import java.util.*
 
 class ApiGatewayResponse(
@@ -13,38 +10,21 @@ class ApiGatewayResponse(
   val headers: Map<String, String>? = Collections.emptyMap(),
   val isBase64Encoded: Boolean = false
 ) {
-
   companion object {
-    inline fun build(block: Builder.() -> Unit) = Builder().apply(block).build()
-  }
+    val defaultHeaders = mapOf("X-Powered-By" to "AWS Lambda & serverless", "Content-Type" to "application/json")
 
-  class Builder {
-    var LOG: Logger = LogManager.getLogger(Builder::class.java)
-    var objectMapper: ObjectMapper = ObjectMapper()
+    inline fun <reified T> withBody(status: Int, bodyObject: T): ApiGatewayResponse {
+      val body = JsonConfig.instance.encodeToString(bodyObject)
+      return ApiGatewayResponse(status, body, defaultHeaders)
+    }
 
-    var statusCode: Int = 200
-    var rawBody: String? = null
-    var headers: Map<String, String>? = Collections.emptyMap()
-    var objectBody: String? = null
-    var binaryBody: ByteArray? = null
-    var base64Encoded: Boolean = false
+    fun withoutBody(status: Int): ApiGatewayResponse {
+      return ApiGatewayResponse(status, body = null, defaultHeaders)
+    }
 
-    fun build(): ApiGatewayResponse {
-      var body: String? = null
-
-      if (rawBody != null) {
-        body = rawBody as String
-      } else if (objectBody != null) {
-        try {
-          body = objectBody
-        } catch (e: JsonProcessingException) {
-          LOG.error("failed to serialize object", e)
-          throw RuntimeException(e)
-        }
-      } else if (binaryBody != null) {
-        body = String(Base64.getEncoder().encode(binaryBody), StandardCharsets.UTF_8)
-      }
-      return ApiGatewayResponse(statusCode, body, headers, base64Encoded)
+    fun error(status: Int, message: String): ApiGatewayResponse {
+      val body = JsonConfig.instance.encodeToString(mapOf("error" to message))
+      return ApiGatewayResponse(status, body, defaultHeaders)
     }
   }
 }

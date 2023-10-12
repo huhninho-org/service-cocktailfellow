@@ -26,7 +26,7 @@ class CreateUser : AbstractRequestHandler() {
   private val rquiredApiKey: String = "V8mjtjn1Kv9TofGELg7ZZL0lHODIlnLl" // todo: replace
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    var headers = input["headers"] as Map<*, *>?
+    val headers = input["headers"] as Map<*, *>?
     val apiKey = headers?.get("x-api-key")
 
     val body = input["body"] as String?
@@ -34,12 +34,7 @@ class CreateUser : AbstractRequestHandler() {
 
     log.info(body)
 
-    if (apiKey == null || apiKey != rquiredApiKey) {
-      return ApiGatewayResponse.build {
-        statusCode = HttpStatusCode.FORBIDDEN.code
-        headers = mapOf("Content-Type" to "application/json")
-      }
-    }
+    if (apiKey == null || apiKey != rquiredApiKey) return generateError(HttpStatusCode.FORBIDDEN.code, "Forbidden.")
 
     try {
       user = body?.let { JsonConfig.instance.decodeFromString(it) }
@@ -71,9 +66,6 @@ class CreateUser : AbstractRequestHandler() {
       throw ValidationException("Username '${user.username}' already exists.")
     }
 
-    return ApiGatewayResponse.build {
-      statusCode = HttpStatusCode.CREATED.code
-      headers = mapOf("X-Powered-By" to "AWS Lambda & serverless", "Content-Type" to "application/json")
-    }
+    return generateResponse(HttpStatusCode.CREATED.code)
   }
 }

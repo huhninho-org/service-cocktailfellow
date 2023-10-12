@@ -6,6 +6,7 @@ import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.database.UserGroupLinkRepository
 import com.cocktailfellow.token.TokenManagement
+import kotlinx.serialization.Serializable
 
 class GetGroups : AbstractRequestHandler() {
 
@@ -23,14 +24,11 @@ class GetGroups : AbstractRequestHandler() {
       username = username
     )
 
-    return ApiGatewayResponse.build {
-      statusCode = HttpStatusCode.OK.code
-      headers = mapOf("X-Powered-By" to "AWS Lambda & serverless", "Content-Type" to "application/json")
-      objectBody = objectMapper.writeValueAsString(mapOf("result" to response, "loginToken" to loginToken))
-    }
+    return generateResponse(HttpStatusCode.OK.code, response, loginToken)
   }
 }
 
+@Serializable
 data class GetGroupsResponse(
   val groups: List<Map<String, String>>,
   val username: String

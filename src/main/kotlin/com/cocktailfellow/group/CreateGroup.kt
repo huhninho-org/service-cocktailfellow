@@ -20,37 +20,34 @@ class CreateGroup : AbstractRequestHandler() {
 
     val authorization = headers?.get("Authorization") as? String
     val request = JsonConfig.instance.decodeFromString<CreateGroupRequest>(body)
-    val groupname = request.groupname
+    val groupName = request.groupName
 
     val loginToken = TokenManagement.validateToken(authorization)
     val username = TokenManagement.getUsername(authorization)
 
     val groupId = UUID.randomUUID().toString()
-    GroupRepository.createGroup(groupId, groupname)
+    GroupRepository.createGroup(groupId, groupName)
 
     UserGroupLinkRepository.linkUserToGroup(username, groupId)
 
     val response = CreateGroupResponse(
       groupId = groupId,
       username = username,
-      groupname = groupname
+      groupName = groupName
     )
 
-    return ApiGatewayResponse.build {
-      statusCode = HttpStatusCode.CREATED.code
-      headers = mapOf("X-Powered-By" to "AWS Lambda & serverless", "Content-Type" to "application/json")
-      objectBody = objectMapper.writeValueAsString(mapOf("result" to response, "loginToken" to loginToken))
-    }
+    return generateResponse(HttpStatusCode.CREATED.code, response, loginToken)
   }
 }
 
 @Serializable
 data class CreateGroupRequest(
-  val groupname: String
+  val groupName: String
 )
 
+@Serializable
 data class CreateGroupResponse(
   val groupId: String,
   val username: String,
-  val groupname: String
+  val groupName: String
 )
