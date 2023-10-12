@@ -5,7 +5,10 @@ import com.cocktailfellow.common.database.UserGroupLinkRepository
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.*
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 
 class GroupRepository {
   companion object {
@@ -40,6 +43,16 @@ class GroupRepository {
 
       val groupName = groupItem["groupname"]?.s()
       return groupName ?: throw ValidationException("No group id found.") // todo: refactor exception
+    }
+
+    fun doesGroupExist(groupId: String): Boolean {
+      val request = GetItemRequest.builder()
+        .tableName(groupTable)
+        .key(mapOf("groupId" to AttributeValue.builder().s(groupId).build()))
+        .build()
+
+      val response = dynamoDb.getItem(request)
+      return response.item() != null
     }
 
     fun deleteGroup(groupId: String) {

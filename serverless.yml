@@ -87,6 +87,21 @@ functions:
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
+  shareGroup:
+    handler: com.cocktailfellow.group.ShareGroup
+    events:
+      - http:
+          path: groups/{groupId}/share
+          method: post
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+          - dynamodb:Query
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
   deleteGroup:
     handler: com.cocktailfellow.group.DeleteGroup
     events:

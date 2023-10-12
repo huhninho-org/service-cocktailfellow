@@ -2,7 +2,6 @@ package com.cocktailfellow.user.database
 
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.database.UserGroupLinkRepository
-import com.cocktailfellow.group.database.GroupRepository
 import com.cocktailfellow.user.model.User
 import com.cocktailfellow.user.model.UserCreate
 import org.apache.logging.log4j.LogManager
@@ -91,12 +90,14 @@ class UserRepository {
     }
 
     fun doesUserExist(username: String): Boolean {
-      val request = GetItemRequest.builder()
+      val userId: String = getUserId(username)
+
+      val itemRequest = GetItemRequest.builder()
         .tableName(userTable)
-        .key(mapOf("username" to AttributeValue.builder().s(username).build()))
+        .key(mapOf("userId" to AttributeValue.builder().s(userId).build()))
         .build()
 
-      val response = dynamoDb.getItem(request)
+      val response = dynamoDb.getItem(itemRequest)
       return response.item() != null
     }
 

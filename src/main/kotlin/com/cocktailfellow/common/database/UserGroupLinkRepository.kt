@@ -19,6 +19,10 @@ class UserGroupLinkRepository {
       val userId = UserRepository.getUserId(username)
       val userGroupLink = "$userId-$groupId"
 
+      if (doesLinkAlreadyExist(userGroupLink)) {
+        throw ValidationException("The user is already linked to the group.") // todo: refactor
+      }
+
       val item = mapOf(
         "id" to AttributeValue.builder().s(userGroupLink).build(),
         "userId" to AttributeValue.builder().s(userId).build(),
@@ -99,6 +103,16 @@ class UserGroupLinkRepository {
         .build()
 
       deleteDataset(dynamoDb.scan(scanRequest))
+    }
+
+    private fun doesLinkAlreadyExist(link: String): Boolean {
+      val itemRequest = GetItemRequest.builder()
+        .tableName(linkTable)
+        .key(mapOf("id" to AttributeValue.builder().s(link).build()))
+        .build()
+
+      val response = dynamoDb.getItem(itemRequest)
+      return response.item() != null
     }
 
     private fun deleteDataset(scanResponse: ScanResponse) {

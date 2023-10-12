@@ -4,12 +4,8 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.JsonConfig
-import com.cocktailfellow.group.DeleteGroupRequest
-import com.cocktailfellow.group.database.GroupRepository
 import com.cocktailfellow.token.TokenManagement
 import com.cocktailfellow.user.database.UserRepository
-import kotlinx.serialization.decodeFromString
 
 class DeleteUser : AbstractRequestHandler() {
 
