@@ -1,13 +1,19 @@
 package com.cocktailfellow.user.database
 
 import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.database.UserGroupLinkRepository
+import com.cocktailfellow.group.database.GroupRepository
 import com.cocktailfellow.user.model.User
 import com.cocktailfellow.user.model.UserCreate
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.*
 
 class UserRepository {
   companion object {
+    private val log: Logger = LogManager.getLogger(UserRepository::class.java)
+
     private val dynamoDb = DynamoDbClient.create()
     private val userTable: String = System.getenv("USER_TABLE")
 
@@ -82,6 +88,38 @@ class UserRepository {
         username = username,
         hashedPassword = item["password"]?.s()
       )
+    }
+
+    fun doesUserExist(username: String): Boolean {
+      val request = GetItemRequest.builder()
+        .tableName(userTable)
+        .key(mapOf("username" to AttributeValue.builder().s(username).build()))
+        .build()
+
+      val response = dynamoDb.getItem(request)
+      return response.item() != null
+    }
+
+    fun deleteUser(username: String) {
+      val userId = getUserId(username)
+
+      val keyMap = mapOf(
+        "userId" to AttributeValue.builder().s(userId).build()
+      )
+
+      val deleteItemRequest = DeleteItemRequest.builder()
+        .tableName(userTable)
+        .key(keyMap)
+        .build()
+
+      try {
+        dynamoDb.deleteItem(deleteItemRequest)
+        log.info("User with id '$userId' deleted.")
+      } catch (e: Exception) {
+        throw ValidationException("Failed to delete user with ID '$userId'.") // todo: refactor exception
+      }
+
+      UserGroupLinkRepository.deleteAllLinksForUser(userId)
     }
   }
 }

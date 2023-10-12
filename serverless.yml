@@ -29,6 +29,7 @@ package:
   artifact: build/libs/cocktail-fellow-dev-all.jar
 
 functions:
+# users
   createUser:
     handler: com.cocktailfellow.user.CreateUser
     events:
@@ -41,6 +42,22 @@ functions:
           - dynamodb:PutItem
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
+  deleteUser:
+    handler: com.cocktailfellow.user.DeleteUser
+    events:
+      - http:
+          path: users
+          method: delete
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:DeleteItem
+          - dynamodb:Scan
+          - dynamodb:Query
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
+# groups
   createGroup:
     handler: com.cocktailfellow.group.CreateGroup
     events:
@@ -85,7 +102,7 @@ functions:
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
-
+# login
   login:
     handler: com.cocktailfellow.user.LoginUser
     events:
