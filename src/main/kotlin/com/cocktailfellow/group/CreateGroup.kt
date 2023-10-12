@@ -15,7 +15,7 @@ import java.util.*
 class CreateGroup : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    var headers = input["headers"] as Map<*, *>?
+    val headers = input["headers"] as Map<*, *>?
     val body = input["body"] as String
 
     val authorization = headers?.get("Authorization") as? String

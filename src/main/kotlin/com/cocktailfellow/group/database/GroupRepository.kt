@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 
 class GroupRepository {
   companion object {
-    private var LOG: Logger = LogManager.getLogger(GroupRepository::class.java)
+    private val log: Logger = LogManager.getLogger(GroupRepository::class.java)
 
     private val dynamoDb = DynamoDbClient.create()
     private val groupTable: String = System.getenv("GROUP_TABLE")
@@ -27,7 +27,7 @@ class GroupRepository {
         .build()
 
       dynamoDb.putItem(putGroupRequest)
-      LOG.info("Group '${groupname}' created.")
+      log.info("Group '${groupname}' created.")
     }
 
     fun getGroupName(groupId: String): String {

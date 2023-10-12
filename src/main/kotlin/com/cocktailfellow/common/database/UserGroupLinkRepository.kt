@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.dynamodb.model.*
 
 class UserGroupLinkRepository {
   companion object {
-    private var log: Logger = LogManager.getLogger(UserGroupLinkRepository::class.java)
+    private val log: Logger = LogManager.getLogger(UserGroupLinkRepository::class.java)
 
     private val dynamoDb = DynamoDbClient.create()
     private val linkTable: String = System.getenv("USER_GROUP_LINK_TABLE")

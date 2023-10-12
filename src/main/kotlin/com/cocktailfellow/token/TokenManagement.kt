@@ -15,11 +15,11 @@ import java.util.*
 class TokenManagement {
 
   companion object {
-    private const val SECRET_KEY = "yourSuperStrongSecretKeyHereMakeSureItIsAtLeast32CharactersLong"
+    private const val SECRET_KEY = "yourSuperStrongSecretKeyHereMakeSureItIsAtLeast32CharactersLong" // todo: replace
     private val key: Key = Keys.hmacShaKeyFor(SECRET_KEY.toByteArray())
     private val nowMillis = System.currentTimeMillis()
     private val now = Date(nowMillis)
-    private var LOG: Logger = LogManager.getLogger(TokenManagement::class.java)
+    private val log: Logger = LogManager.getLogger(TokenManagement::class.java)
 
     fun validateToken(token: String?): String? {
       val username = getUsername(token)
@@ -37,7 +37,7 @@ class TokenManagement {
           .parseClaimsJws(bearerToken)
           .body
           .get("username", String::class.java)
-        LOG.info("Valid token for user $username")
+        log.info("Valid token for user $username")
       } catch (exception: SignatureException) {
         throw JwtTokenException("Invalid token signature", ErrorType.JWT_INVALID_SIGNATURE_EXCEPTION)
       } catch (exception: ExpiredJwtException) {
