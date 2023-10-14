@@ -59,8 +59,7 @@ class UserGroupLinkRepository {
       try {
         dynamoDb.deleteItem(itemRequest)
       } catch (e: Exception) {
-        log.error("Remove link between user '$userId' and group '$groupId' failed.")
-        throw ValidationException("User is already linked to this group.") // todo: refactor
+        throw ValidationException("Remove link between user '$userId' and group '$groupId' failed.") // todo: refactor
       }
     }
 
@@ -112,7 +111,7 @@ class UserGroupLinkRepository {
         .build()
 
       val response = dynamoDb.getItem(itemRequest)
-      return response.item() != null
+      return response.item().isNotEmpty()
     }
 
     private fun deleteDataset(scanResponse: ScanResponse) {

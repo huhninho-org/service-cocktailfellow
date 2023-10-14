@@ -52,7 +52,7 @@ class GroupRepository {
         .build()
 
       val response = dynamoDb.getItem(request)
-      return response.item() != null
+      return response.item().isNotEmpty()
     }
 
     fun deleteGroup(groupId: String) {

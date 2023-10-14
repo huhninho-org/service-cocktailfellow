@@ -98,7 +98,7 @@ class UserRepository {
         .build()
 
       val response = dynamoDb.getItem(itemRequest)
-      return response.item() != null
+      return response.item().isNotEmpty()
     }
 
     fun deleteUser(username: String) {
