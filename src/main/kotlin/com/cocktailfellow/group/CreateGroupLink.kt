@@ -13,7 +13,7 @@ import com.cocktailfellow.user.database.UserRepository
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 
-class ShareGroup : AbstractRequestHandler() {
+class CreateGroupLink : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val headers = input["headers"] as Map<*, *>?
@@ -21,7 +21,7 @@ class ShareGroup : AbstractRequestHandler() {
     val body = input["body"] as String
 
     val authorization = headers?.get("Authorization") as? String
-    val request = JsonConfig.instance.decodeFromString<ShareGroupRequest>(body)
+    val request = JsonConfig.instance.decodeFromString<CreateGroupLinkRequest>(body)
     val groupId = pathParameter?.get("groupId") as? String ?: throw ValidationException("Invalid group ID.")
 
     TokenManagement.validateToken(authorization)
@@ -33,13 +33,13 @@ class ShareGroup : AbstractRequestHandler() {
       throw ValidationException("The specified group does not exist.") // todo: refactor
     }
 
-    UserGroupLinkRepository.linkUserToGroup(request.username, groupId)
+    UserGroupLinkRepository.createUserToGroupLink(request.username, groupId)
 
     return generateResponse(HttpStatusCode.CREATED.code)
   }
 }
 
 @Serializable
-data class ShareGroupRequest(
+data class CreateGroupLinkRequest(
   val username: String
 )

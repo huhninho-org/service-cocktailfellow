@@ -14,10 +14,11 @@ class UserGroupLinkRepository {
 
     private val dynamoDb = DynamoDbClient.create()
     private val linkTable: String = System.getenv("USER_GROUP_LINK_TABLE")
+    private const val ID_PATTERN: String = "%s-%s"
 
-    fun linkUserToGroup(username: String, groupId: String) {
+    fun createUserToGroupLink(username: String, groupId: String) {
       val userId = UserRepository.getUserId(username)
-      val userGroupLink = "$userId-$groupId"
+      val userGroupLink = String.format(ID_PATTERN, userId, groupId)
 
       if (doesLinkAlreadyExist(userGroupLink)) {
         throw ValidationException("The user is already linked to the group.") // todo: refactor
@@ -46,7 +47,7 @@ class UserGroupLinkRepository {
 
     fun deleteUserToGroupLink(username: String, groupId: String) {
       val userId = UserRepository.getUserId(username)
-      val userGroupLink = "$userId-$groupId"
+      val userGroupLink = String.format(ID_PATTERN, userId, groupId)
       val keyMap = mapOf(
         "id" to AttributeValue.builder().s(userGroupLink).build()
       )

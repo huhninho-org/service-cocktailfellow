@@ -28,7 +28,7 @@ class CreateGroup : AbstractRequestHandler() {
     val groupId = UUID.randomUUID().toString()
     GroupRepository.createGroup(groupId, groupName)
 
-    UserGroupLinkRepository.linkUserToGroup(username, groupId)
+    UserGroupLinkRepository.createUserToGroupLink(username, groupId)
 
     val response = CreateGroupResponse(
       groupId = groupId,
