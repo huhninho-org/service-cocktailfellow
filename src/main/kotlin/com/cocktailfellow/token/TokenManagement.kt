@@ -15,29 +15,60 @@ import java.util.*
 class TokenManagement {
 
   companion object {
-    private const val SECRET_KEY = "yourSuperStrongSecretKeyHereMakeSureItIsAtLeast32CharactersLong" // todo: replace
-    private val key: Key = Keys.hmacShaKeyFor(SECRET_KEY.toByteArray())
+    private val key: Key = Keys.hmacShaKeyFor(TokenManagementConfig.appSecretKey.toByteArray())
     private val nowMillis = System.currentTimeMillis()
     private val now = Date(nowMillis)
     private val log: Logger = LogManager.getLogger(TokenManagement::class.java)
 
-    fun validateToken(token: String?): String? {
-      val username = getUsername(token)
-      return createLoginToken(username)
+    fun validateTokenAndGetData(loginToken: String?): TokenManagementData {
+      val bearerLoginToken = extractBearer(loginToken)
+      validateToken(bearerLoginToken)
+      val username = getUsername(bearerLoginToken)
+      log.info("Valid login for token $bearerLoginToken")
+      return TokenManagementData(
+        username = username,
+        loginToken = createLoginToken(username)
+      )
     }
 
-    fun getUsername(token: String?): String {
+    fun validateTokenOnly(loginToken: String?) {
+      val bearerLoginToken = extractBearer(loginToken)
+      validateToken(bearerLoginToken)
+      log.info("Valid login for token $bearerLoginToken")
+    }
+
+    fun createLoginToken(username: String): String {
+      return Jwts.builder()
+        .setSubject(username)
+        .setIssuedAt(now)
+        .setExpiration(Date(nowMillis + TokenManagementConfig.jwtTtl))
+        .claim("username", username)
+        .signWith(key, SignatureAlgorithm.HS256)
+        .compact()
+    }
+
+    private fun extractBearer(token: String?): String {
       if (token.isNullOrBlank()) throw JwtTokenException("No token provided", ErrorType.JWT_INVALID_EXCEPTION)
-      val bearerToken = token.split(" ")[1]
-      val username: String?
+      return token.split(" ")[1]
+    }
+
+    private fun getUsername(token: String?): String {
+      return Jwts.parserBuilder()
+        .setSigningKey(key)
+        .build()
+        .parseClaimsJws(token)
+        .body
+        .get("username", String::class.java)
+    }
+
+    private fun validateToken(token: String?) {
       try {
-        username = Jwts.parserBuilder()
+        Jwts.parserBuilder()
           .setSigningKey(key)
           .build()
-          .parseClaimsJws(bearerToken)
+          .parseClaimsJws(token)
           .body
           .get("username", String::class.java)
-        log.info("Valid token for user $username")
       } catch (exception: SignatureException) {
         throw JwtTokenException("Invalid token signature", ErrorType.JWT_INVALID_SIGNATURE_EXCEPTION)
       } catch (exception: ExpiredJwtException) {
@@ -45,27 +76,11 @@ class TokenManagement {
       } catch (exception: Exception) {
         throw JwtTokenException("Invalid Token", ErrorType.JWT_INVALID_EXCEPTION)
       }
-      return username ?: throw JwtTokenException("Invalid token", ErrorType.JWT_INVALID_EXCEPTION)
-    }
-
-    fun createLoginToken(username: String): String? {
-      return Jwts.builder()
-        .setSubject(username)
-        .setIssuedAt(now)
-        .setExpiration(Date(nowMillis + 1800000))  // Valid for 30 minutes
-        .claim("username", username)
-        .signWith(key, SignatureAlgorithm.HS256)
-        .compact()
-    }
-
-    fun createRefreshToken(username: String): String? {
-      return Jwts.builder()
-        .setSubject(username)
-        .setIssuedAt(now)
-        .setExpiration(Date(nowMillis + 43200000))  // Valid for 12 hours
-        .claim("username", username)
-        .signWith(key, SignatureAlgorithm.HS256)
-        .compact()
     }
   }
 }
+
+data class TokenManagementData(
+  val username: String,
+  val loginToken: String
+)

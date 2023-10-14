@@ -22,11 +22,9 @@ class LoginUser : AbstractRequestHandler() {
 
     return if (BCrypt.checkpw(loginRequest.password, user.hashedPassword)) {
       val loginToken = TokenManagement.createLoginToken(username)
-      val refreshToken = TokenManagement.createRefreshToken(username)
 
       val loginResponse = LoginResponse(
-        loginToken = loginToken,
-        refreshToken = refreshToken
+        loginToken = loginToken
       )
 
       return generateLoginResponse(HttpStatusCode.OK.code, loginResponse)
@@ -54,6 +52,5 @@ data class LoginRequest(
 
 @Serializable
 data class LoginResponse(
-  val loginToken: String?,
-  val refreshToken: String?
+  val loginToken: String
 )

@@ -13,11 +13,9 @@ class DeleteUser : AbstractRequestHandler() {
     val headers = input["headers"] as Map<*, *>?
 
     val authorization = headers?.get("Authorization") as? String
+    val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
 
-    TokenManagement.validateToken(authorization)
-    val username = TokenManagement.getUsername(authorization)
-
-    UserRepository.deleteUser(username)
+    UserRepository.deleteUser(tokenManagementData.username)
 
     return generateResponse(HttpStatusCode.OK.code)
   }

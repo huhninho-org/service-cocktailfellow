@@ -14,8 +14,8 @@ class GetGroups : AbstractRequestHandler() {
     val headers = input["headers"] as Map<*, *>?
     val authorization = headers?.get("Authorization") as? String
 
-    val loginToken = TokenManagement.validateToken(authorization)
-    val username = TokenManagement.getUsername(authorization)
+    val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
+    val username = tokenManagementData.username
 
     val groups = UserGroupLinkRepository.getGroups(username)
 
@@ -24,7 +24,7 @@ class GetGroups : AbstractRequestHandler() {
       username = username
     )
 
-    return generateResponse(HttpStatusCode.OK.code, response, loginToken)
+    return generateResponse(HttpStatusCode.OK.code, response, tokenManagementData.loginToken)
   }
 }
 

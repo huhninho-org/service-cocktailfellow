@@ -24,6 +24,8 @@ provider:
     USER_TABLE: ${self:custom.tables.user}
     GROUP_TABLE: ${self:custom.tables.group}
     USER_GROUP_LINK_TABLE: ${self:custom.tables.userGroupLink}
+    APP_SECRET_KEY: yourSuperStrongSecretKeyHereMakeSureItIsAtLeast32CharactersLong
+    JWT_TTL: 1800000 # 30 minutes
 
 package:
   artifact: build/libs/cocktail-fellow-dev-all.jar

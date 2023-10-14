@@ -20,7 +20,7 @@ class DeleteGroup : AbstractRequestHandler() {
     val request = JsonConfig.instance.decodeFromString<DeleteGroupRequest>(body)
     val groupId = request.groupId
 
-    TokenManagement.validateToken(authorization)
+    TokenManagement.validateTokenOnly(authorization)
 
     GroupRepository.deleteGroup(groupId)
 

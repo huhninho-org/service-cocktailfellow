@@ -22,18 +22,19 @@ class CreateGroupLink : AbstractRequestHandler() {
 
     val authorization = headers?.get("Authorization") as? String
     val request = JsonConfig.instance.decodeFromString<CreateGroupLinkRequest>(body)
+    val usernameToBeLinked = request.username
     val groupId = pathParameter?.get("groupId") as? String ?: throw ValidationException("Invalid group ID.")
 
-    TokenManagement.validateToken(authorization)
+   TokenManagement.validateTokenOnly(authorization)
 
-    if (!UserRepository.doesUserExist(request.username)) {
+    if (!UserRepository.doesUserExist(usernameToBeLinked)) {
       throw ValidationException("The specified user does not exist.") // todo: refactor
     }
     if (!GroupRepository.doesGroupExist(groupId)) {
       throw ValidationException("The specified group does not exist.") // todo: refactor
     }
 
-    UserGroupLinkRepository.createUserToGroupLink(request.username, groupId)
+    UserGroupLinkRepository.createUserToGroupLink(usernameToBeLinked, groupId)
 
     return generateResponse(HttpStatusCode.CREATED.code)
   }

@@ -22,8 +22,8 @@ class CreateGroup : AbstractRequestHandler() {
     val request = JsonConfig.instance.decodeFromString<CreateGroupRequest>(body)
     val groupName = request.groupName
 
-    val loginToken = TokenManagement.validateToken(authorization)
-    val username = TokenManagement.getUsername(authorization)
+    val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
+    val username = tokenManagementData.username
 
     val groupId = UUID.randomUUID().toString()
     GroupRepository.createGroup(groupId, groupName)
@@ -36,7 +36,7 @@ class CreateGroup : AbstractRequestHandler() {
       groupName = groupName
     )
 
-    return generateResponse(HttpStatusCode.CREATED.code, response, loginToken)
+    return generateResponse(HttpStatusCode.CREATED.code, response, tokenManagementData.loginToken)
   }
 }
 

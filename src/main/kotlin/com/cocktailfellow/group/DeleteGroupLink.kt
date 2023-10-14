@@ -19,8 +19,8 @@ class DeleteGroupLink : AbstractRequestHandler() {
     val authorization = headers?.get("Authorization") as? String
     val groupId = pathParameter?.get("groupId") as? String ?: throw ValidationException("Invalid group ID.")
 
-    TokenManagement.validateToken(authorization)
-    val username = TokenManagement.getUsername(authorization)
+    val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
+    val username = tokenManagementData.username
 
     if (!UserRepository.doesUserExist(username)) {
       throw ValidationException("The specified user does not exist.") // todo: refactor
