@@ -105,6 +105,13 @@ class UserGroupLinkRepository {
       deleteDataset(dynamoDb.scan(scanRequest))
     }
 
+    fun isMemberOfGroup(username: String, groupId: String): Boolean {
+      val userId = UserRepository.getUserId(username)
+      val userGroupLink = String.format(ID_PATTERN, userId, groupId)
+      return doesLinkAlreadyExist(userGroupLink)
+    }
+
+
     private fun doesLinkAlreadyExist(link: String): Boolean {
       val itemRequest = GetItemRequest.builder()
         .tableName(linkTable)
