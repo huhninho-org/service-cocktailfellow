@@ -145,7 +145,7 @@ functions:
     handler: com.cocktailfellow.cocktail.CreateCocktail
     events:
       - http:
-          path: cocktails
+          path: groups/{groupId}/cocktails
           method: post
     iamRoleStatements:
       - Effect: "Allow"

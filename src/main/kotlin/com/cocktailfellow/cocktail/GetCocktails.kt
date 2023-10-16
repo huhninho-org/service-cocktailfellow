@@ -5,14 +5,11 @@ import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.model.Cocktail
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.database.CocktailGroupLinkRepository
-import com.cocktailfellow.group.CreateGroupLinkRequest
 import com.cocktailfellow.group.database.GroupRepository
 import com.cocktailfellow.token.TokenManagement
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 
 class GetCocktails : AbstractRequestHandler() {
 
