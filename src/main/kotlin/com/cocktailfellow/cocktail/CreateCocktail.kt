@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.database.CocktailRepository
+import com.cocktailfellow.cocktail.model.Ingredient
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
@@ -33,7 +34,6 @@ class CreateCocktail : AbstractRequestHandler() {
     val cocktailId = UUID.randomUUID().toString()
     CocktailRepository.createCocktail(cocktailId, request.name, request.method, request.story, request.notes, request.ingredients)
     CocktailGroupLinkRepository.createCocktailToGroupLink(groupId, cocktailId)
-
 
     val response = CreateCocktailResponse(
       groupId = groupId,
@@ -69,10 +69,3 @@ data class CreateCocktailResponse(
   val notes: String?,
   val ingredients: List<Ingredient>
 )
-
-@Serializable
-data class Ingredient(
-  val ingredientName: String,
-  val amount: String
-)
-

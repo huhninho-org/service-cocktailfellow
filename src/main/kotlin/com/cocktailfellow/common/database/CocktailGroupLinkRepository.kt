@@ -1,13 +1,12 @@
 package com.cocktailfellow.common.database
 
+import com.cocktailfellow.cocktail.database.CocktailRepository
+import com.cocktailfellow.cocktail.model.Cocktail
 import com.cocktailfellow.common.ValidationException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
-import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
-import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
+import software.amazon.awssdk.services.dynamodb.model.*
 
 class CocktailGroupLinkRepository {
   companion object {
@@ -53,6 +52,32 @@ class CocktailGroupLinkRepository {
 
       val response = dynamoDb.getItem(itemRequest)
       return response.item().isNotEmpty()
+    }
+
+    fun getCocktails(groupId: String): List<Cocktail> {
+      val scanRequest = ScanRequest.builder()
+        .tableName(linkTable)
+        .filterExpression("groupId = :groupIdValue")
+        .expressionAttributeValues(mapOf(":groupIdValue" to AttributeValue.builder().s(groupId).build()))
+        .build()
+
+      val response = dynamoDb.scan(scanRequest)
+
+      val items = response.items() ?: throw ValidationException("No cocktail found for group: $groupId")
+
+      return items.map { item ->
+        val cocktailId =
+          item["cocktailId"]?.s() ?: throw ValidationException("CocktailId is missing for group: $groupId")
+        val cocktail = CocktailRepository.getCocktail(cocktailId)
+        Cocktail(
+          cocktailId = cocktail.cocktailId,
+          name = cocktail.name,
+          method = cocktail.method,
+          story = cocktail.story,
+          notes = cocktail.notes,
+          ingredients = cocktail.ingredients,
+        )
+      }
     }
   }
 }
