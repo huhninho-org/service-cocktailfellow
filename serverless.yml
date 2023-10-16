@@ -12,6 +12,8 @@ custom:
     user: ${self:custom.teamPrefix}_${self:custom.stage}_user
     group: ${self:custom.teamPrefix}_${self:custom.stage}_group
     userGroupLink: ${self:custom.teamPrefix}_${self:custom.stage}_userGroupLink
+    cocktail: ${self:custom.teamPrefix}_${self:custom.stage}_cocktail
+    cocktailGroupLink: ${self:custom.teamPrefix}_${self:custom.stage}_cocktailGroupLink
 
 provider:
   name: aws
@@ -21,9 +23,13 @@ provider:
   stage: dev
   environment:
     REGION: ${self:custom.region}
+    # tables
     USER_TABLE: ${self:custom.tables.user}
     GROUP_TABLE: ${self:custom.tables.group}
     USER_GROUP_LINK_TABLE: ${self:custom.tables.userGroupLink}
+    COCKTAIL_TABLE: ${self:custom.tables.cocktail}
+    COCKTAIL_GROUP_LINK_TABLE: ${self:custom.tables.cocktailGroupLink}
+
     APP_SECRET_KEY: yourSuperStrongSecretKeyHereMakeSureItIsAtLeast32CharactersLong
     JWT_TTL: 1800000 # 30 minutes
 
@@ -134,6 +140,22 @@ functions:
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
+# cocktails
+  createCocktail:
+    handler: com.cocktailfellow.cocktail.CreateCocktail
+    events:
+      - http:
+          path: cocktails
+          method: post
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+          - dynamodb:Query
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktailGroupLink}
 # login
   login:
     handler: com.cocktailfellow.user.LoginUser
@@ -214,6 +236,46 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
+    cocktails:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tables.cocktail}
+        AttributeDefinitions:
+          - AttributeName: cocktailId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: cocktailId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    cocktailGroupLinks:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tables.cocktailGroupLink}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: groupId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: groupId-index
+            KeySchema:
+              - AttributeName: groupId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+
 plugins:
   - serverless-iam-roles-per-function
   - serverless-offline
+  - serverless-dynamodb-local
