@@ -1,7 +1,7 @@
 package com.cocktailfellow.common.database
 
 import com.cocktailfellow.cocktail.database.CocktailRepository
-import com.cocktailfellow.cocktail.model.Cocktail
+import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.common.ValidationException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -54,7 +54,7 @@ class CocktailGroupLinkRepository {
       return response.item().isNotEmpty()
     }
 
-    fun getCocktails(groupId: String): List<Cocktail> {
+    fun getCocktails(groupId: String): List<CocktailInfo> {
       val scanRequest = ScanRequest.builder()
         .tableName(linkTable)
         .filterExpression("groupId = :groupIdValue")
@@ -68,15 +68,7 @@ class CocktailGroupLinkRepository {
       return items.map { item ->
         val cocktailId =
           item["cocktailId"]?.s() ?: throw ValidationException("CocktailId is missing for group: $groupId")
-        val cocktail = CocktailRepository.getCocktail(cocktailId)
-        Cocktail(
-          cocktailId = cocktail.cocktailId,
-          name = cocktail.name,
-          method = cocktail.method,
-          story = cocktail.story,
-          notes = cocktail.notes,
-          ingredients = cocktail.ingredients,
-        )
+        CocktailRepository.getCocktailInfo(cocktailId)
       }
     }
   }

@@ -1,15 +1,19 @@
 package com.cocktailfellow.cocktail.database
 
 import com.cocktailfellow.cocktail.model.Cocktail
+import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.cocktail.model.Ingredient
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.*
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 
 class CocktailRepository {
   companion object {
@@ -66,6 +70,31 @@ class CocktailRepository {
         story = item["story"]?.s(),
         notes = item["notes"]?.s(),
         ingredients = ingredients,
+      )
+    }
+
+    fun getCocktailInfo(cocktailId: String): CocktailInfo {
+      val projectionExpression = "#ci, #n, #m"
+
+      val expressionAttributeNames = mapOf(
+        "#ci" to "cocktailId",
+        "#n" to "name",
+        "#m" to "method"
+      )
+
+      val itemRequest = GetItemRequest.builder()
+        .tableName(cocktailTable)
+        .key(mapOf("cocktailId" to AttributeValue.builder().s(cocktailId).build()))
+        .projectionExpression(projectionExpression)
+        .expressionAttributeNames(expressionAttributeNames)
+        .build()
+
+      val item = dynamoDb.getItem(itemRequest).item()
+
+      return CocktailInfo(
+        cocktailId = item["cocktailId"]?.s()!!,
+        name = item["name"]?.s()!!,
+        method = item["method"]?.s()
       )
     }
 

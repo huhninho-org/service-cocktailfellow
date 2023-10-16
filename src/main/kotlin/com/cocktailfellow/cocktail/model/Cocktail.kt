@@ -13,6 +13,13 @@ data class Cocktail(
 )
 
 @Serializable
+data class CocktailInfo(
+  val cocktailId: String,
+  val name: String,
+  val method: String?
+)
+
+@Serializable
 data class Ingredient(
   val ingredientName: String,
   val amount: String

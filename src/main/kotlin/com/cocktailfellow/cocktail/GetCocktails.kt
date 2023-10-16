@@ -3,7 +3,7 @@ package com.cocktailfellow.cocktail
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
-import com.cocktailfellow.cocktail.model.Cocktail
+import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.database.CocktailGroupLinkRepository
@@ -37,5 +37,5 @@ class GetCocktails : AbstractRequestHandler() {
 
 @Serializable
 data class GetCocktailsResponse(
-  val cocktails: List<Cocktail>
+  val cocktails: List<CocktailInfo>
 )
