@@ -170,6 +170,19 @@ functions:
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktailGroupLink}
+  getCocktail:
+    handler: com.cocktailfellow.cocktail.GetCocktail
+    events:
+      - http:
+          path: groups/{groupId}/cocktails/{cocktailId}
+          method: get
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:Query
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
 # login
   login:
     handler: com.cocktailfellow.user.LoginUser
