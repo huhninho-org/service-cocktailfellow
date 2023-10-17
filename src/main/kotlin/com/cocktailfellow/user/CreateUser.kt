@@ -19,19 +19,18 @@ class CreateUser : AbstractRequestHandler() {
 
   private val log: Logger = LogManager.getLogger(CreateUser::class.java)
 
-  private val rquiredApiKey: String = "V8mjtjn1Kv9TofGELg7ZZL0lHODIlnLl" // todo: replace
+  private val requiredApiKey: String = System.getenv("APP_API_KEY")
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    val headers = input["headers"] as Map<*, *>?
-    val apiKey = headers?.get("x-api-key")
+    val apiKey = getApiKeyHeader(input)
 
-    val body = input["body"] as String?
+    val body = getBody(input)
     val user: CreateUserRequest
 
-    if (apiKey == null || apiKey != rquiredApiKey) return generateError(HttpStatusCode.FORBIDDEN.code, "Forbidden.")
+    if (apiKey == null || apiKey != requiredApiKey) return generateError(HttpStatusCode.FORBIDDEN.code, "Forbidden.")
 
     try {
-      user = body?.let { JsonConfig.instance.decodeFromString(it) }
+      user = body.let { JsonConfig.instance.decodeFromString(it) }
         ?: throw ValidationException("No user found in the request body.")
     } catch (e: Exception) {
       throw ValidationException("Invalid JSON")

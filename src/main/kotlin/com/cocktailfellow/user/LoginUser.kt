@@ -14,7 +14,7 @@ import org.mindrot.jbcrypt.BCrypt
 class LoginUser : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    val body = input["body"] as String
+    val body = getBody(input)
     val loginRequest = JsonConfig.instance.decodeFromString<LoginRequest>(body)
     val username = loginRequest.username
 

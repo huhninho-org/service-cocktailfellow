@@ -18,12 +18,10 @@ import java.util.*
 class CreateCocktail : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    val headers = input["headers"] as Map<*, *>?
-    val pathParameter = input["pathParameters"] as? Map<*, *>
-    val body = input["body"] as String
+    val authorization = getAuthorizationHeader(input)
+    val groupId = getPathParameterGroupId(input)
+    val body = getBody(input)
 
-    val authorization = headers?.get("Authorization") as? String
-    val groupId = pathParameter?.get("groupId") as? String ?: throw ValidationException("Invalid group ID.")
     val request = JsonConfig.instance.decodeFromString<CreateCocktailRequest>(body)
 
     val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)

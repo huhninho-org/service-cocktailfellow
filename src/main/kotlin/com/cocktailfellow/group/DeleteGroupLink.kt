@@ -13,11 +13,8 @@ import com.cocktailfellow.user.database.UserRepository
 class DeleteGroupLink : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    val headers = input["headers"] as Map<*, *>?
-    val pathParameter = input["pathParameters"] as? Map<*, *>
-
-    val authorization = headers?.get("Authorization") as? String
-    val groupId = pathParameter?.get("groupId") as? String ?: throw ValidationException("Invalid group ID.")
+    val authorization = getAuthorizationHeader(input)
+    val groupId = getPathParameterGroupId(input)
 
     val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username

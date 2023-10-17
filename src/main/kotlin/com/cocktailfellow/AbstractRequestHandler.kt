@@ -2,10 +2,7 @@ package com.cocktailfellow
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
-import com.cocktailfellow.common.CustomException
-import com.cocktailfellow.common.ErrorResponse
-import com.cocktailfellow.common.ErrorType
-import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.*
 import kotlinx.serialization.Serializable
 
 abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGatewayResponse> {
@@ -48,6 +45,34 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
         message = e.message ?: "An error occurred."
       )
     }
+  }
+
+  private fun getInputHeaders(input: Map<String, Any>): Map<*, *>? {
+    return input["headers"] as? Map<*, *>
+  }
+
+  private fun getPathParameters(input: Map<String, Any>): Map<*, *>? {
+    return input["pathParameters"] as? Map<*, *>
+  }
+
+  protected fun getAuthorizationHeader(input: Map<String, Any>): String? {
+    return getInputHeaders(input)?.get("Authorization") as? String
+  }
+
+  protected fun getApiKeyHeader(input: Map<String, Any>): String? {
+    return getInputHeaders(input)?.get("x-api-key") as? String
+  }
+
+  protected fun getPathParameterGroupId(input: Map<String, Any>): String {
+    return getPathParameters(input)?.get("groupId") as? String ?: throw ValidationException("Invalid group ID.") // todo: refactor
+  }
+
+  protected fun getPathParameterCocktailId(input: Map<String, Any>): String {
+    return getPathParameters(input)?.get("cocktailId") as? String ?: throw ValidationException("Invalid group ID.") // todo: refactor
+  }
+
+  protected fun getBody(input: Map<String, Any>): String {
+    return input["body"] as String
   }
 }
 

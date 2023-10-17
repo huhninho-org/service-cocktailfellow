@@ -11,8 +11,7 @@ import kotlinx.serialization.Serializable
 class GetGroups : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    val headers = input["headers"] as Map<*, *>?
-    val authorization = headers?.get("Authorization") as? String
+    val authorization = getAuthorizationHeader(input)
 
     val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username

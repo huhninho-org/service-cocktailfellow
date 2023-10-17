@@ -14,12 +14,9 @@ import kotlinx.serialization.Serializable
 class GetCocktail : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    val headers = input["headers"] as Map<*, *>?
-    val pathParameter = input["pathParameters"] as? Map<*, *>
-
-    val authorization = headers?.get("Authorization") as? String
-    val groupId = pathParameter?.get("groupId") as? String ?: throw ValidationException("Invalid group ID.")
-    val cocktailId = pathParameter?.get("cocktailId") as? String ?: throw ValidationException("Invalid cocktail ID.")
+    val authorization = getAuthorizationHeader(input)
+    val groupId = getPathParameterGroupId(input)
+    val cocktailId = getPathParameterCocktailId(input)
 
     val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
 

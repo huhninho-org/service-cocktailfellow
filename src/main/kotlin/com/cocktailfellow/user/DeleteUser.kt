@@ -10,9 +10,7 @@ import com.cocktailfellow.user.database.UserRepository
 class DeleteUser : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    val headers = input["headers"] as Map<*, *>?
-
-    val authorization = headers?.get("Authorization") as? String
+    val authorization = getAuthorizationHeader(input)
     val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
 
     UserRepository.deleteUser(tokenManagementData.username)

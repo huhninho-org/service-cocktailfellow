@@ -16,16 +16,14 @@ import kotlinx.serialization.decodeFromString
 class CreateGroupLink : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    val headers = input["headers"] as Map<*, *>?
-    val pathParameter = input["pathParameters"] as? Map<*, *>
-    val body = input["body"] as String
+    val authorization = getAuthorizationHeader(input)
+    val groupId = getPathParameterGroupId(input)
+    val body = getBody(input)
 
-    val authorization = headers?.get("Authorization") as? String
     val request = JsonConfig.instance.decodeFromString<CreateGroupLinkRequest>(body)
     val usernameToBeLinked = request.username
-    val groupId = pathParameter?.get("groupId") as? String ?: throw ValidationException("Invalid group ID.")
 
-   TokenManagement.validateTokenOnly(authorization)
+    TokenManagement.validateTokenOnly(authorization)
 
     if (!UserRepository.doesUserExist(usernameToBeLinked)) {
       throw ValidationException("The specified user does not exist.") // todo: refactor

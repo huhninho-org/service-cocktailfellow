@@ -16,10 +16,9 @@ import kotlinx.serialization.decodeFromString
 class DeleteGroup : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    val headers = input["headers"] as Map<*, *>?
-    val body = input["body"] as String
+    val authorization = getAuthorizationHeader(input)
+    val body = getBody(input)
 
-    val authorization = headers?.get("Authorization") as? String
     val request = JsonConfig.instance.decodeFromString<DeleteGroupRequest>(body)
     val groupId = request.groupId
 
