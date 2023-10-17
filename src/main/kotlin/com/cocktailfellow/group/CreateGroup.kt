@@ -31,7 +31,6 @@ class CreateGroup : AbstractRequestHandler() {
 
     val response = CreateGroupResponse(
       groupId = groupId,
-      username = username,
       groupName = groupName
     )
 
@@ -47,6 +46,5 @@ data class CreateGroupRequest(
 @Serializable
 data class CreateGroupResponse(
   val groupId: String,
-  val username: String,
   val groupName: String
 )

@@ -19,8 +19,7 @@ class GetGroups : AbstractRequestHandler() {
     val groups = UserGroupLinkRepository.getGroups(username)
 
     val response = GetGroupsResponse(
-      groups = groups,
-      username = username
+      groups = groups
     )
 
     return generateResponse(HttpStatusCode.OK.code, response, tokenManagementData.loginToken)
@@ -29,6 +28,5 @@ class GetGroups : AbstractRequestHandler() {
 
 @Serializable
 data class GetGroupsResponse(
-  val groups: List<Map<String, String>>,
-  val username: String
+  val groups: List<Map<String, String>>
 )
