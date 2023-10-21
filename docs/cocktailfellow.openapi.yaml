@@ -1,0 +1,573 @@
+openapi: 3.0.0
+info:
+  title: Cocktail Fellow API
+  version: '1.0.0'
+servers:
+  - url: https://your-api-gateway-url
+
+paths:
+  /users:
+    post:
+      tags:
+        - Users
+      summary: Create a new user
+      description: Adds a new user to the database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - api_key: [ ]
+
+    delete:
+      tags:
+        - Users
+      summary: Delete the authenticated user
+      description: Deletes the user who is currently authenticated.
+      responses:
+        '204':
+          description: User successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: [ ]
+
+  /login:
+    post:
+      tags:
+        - Login
+      summary: Log in a user
+      description: Authenticates a user and returns a login token (jwt).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: User successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loginToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMdWthcyIsImlhdCI6MTY5Nzg5NzI1MSwiZXhwIjoxNjk3ODk5MDUxLCJ1c2VybmFtZSI6Ikx1a2FzIn0.PBll6BcdkmxFDP8Ktcq32R4wv4VHnWfTLvymLJEcEE8"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - apiKey: [ ]
+
+  /groups:
+    post:
+      tags:
+        - Groups
+      summary: Create a new group
+      description: Adds a new group and links it to the user provided by the jwt token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '201':
+          description: Group successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      groupId:
+                        type: string
+                        example: "e89c1398-262d-410b-9c12-f348bfcd8d13"
+                      groupName:
+                        type: string
+                        example: "my group"
+                  loginToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMdWthczEiLCJpYXQiOjE2OTc4ODI1MTcsImV4cCI6MTY5Nzg4NDMxNywidXNlcm5hbWUiOiJMdWthczEifQ.h6t34ZwOBIPFt1Tt57A8lx7F1oeW9rUmZT5W_jdRVUk"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: [ ]
+
+  /groups/{groupId}:
+    delete:
+      tags:
+        - Groups
+      summary: Delete a group
+      description: Removes a group and also all links to user and cocktails.
+      parameters:
+        - name: groupId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: Unique identifier of the group
+      responses:
+        '200':
+          description: Group successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loginToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMdWthczEiLCJpYXQiOjE2OTc4ODI1OTQsImV4cCI6MTY5Nzg4NDM5NCwidXNlcm5hbWUiOiJMdWthczEifQ.5i2JmmbYjvO4EI39QkETioqBQs6Lfe8hG2b-I8_gpp8"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: [ ]
+
+  /groups/{groupId}/link:
+    post:
+      tags:
+        - Link Groups
+      summary: Add a user to a group
+      description: Links a user to a group.
+      parameters:
+        - name: groupId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: Unique identifier of the group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupLinkRequest'
+      responses:
+        '201':
+          description: User successfully linked to the group
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loginToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMdWthczEiLCJpYXQiOjE2OTc4ODI1MzAsImV4cCI6MTY5Nzg4NDMzMCwidXNlcm5hbWUiOiJMdWthczEifQ.ofjqNVU7zYE8r9YZTwIsA2Cm9PDvhJegySP1OY3dn24"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: [ ]
+
+    delete:
+      tags:
+        - Link Groups
+      summary: Remove a user from a group
+      description: Unlinks a user from a group.
+      parameters:
+        - name: groupId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: Unique identifier of the group
+      responses:
+        '200':
+          description: User successfully unlinked from the group
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loginToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMdWthczEiLCJpYXQiOjE2OTc4ODI1MzAsImV4cCI6MTY5Nzg4NDMzMCwidXNlcm5hbWUiOiJMdWthczEifQ.ofjqNVU7zYE8r9YZTwIsA2Cm9PDvhJegySP1OY3dn24"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: [ ]
+
+  /groups/{groupId}/cocktails:
+    get:
+      tags:
+        - Cocktails
+      summary: Get all cocktails in a group
+      description: Returns a list of all cocktails in the specified group.
+      parameters:
+        - name: groupId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: Unique identifier of the group
+      responses:
+        '200':
+          description: Cocktails successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      cocktails:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Cocktail'
+                  loginToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMdWthcyIsImlhdCI6MTY5Nzg5NzI2NSwiZXhwIjoxNjk3ODk5MDY1LCJ1c2VybmFtZSI6Ikx1a2FzIn0.henQprwhS0KhqQMBH6AZbu68EquMr9T_LQpUWPz6Rt0"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: [ ]
+
+    post:
+      tags:
+        - Cocktails
+      summary: Add a cocktail to a group
+      description: Adds a new cocktail to the specified group.
+      parameters:
+        - name: groupId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: Unique identifier of the group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCocktailRequest'
+      responses:
+        '201':
+          description: Cocktail successfully created and added to the group
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      cocktailId:
+                        type: string
+                        example: "8b0c8fc7-2fec-4310-b5cc-5fc61d791467"
+                      groupId:
+                        type: string
+                        example: "7dcbc1c9-fb89-4db0-84cf-09a660196e75"
+                      name:
+                        type: string
+                        example: "Basil Smash"
+                      method:
+                        type: string
+                        example: "In a cocktail shaker, muddle fresh basil leaves and sugar. Add lemon juice and gin to the shaker. Fill the shaker with ice cubes and shake vigorously. Strain the mixture into a chilled cocktail glass. Garnish with a fresh basil leaf."
+                      story:
+                        type: string
+                        example: "The Basil Smash is a modern cocktail known for its refreshing and herbal flavors. It's a popular choice for those who appreciate a unique twist on classic cocktails."
+                      notes:
+                        type: string
+                        example: "Serve in a chilled cocktail glass for the best taste experience."
+                      ingredients:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Ingredient'
+                  loginToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMdWthcyIsImlhdCI6MTY5Nzg5NzI1NywiZXhwIjoxNjk3ODk5MDU3LCJ1c2VybmFtZSI6Ikx1a2FzIn0.vZdnc226Cz_t4_O6YfMuvzCyYTHGH44edvoX0PBkw9Y"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: [ ]
+
+  /groups/{groupId}/cocktails/{cocktailId}:
+    get:
+      tags:
+        - Cocktails
+      summary: Get details of a cocktail in a group
+      description: Retrieves the details of a specific cocktail in the specified group.
+      parameters:
+        - name: groupId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: Unique identifier of the group
+        - name: cocktailId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: Unique identifier of the cocktail
+      responses:
+        '200':
+          description: Cocktail details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      cocktailId:
+                        type: string
+                        example: "baac9698-923f-4eb0-915a-df76e4a98609"
+                      name:
+                        type: string
+                        example: "Mojito"
+                      method:
+                        type: string
+                        example: "Muddle mint leaves with sugar and lime juice. Add a splash of soda water and fill the glass with cracked ice. Pour the rum over the ice, and fill the glass with soda water. Garnish with mint leaves."
+                      story:
+                        type: string
+                        example: "The Mojito is a traditional Cuban cocktail, and legend has it that this drink was a favorite of Ernest Hemingway while he stayed in Havana."
+                      notes:
+                        type: string
+                        example: "Best served in a tall glass and enjoyed on a hot summer day."
+                      ingredients:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Ingredient'
+                  loginToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMdWthczEiLCJpYXQiOjE2OTc4ODI1ODEsImV4cCI6MTY5Nzg4NDM4MSwidXNlcm5hbWUiOiJMdWthczEifQ.IbtmGD1809c6dnMnPnzq-Y1HsEIMIQwNiynU-JC840k"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: [ ]
+
+    delete:
+      tags:
+        - Cocktails
+      summary: Delete a cocktail from a group
+      description: Removes the specified cocktail from the group.
+      parameters:
+        - name: groupId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: Unique identifier of the group
+        - name: cocktailId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: Unique identifier of the cocktail
+      responses:
+        '200':
+          description: Cocktail deleted successfully
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: [ ]
+
+components:
+  schemas:
+    CreateUserRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    CreateGroupRequest:
+      type: object
+      required:
+        - groupName
+      properties:
+        groupName:
+          type: string
+    CreateGroupLinkRequest:
+      type: object
+      required:
+        - username
+      properties:
+        username:
+          type: string
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    CreateCocktailRequest:
+      type: object
+      required:
+        - name
+        - ingredients
+      properties:
+        name:
+          type: string
+        method:
+          type: string
+        story:
+          type: string
+        notes:
+          type: string
+        ingredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
+    ApiResponse:
+      type: object
+      properties:
+        result:
+          oneOf:
+            - $ref: '#/components/schemas/CreateCocktailResponse'
+            - $ref: '#/components/schemas/GetCocktailsResponse'
+        loginToken:
+          type: string
+    GetCocktailsResponse:
+      type: object
+      properties:
+        cocktails:
+          $ref: '#/components/schemas/CocktailInfoList'
+    CocktailInfoList:
+      type: array
+      items:
+        $ref: '#/components/schemas/CocktailInfo'
+    CocktailInfo:
+      type: object
+      properties:
+        cocktailId:
+          type: string
+        name:
+          type: string
+        method:
+          type: string
+    CreateCocktailResponse:
+      type: object
+      properties:
+        cocktailId:
+          type: string
+        groupId:
+          type: string
+        name:
+          type: string
+        method:
+          type: string
+        story:
+          type: string
+        notes:
+          type: string
+        ingredients:
+          $ref: '#/components/schemas/IngredientList'
+    IngredientList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Ingredient'
+    Cocktail:
+      type: object
+      properties:
+        cocktailId:
+          type: string
+          example: "8b0c8fc7-2fec-4310-b5cc-5fc61d791467"
+        name:
+          type: string
+          example: "Basil Smash"
+        method:
+          type: string
+          example: "In a cocktail shaker, muddle fresh basil leaves and sugar. Add lemon juice and gin to the shaker. Fill the shaker with ice cubes and shake vigorously. Strain the mixture into a chilled cocktail glass. Garnish with a fresh basil leaf."
+    Ingredient:
+      type: object
+      properties:
+        ingredientName:
+          type: string
+          example: "Fresh Basil Leaves"
+        amount:
+          type: string
+          example: "8-10 leaves"
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: API_KEY
+      in: header
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token must be provided in the Authorization header.

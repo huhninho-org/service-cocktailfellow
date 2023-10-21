@@ -4,14 +4,11 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.database.UserGroupLinkRepository
 import com.cocktailfellow.group.database.GroupRepository
 import com.cocktailfellow.token.TokenManagement
 import com.cocktailfellow.token.TokenManagementData
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 
 class DeleteGroup : AbstractRequestHandler() {
 
