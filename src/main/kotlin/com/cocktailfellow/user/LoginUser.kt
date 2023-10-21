@@ -13,10 +13,15 @@ import org.mindrot.jbcrypt.BCrypt
 
 class LoginUser : AbstractRequestHandler() {
 
+  private val requiredApiKey: String = System.getenv("APP_API_KEY")
+
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val body = getBody(input)
     val loginRequest = JsonConfig.instance.decodeFromString<LoginRequest>(body)
     val username = loginRequest.username
+    val apiKey = getApiKeyHeader(input)
+
+    if (apiKey == null || apiKey != requiredApiKey) return generateError(HttpStatusCode.FORBIDDEN.code, "Forbidden.")
 
     val user = UserRepository.getUser(username)
 

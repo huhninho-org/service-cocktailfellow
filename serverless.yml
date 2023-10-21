@@ -130,7 +130,7 @@ functions:
     handler: com.cocktailfellow.group.DeleteGroup
     events:
       - http:
-          path: groups
+          path: groups/{groupId}
           method: delete
     iamRoleStatements:
       - Effect: "Allow"
