@@ -9,6 +9,7 @@ import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.database.UserGroupLinkRepository
 import com.cocktailfellow.group.database.GroupRepository
 import com.cocktailfellow.token.TokenManagement
+import com.cocktailfellow.token.TokenManagementData
 import com.cocktailfellow.user.database.UserRepository
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -23,7 +24,7 @@ class CreateGroupLink : AbstractRequestHandler() {
     val request = JsonConfig.instance.decodeFromString<CreateGroupLinkRequest>(body)
     val usernameToBeLinked = request.username
 
-    TokenManagement.validateTokenOnly(authorization)
+    val tokenManagementData: TokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
 
     if (!UserRepository.doesUserExist(usernameToBeLinked)) {
       throw ValidationException("The specified user does not exist.") // todo: refactor
@@ -34,7 +35,7 @@ class CreateGroupLink : AbstractRequestHandler() {
 
     UserGroupLinkRepository.createUserToGroupLink(usernameToBeLinked, groupId)
 
-    return generateResponse(HttpStatusCode.CREATED.code)
+    return generateResponse(HttpStatusCode.CREATED.code, tokenManagementData.loginToken)
   }
 }
 

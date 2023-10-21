@@ -8,6 +8,7 @@ import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.database.UserGroupLinkRepository
 import com.cocktailfellow.group.database.GroupRepository
 import com.cocktailfellow.token.TokenManagement
+import com.cocktailfellow.token.TokenManagementData
 import com.cocktailfellow.user.database.UserRepository
 
 class DeleteGroupLink : AbstractRequestHandler() {
@@ -16,7 +17,7 @@ class DeleteGroupLink : AbstractRequestHandler() {
     val authorization = getAuthorizationHeader(input)
     val groupId = getPathParameterGroupId(input)
 
-    val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
+    val tokenManagementData: TokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username
 
     if (!UserRepository.doesUserExist(username)) {
@@ -28,6 +29,6 @@ class DeleteGroupLink : AbstractRequestHandler() {
 
     UserGroupLinkRepository.deleteUserToGroupLink(username, groupId)
 
-    return generateResponse(HttpStatusCode.NO_CONTENT.code)
+    return generateResponse(HttpStatusCode.OK.code, tokenManagementData.loginToken)
   }
 }

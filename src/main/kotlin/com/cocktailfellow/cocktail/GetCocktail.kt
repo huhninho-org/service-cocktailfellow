@@ -37,7 +37,7 @@ class GetCocktail : AbstractRequestHandler() {
       ingredients = cocktail.ingredients
     )
 
-    return generateResponse(HttpStatusCode.CREATED.code, response, tokenManagementData.loginToken)
+    return generateResponse(HttpStatusCode.OK.code, response, tokenManagementData.loginToken)
   }
 }
 

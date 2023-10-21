@@ -29,7 +29,7 @@ class DeleteGroup : AbstractRequestHandler() {
     }
     GroupRepository.deleteGroup(groupId)
 
-    return generateResponse(HttpStatusCode.OK.code)
+    return generateResponse(HttpStatusCode.OK.code, tokenManagementData.loginToken)
   }
 }
 

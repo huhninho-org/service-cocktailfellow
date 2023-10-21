@@ -22,6 +22,13 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
     return ApiGatewayResponse.withoutBody(status)
   }
 
+  fun generateResponse(status: Int, loginToken: String): ApiGatewayResponse {
+    val loginResponse = LoginResponse(
+      loginToken = loginToken
+    )
+    return ApiGatewayResponse.withBody(status, loginResponse)
+  }
+
   inline fun <reified T> generateResponse(status: Int, result: T, loginToken: String? = null): ApiGatewayResponse {
     val response = ApiResponse(result, loginToken)
     return ApiGatewayResponse.withBody(status, response)
@@ -80,4 +87,9 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
 data class ApiResponse<T>(
   val result: T?,
   val loginToken: String?
+)
+
+@Serializable
+data class LoginResponse(
+  val loginToken: String
 )

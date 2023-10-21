@@ -31,12 +31,6 @@ class TokenManagement {
       )
     }
 
-    fun validateTokenOnly(loginToken: String?) {
-      val bearerLoginToken = extractBearer(loginToken)
-      validateToken(bearerLoginToken)
-      log.info("Valid login for token $bearerLoginToken")
-    }
-
     fun createLoginToken(username: String): String {
       return Jwts.builder()
         .setSubject(username)

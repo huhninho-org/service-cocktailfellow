@@ -23,34 +23,15 @@ class LoginUser : AbstractRequestHandler() {
     return if (BCrypt.checkpw(loginRequest.password, user.hashedPassword)) {
       val loginToken = TokenManagement.createLoginToken(username)
 
-      val loginResponse = LoginResponse(
-        loginToken = loginToken
-      )
-
-      return generateLoginResponse(HttpStatusCode.OK.code, loginResponse)
+      return generateResponse(HttpStatusCode.OK.code, loginToken)
     } else {
       generateError(HttpStatusCode.UNAUTHORIZED.code, "Unauthorized")
     }
   }
-
-  private fun generateLoginResponse(status: Int, result: LoginResponse): ApiGatewayResponse {
-    val response = CustomApiResponse(result)
-    return ApiGatewayResponse.withBody(status, response)
-  }
 }
-
-@Serializable
-data class CustomApiResponse<LoginResponse>(
-  val result: LoginResponse,
-)
 
 @Serializable
 data class LoginRequest(
   val username: String,
   val password: String
-)
-
-@Serializable
-data class LoginResponse(
-  val loginToken: String
 )
