@@ -109,7 +109,6 @@ class CocktailRepository {
     }
 
     fun deleteCocktail(cocktailId: String) {
-      println("DEBUG: in delete cocktail, cocktailId: $cocktailId")
       val keyMap = mapOf(
         "cocktailId" to AttributeValue.builder().s(cocktailId).build()
       )
@@ -119,7 +118,6 @@ class CocktailRepository {
         .key(keyMap)
         .build()
 
-      println("DEBUG: in delete cocktail, deleteItemRequest: $deleteItemRequest")
       try {
         dynamoDb.deleteItem(deleteItemRequest)
         log.info("Cocktail with id '$cocktailId' deleted.")

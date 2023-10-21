@@ -27,9 +27,7 @@ class DeleteCocktail : AbstractRequestHandler() {
       throw ValidationException("Cocktail is not member the group.") // todo: refactor
     }
 
-    println("DEBUG: before remove")
     CocktailRepository.deleteCocktail(cocktailId)
-    println("DEBUG: before remove link")
     CocktailGroupLinkRepository.deleteLink(cocktailId, groupId)
 
     return generateResponse(HttpStatusCode.OK.code, tokenManagementData.loginToken)

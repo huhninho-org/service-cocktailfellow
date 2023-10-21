@@ -17,10 +17,7 @@ class DeleteGroup : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
-    val body = getBody(input)
-
-    val request = JsonConfig.instance.decodeFromString<DeleteGroupRequest>(body)
-    val groupId = request.groupId
+    val groupId = getPathParameterGroupId(input)
 
     val tokenManagementData: TokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
 
@@ -32,8 +29,3 @@ class DeleteGroup : AbstractRequestHandler() {
     return generateResponse(HttpStatusCode.OK.code, tokenManagementData.loginToken)
   }
 }
-
-@Serializable
-data class DeleteGroupRequest(
-  val groupId: String
-)

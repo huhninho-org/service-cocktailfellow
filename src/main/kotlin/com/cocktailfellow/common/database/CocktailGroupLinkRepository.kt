@@ -79,7 +79,6 @@ class CocktailGroupLinkRepository {
 
     fun deleteLink(cocktailId: String, groupId: String) {
       val userGroupLink = String.format(ID_PATTERN, cocktailId, groupId)
-      println("DEBUG: in delete link, userGroupLink: $userGroupLink")
       val keyMap = mapOf(
         "id" to AttributeValue.builder().s(userGroupLink).build()
       )
@@ -88,8 +87,6 @@ class CocktailGroupLinkRepository {
         .tableName(linkTable)
         .key(keyMap)
         .build()
-
-      println("DEBUG: in delete link, itemRequest: $itemRequest")
 
       try {
         dynamoDb.deleteItem(itemRequest)
