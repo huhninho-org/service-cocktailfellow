@@ -111,7 +111,6 @@ class UserGroupLinkRepository {
       return doesLinkAlreadyExist(userGroupLink)
     }
 
-
     private fun doesLinkAlreadyExist(link: String): Boolean {
       val itemRequest = GetItemRequest.builder()
         .tableName(linkTable)

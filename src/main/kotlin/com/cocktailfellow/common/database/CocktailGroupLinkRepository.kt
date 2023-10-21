@@ -44,6 +44,11 @@ class CocktailGroupLinkRepository {
       }
     }
 
+    fun isMemberOfGroup(cocktailId: String, groupId: String): Boolean {
+      val userGroupLink = String.format(ID_PATTERN, cocktailId, groupId)
+      return doesLinkAlreadyExist(userGroupLink)
+    }
+
     private fun doesLinkAlreadyExist(link: String): Boolean {
       val itemRequest = GetItemRequest.builder()
         .tableName(linkTable)
@@ -69,6 +74,27 @@ class CocktailGroupLinkRepository {
         val cocktailId =
           item["cocktailId"]?.s() ?: throw ValidationException("CocktailId is missing for group: $groupId")
         CocktailRepository.getCocktailInfo(cocktailId)
+      }
+    }
+
+    fun deleteLink(cocktailId: String, groupId: String) {
+      val userGroupLink = String.format(ID_PATTERN, cocktailId, groupId)
+      println("DEBUG: in delete link, userGroupLink: $userGroupLink")
+      val keyMap = mapOf(
+        "id" to AttributeValue.builder().s(userGroupLink).build()
+      )
+
+      val itemRequest = DeleteItemRequest.builder()
+        .tableName(linkTable)
+        .key(keyMap)
+        .build()
+
+      println("DEBUG: in delete link, itemRequest: $itemRequest")
+
+      try {
+        dynamoDb.deleteItem(itemRequest)
+      } catch (e: Exception) {
+        throw ValidationException("Remove link between cocktail '$cocktailId' and group '$groupId' failed.") // todo: refactor
       }
     }
   }
