@@ -78,6 +78,12 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
     return getPathParameters(input)?.get("cocktailId") as? String ?: throw ValidationException("Invalid group ID.") // todo: refactor
   }
 
+  protected fun getQueryParameterIngredients(input: Map<String, Any>): List<String> {
+    val queryStringParameters = input["queryStringParameters"] as? Map<String, String> ?: throw ValidationException("Missing query parameters.")
+    val ingredients = queryStringParameters["ingredients"] ?: throw ValidationException("Missing ingredients parameter.") // todo: refactor
+    return ingredients.split(",")
+  }
+
   protected fun getBody(input: Map<String, Any>): String {
     return input["body"] as String
   }

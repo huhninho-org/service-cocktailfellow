@@ -4,10 +4,10 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.database.CocktailRepository
-import com.cocktailfellow.cocktail.model.Ingredient
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.group.database.GroupRepository
+import com.cocktailfellow.ingredient.model.Ingredient
 import com.cocktailfellow.token.TokenManagement
 import kotlinx.serialization.Serializable
 

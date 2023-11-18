@@ -1,5 +1,6 @@
 package com.cocktailfellow.cocktail.model
 
+import com.cocktailfellow.ingredient.model.Ingredient
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -20,7 +21,8 @@ data class CocktailInfo(
 )
 
 @Serializable
-data class Ingredient(
-  val ingredientName: String,
-  val amount: String
+data class CocktailIngredients(
+  val cocktailId: String,
+  val name: String,
+  val ingredients: List<Ingredient>
 )
