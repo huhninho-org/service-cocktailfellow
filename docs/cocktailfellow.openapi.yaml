@@ -140,6 +140,38 @@ paths:
       security:
         - BearerAuth: [ ]
 
+    get:
+      tags:
+        - Groups
+      summary: Get all groups for a user
+      description: Returns a list of all groups for a given user. The user is identified by the authentication jwt token.
+      responses:
+        '200':
+          description: Cocktails successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      groups:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Groups'
+                  loginToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMdWthcyIsImlhdCI6MTY5Nzg5NzI2NSwiZXhwIjoxNjk3ODk5MDY1LCJ1c2VybmFtZSI6Ikx1a2FzIn0.henQprwhS0KhqQMBH6AZbu68EquMr9T_LQpUWPz6Rt0"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: [ ]
+
   /groups/{groupId}:
     delete:
       tags:
@@ -620,6 +652,17 @@ components:
                 $ref: '#/components/schemas/IngredientsOverview'
         loginToken:
           type: string
+    Groups:
+      type: object
+      properties:
+        groupId:
+          type: string
+          description: Unique identifier for the group
+          example: "491cd013-4b28-4597-a8b7-85902d85b272"
+        groupName:
+          type: string
+          description: Name of the group
+          example: "my new group"
   securitySchemes:
     api_key:
       type: apiKey
