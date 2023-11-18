@@ -8,6 +8,8 @@ enum class ErrorType {
   JWT_EXPIRED_EXCEPTION,
   JWT_INVALID_SIGNATURE_EXCEPTION,
   JWT_INVALID_EXCEPTION,
+  LINK_EXCEPTION,
+
   UNKNOWN_EXCEPTION;
 
   open fun toLowerCase(): String {
@@ -26,6 +28,13 @@ class ValidationException(
   message: String
 ) : CustomException(
   message = message, statusCode = HttpStatusCode.BAD_REQUEST, errorType = ErrorType.VALIDATION_EXCEPTION
+)
+
+class LinkException(
+  message: String,
+  statusCode: HttpStatusCode = HttpStatusCode.BAD_REQUEST
+) : CustomException(
+  message = message, statusCode = statusCode, errorType = ErrorType.LINK_EXCEPTION
 )
 
 class JwtTokenException(

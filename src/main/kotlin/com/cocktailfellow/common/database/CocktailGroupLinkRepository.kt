@@ -3,6 +3,8 @@ package com.cocktailfellow.common.database
 import com.cocktailfellow.cocktail.database.CocktailRepository
 import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.cocktail.model.CocktailIngredients
+import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.LinkException
 import com.cocktailfellow.common.ValidationException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -21,7 +23,7 @@ class CocktailGroupLinkRepository {
       val cocktailGroupLink = String.format(ID_PATTERN, cocktailId, groupId)
 
       if (doesLinkAlreadyExist(cocktailGroupLink)) {
-        throw ValidationException("The cocktail is already linked to the group.") // todo: refactor
+        throw LinkException("The cocktail is already linked to the group.")
       }
 
       val item = mapOf(
@@ -41,7 +43,10 @@ class CocktailGroupLinkRepository {
         log.info("Linked cocktail '$cocktailId' to group '$groupId'.")
       } catch (e: ConditionalCheckFailedException) {
         log.error("Link between cocktail '$cocktailId' and group '$groupId' already exists.")
-        throw throw ValidationException("User is already linked to this group.")
+        throw throw LinkException("Cocktail is already linked to this group.")
+      } catch (e: Exception) {
+        log.error("Linking cocktail '$cocktailId' to group '$groupId' failed. ${e.message}")
+        throw throw LinkException("Linking cocktail to group failed.")
       }
     }
 
@@ -89,7 +94,7 @@ class CocktailGroupLinkRepository {
 
       val response = dynamoDb.scan(scanRequest)
 
-      return response.items() ?: throw ValidationException("No cocktail found for group: $groupId")
+      return response.items() ?: mutableListOf()
     }
 
     fun deleteLink(cocktailId: String, groupId: String) {
@@ -106,7 +111,8 @@ class CocktailGroupLinkRepository {
       try {
         dynamoDb.deleteItem(itemRequest)
       } catch (e: Exception) {
-        throw ValidationException("Remove link between cocktail '$cocktailId' and group '$groupId' failed.") // todo: refactor
+        log.error("Failed to delete link with id '$userGroupLink'. error: ${e.message}")
+        throw LinkException("Failed to delete link with id '$userGroupLink'.", HttpStatusCode.INTERNAL_SERVER_ERROR)
       }
     }
   }

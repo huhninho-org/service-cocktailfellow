@@ -1,5 +1,7 @@
 package com.cocktailfellow.common.database
 
+import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.LinkException
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.group.database.GroupRepository
 import com.cocktailfellow.user.database.UserRepository
@@ -21,7 +23,7 @@ class UserGroupLinkRepository {
       val userGroupLink = String.format(ID_PATTERN, userId, groupId)
 
       if (doesLinkAlreadyExist(userGroupLink)) {
-        throw ValidationException("The user is already linked to the group.") // todo: refactor
+        throw LinkException("The user is already linked to the group.")
       }
 
       val item = mapOf(
@@ -41,7 +43,10 @@ class UserGroupLinkRepository {
         log.info("Linked user '$userId' to group '$groupId'.")
       } catch (e: ConditionalCheckFailedException) {
         log.error("Link between user '$userId' and group '$groupId' already exists.")
-        throw throw ValidationException("User is already linked to this group.")
+        throw throw LinkException("User is already linked to this group.")
+      } catch (e: Exception) {
+        log.error("Linking user '$userId' to group '$groupId' failed. ${e.message}")
+        throw throw LinkException("Linking user to group failed.")
       }
     }
 
@@ -60,7 +65,10 @@ class UserGroupLinkRepository {
       try {
         dynamoDb.deleteItem(itemRequest)
       } catch (e: Exception) {
-        throw ValidationException("Remove link between user '$userId' and group '$groupId' failed.") // todo: refactor
+        throw LinkException(
+          "Remove link between user '$userId' and group '$groupId' failed.",
+          HttpStatusCode.INTERNAL_SERVER_ERROR
+        )
       }
     }
 
@@ -76,7 +84,7 @@ class UserGroupLinkRepository {
 
       val response = dynamoDb.scan(scanRequest)
 
-      val items = response.items() ?: throw ValidationException("No group found for username: $username")
+      val items = response.items() ?: emptyList()
 
       return items.map { item ->
         val groupId = item["groupId"]?.s() ?: throw ValidationException("GroupId is missing for username: $username")
@@ -111,7 +119,7 @@ class UserGroupLinkRepository {
       return doesLinkAlreadyExist(userGroupLink)
     }
 
-    private fun doesLinkAlreadyExist(link: String): Boolean {
+    fun doesLinkAlreadyExist(link: String): Boolean {
       val itemRequest = GetItemRequest.builder()
         .tableName(linkTable)
         .key(mapOf("id" to AttributeValue.builder().s(link).build()))
@@ -133,7 +141,8 @@ class UserGroupLinkRepository {
           try {
             dynamoDb.deleteItem(deleteRequest)
           } catch (e: Exception) {
-            throw ValidationException("Failed to delete link with id '$linkId'.") // todo: refactor
+            log.error("Failed to delete link with id '$linkId'. error: ${e.message}")
+            throw LinkException("Failed to delete link with id '$linkId'.", HttpStatusCode.INTERNAL_SERVER_ERROR)
           }
         }
       }
