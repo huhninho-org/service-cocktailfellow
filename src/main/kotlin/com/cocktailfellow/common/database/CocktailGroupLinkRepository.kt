@@ -2,6 +2,7 @@ package com.cocktailfellow.common.database
 
 import com.cocktailfellow.cocktail.database.CocktailRepository
 import com.cocktailfellow.cocktail.model.CocktailInfo
+import com.cocktailfellow.cocktail.model.CocktailIngredients
 import com.cocktailfellow.common.ValidationException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -60,6 +61,26 @@ class CocktailGroupLinkRepository {
     }
 
     fun getCocktails(groupId: String): List<CocktailInfo> {
+      val items = fetchItems(groupId)
+
+      return items.map { item ->
+        val cocktailId =
+          item["cocktailId"]?.s() ?: throw ValidationException("CocktailId is missing for group: $groupId")
+        CocktailRepository.getCocktailInfo(cocktailId)
+      }
+    }
+
+    fun getCocktailsIngredients(groupId: String): List<CocktailIngredients> {
+      val cocktails = fetchItems(groupId)
+
+      return cocktails.map { cocktail ->
+        val cocktailId =
+          cocktail["cocktailId"]?.s() ?: throw ValidationException("CocktailId is missing for group: $groupId")
+        CocktailRepository.getCocktailIngredients(cocktailId)
+      }
+    }
+
+    private fun fetchItems(groupId: String): MutableList<MutableMap<String, AttributeValue>> {
       val scanRequest = ScanRequest.builder()
         .tableName(linkTable)
         .filterExpression("groupId = :groupIdValue")
@@ -68,13 +89,7 @@ class CocktailGroupLinkRepository {
 
       val response = dynamoDb.scan(scanRequest)
 
-      val items = response.items() ?: throw ValidationException("No cocktail found for group: $groupId")
-
-      return items.map { item ->
-        val cocktailId =
-          item["cocktailId"]?.s() ?: throw ValidationException("CocktailId is missing for group: $groupId")
-        CocktailRepository.getCocktailInfo(cocktailId)
-      }
+      return response.items() ?: throw ValidationException("No cocktail found for group: $groupId")
     }
 
     fun deleteLink(cocktailId: String, groupId: String) {

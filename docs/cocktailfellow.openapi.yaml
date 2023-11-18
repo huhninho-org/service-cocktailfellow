@@ -438,6 +438,40 @@ paths:
       security:
         - BearerAuth: [ ]
 
+  /ingredients:
+    get:
+      summary: Ingredients
+      operationId: filterIngredients
+      description: Returns cocktails filtered given the ingredients provided
+      parameters:
+        - in: query
+          name: ingredients
+          schema:
+            type: string
+          required: true
+          description: Comma separated list of ingredients
+      responses:
+        '200':
+          description: A list of filtered cocktails
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchCocktailsByIngredientsResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - api_key: [ ]
+
 components:
   schemas:
     CreateUserRequest:
@@ -552,6 +586,19 @@ components:
         method:
           type: string
           example: "In a cocktail shaker, muddle fresh basil leaves and sugar. Add lemon juice and gin to the shaker. Fill the shaker with ice cubes and shake vigorously. Strain the mixture into a chilled cocktail glass. Garnish with a fresh basil leaf."
+    IngredientsOverview:
+      type: object
+      properties:
+        cocktailId:
+          type: string
+          example: "8b0c8fc7-2fec-4310-b5cc-5fc61d791467"
+        name:
+          type: string
+          example: "Basil Smash"
+        ingredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
     Ingredient:
       type: object
       properties:
@@ -561,6 +608,18 @@ components:
         amount:
           type: string
           example: "8-10 leaves"
+    SearchCocktailsByIngredientsResponse:
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            cocktails:
+              type: array
+              items:
+                $ref: '#/components/schemas/IngredientsOverview'
+        loginToken:
+          type: string
   securitySchemes:
     api_key:
       type: apiKey

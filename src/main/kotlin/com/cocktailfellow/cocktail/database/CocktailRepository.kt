@@ -2,11 +2,9 @@ package com.cocktailfellow.cocktail.database
 
 import com.cocktailfellow.cocktail.model.Cocktail
 import com.cocktailfellow.cocktail.model.CocktailInfo
-import com.cocktailfellow.cocktail.model.Ingredient
-import com.cocktailfellow.common.JsonConfig
+import com.cocktailfellow.cocktail.model.CocktailIngredients
 import com.cocktailfellow.common.ValidationException
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
+import com.cocktailfellow.ingredient.model.Ingredient
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
@@ -30,11 +28,11 @@ class CocktailRepository {
       notes: String?,
       ingredients: List<Ingredient>
     ) {
-      val ingredientJson = JsonConfig.instance.encodeToString(ingredients)
+      val ingredientStrings = ingredients.map { "${it.ingredientName}:${it.amount}" }
       val item = mutableMapOf<String, AttributeValue>(
         "cocktailId" to AttributeValue.builder().s(cocktailId).build(),
         "name" to AttributeValue.builder().s(name).build(),
-        "ingredients" to AttributeValue.builder().s(ingredientJson).build()
+        "ingredients" to AttributeValue.builder().ss(ingredientStrings).build()
       )
 
       method?.let { item["method"] = AttributeValue.builder().s(it).build() }
@@ -58,9 +56,10 @@ class CocktailRepository {
 
       val item = dynamoDb.getItem(itemRequest).item()
 
-      val ingredientJson = item["ingredients"]?.s()
-      val ingredients = ingredientJson?.let {
-        JsonConfig.instance.decodeFromString<List<Ingredient>>(it)
+      val ingredientStrings = item["ingredients"]?.ss()
+      val ingredients = ingredientStrings?.map {
+        val parts = it.split(":")
+        Ingredient(ingredientName = parts[0], amount = parts[1])
       } ?: emptyList()
 
       return Cocktail(
@@ -95,6 +94,37 @@ class CocktailRepository {
         cocktailId = item["cocktailId"]?.s()!!,
         name = item["name"]?.s()!!,
         method = item["method"]?.s()
+      )
+    }
+
+    fun getCocktailIngredients(cocktailId: String): CocktailIngredients {
+      val projectionExpression = "#ci, #n, #i"
+
+      val expressionAttributeNames = mapOf(
+        "#ci" to "cocktailId",
+        "#n" to "name",
+        "#i" to "ingredients"
+      )
+
+      val itemRequest = GetItemRequest.builder()
+        .tableName(cocktailTable)
+        .key(mapOf("cocktailId" to AttributeValue.builder().s(cocktailId).build()))
+        .projectionExpression(projectionExpression)
+        .expressionAttributeNames(expressionAttributeNames)
+        .build()
+
+      val item = dynamoDb.getItem(itemRequest).item()
+
+      val ingredientStrings = item["ingredients"]?.ss()
+      val ingredients = ingredientStrings?.map {
+        val parts = it.split(":")
+        Ingredient(ingredientName = parts[0], amount = parts[1])
+      } ?: emptyList()
+
+      return CocktailIngredients(
+        cocktailId = item["cocktailId"]?.s()!!,
+        name = item["name"]?.s()!!,
+        ingredients = ingredients
       )
     }
 
