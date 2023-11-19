@@ -5,14 +5,15 @@ import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
-import com.cocktailfellow.common.database.UserGroupLinkRepository
-import com.cocktailfellow.group.database.GroupRepository
+import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.token.TokenManagement
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import java.util.*
 
-class CreateGroup : AbstractRequestHandler() {
+class CreateGroup: AbstractRequestHandler() {
+  private val groupService = GroupService()
+  private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -25,9 +26,9 @@ class CreateGroup : AbstractRequestHandler() {
     val username = tokenManagementData.username
 
     val groupId = UUID.randomUUID().toString()
-    GroupRepository.createGroup(groupId, groupName)
+    groupService.createGroup(groupId, groupName)
 
-    UserGroupLinkRepository.createUserToGroupLink(username, groupId)
+    userGroupLinkService.createUserToGroupLink(username, groupId)
 
     val response = CreateGroupResponse(
       groupId = groupId,

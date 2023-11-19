@@ -4,14 +4,16 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.common.database.UserGroupLinkRepository
-import com.cocktailfellow.group.database.GroupRepository
 import com.cocktailfellow.token.TokenManagement
 import com.cocktailfellow.token.TokenManagementData
-import com.cocktailfellow.user.database.UserRepository
+import com.cocktailfellow.user.common.UserService
 
 class DeleteGroupLink : AbstractRequestHandler() {
+  private val groupService: GroupService = GroupService()
+  private val userService: UserService = UserService()
+  private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -20,14 +22,14 @@ class DeleteGroupLink : AbstractRequestHandler() {
     val tokenManagementData: TokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username
 
-    if (!UserRepository.doesUserExist(username)) {
+    if (!userService.doesUserExist(username)) {
       throw ValidationException("The specified user does not exist.") // todo: refactor
     }
-    if (!GroupRepository.doesGroupExist(groupId)) {
+    if (!groupService.doesGroupExist(groupId)) {
       throw ValidationException("The specified group does not exist.") // todo: refactor
     }
 
-    UserGroupLinkRepository.deleteUserToGroupLink(username, groupId)
+    userGroupLinkService.deleteUserToGroupLink(username, groupId)
 
     return generateResponse(HttpStatusCode.OK.code, tokenManagementData.loginToken)
   }

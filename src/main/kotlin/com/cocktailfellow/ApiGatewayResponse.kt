@@ -22,8 +22,8 @@ class ApiGatewayResponse(
       return ApiGatewayResponse(statusCode = status)
     }
 
-    fun error(status: Int, message: String): ApiGatewayResponse {
-      val body = JsonConfig.instance.encodeToString(mapOf("error" to message))
+    fun error(status: Int, type: String, message: String): ApiGatewayResponse {
+      val body = JsonConfig.instance.encodeToString(mapOf("type" to type, "error" to message))
       return ApiGatewayResponse(statusCode = status, body = body)
     }
   }

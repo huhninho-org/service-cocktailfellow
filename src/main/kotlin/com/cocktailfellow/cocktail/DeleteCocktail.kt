@@ -4,14 +4,19 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.database.CocktailRepository
+import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.common.database.CocktailGroupLinkRepository
-import com.cocktailfellow.common.database.UserGroupLinkRepository
 import com.cocktailfellow.token.TokenManagement
 import com.cocktailfellow.token.TokenManagementData
 
-class DeleteCocktail : AbstractRequestHandler() {
+class DeleteCocktail(
+  private val cocktailRepository: CocktailRepository = CocktailRepository()
+) : AbstractRequestHandler() {
+  private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService()
+
+  private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -20,15 +25,15 @@ class DeleteCocktail : AbstractRequestHandler() {
 
     val tokenManagementData: TokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
 
-    if (!UserGroupLinkRepository.isMemberOfGroup(tokenManagementData.username, groupId)) {
+    if (!userGroupLinkService.isMemberOfGroup(tokenManagementData.username, groupId)) {
       throw ValidationException("User is not member the group.") // todo: refactor
     }
-    if (!CocktailGroupLinkRepository.isMemberOfGroup(cocktailId, groupId)) {
+    if (!cocktailGroupLinkService.isMemberOfGroup(cocktailId, groupId)) {
       throw ValidationException("Cocktail is not member the group.") // todo: refactor
     }
 
-    CocktailRepository.deleteCocktail(cocktailId)
-    CocktailGroupLinkRepository.deleteLink(cocktailId, groupId)
+    cocktailRepository.deleteCocktail(cocktailId)
+    cocktailGroupLinkService.deleteLink(cocktailId, groupId)
 
     return generateResponse(HttpStatusCode.OK.code, tokenManagementData.loginToken)
   }

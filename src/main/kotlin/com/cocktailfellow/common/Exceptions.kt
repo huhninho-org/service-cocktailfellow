@@ -39,7 +39,8 @@ class LinkException(
 
 class JwtTokenException(
   message: String,
-  errorType: ErrorType
+  errorType: ErrorType,
+  statusCode: HttpStatusCode = HttpStatusCode.BAD_REQUEST
 ) : CustomException(
-  message = message, statusCode = HttpStatusCode.BAD_REQUEST, errorType = errorType
+  message = message, statusCode = statusCode, errorType = errorType
 )

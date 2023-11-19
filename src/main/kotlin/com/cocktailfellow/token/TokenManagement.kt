@@ -1,6 +1,7 @@
 package com.cocktailfellow.token
 
 import com.cocktailfellow.common.ErrorType
+import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JwtTokenException
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
@@ -68,7 +69,7 @@ class TokenManagement {
       } catch (exception: ExpiredJwtException) {
         throw JwtTokenException("Token expired", ErrorType.JWT_EXPIRED_EXCEPTION)
       } catch (exception: Exception) {
-        throw JwtTokenException("Invalid Token", ErrorType.JWT_INVALID_EXCEPTION)
+        throw JwtTokenException("Invalid Token", ErrorType.JWT_INVALID_EXCEPTION, HttpStatusCode.UNAUTHORIZED)
       }
     }
   }

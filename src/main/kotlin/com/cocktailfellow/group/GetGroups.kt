@@ -4,11 +4,14 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.database.UserGroupLinkRepository
+import com.cocktailfellow.common.link.UserGroupLinkService
+import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.token.TokenManagement
 import kotlinx.serialization.Serializable
 
 class GetGroups : AbstractRequestHandler() {
+  private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
+  private val groupService: GroupService = GroupService()
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -16,10 +19,17 @@ class GetGroups : AbstractRequestHandler() {
     val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username
 
-    val groups = UserGroupLinkRepository.getGroups(username)
+    val groups = userGroupLinkService.getGroups(username)
+
+    val groupNames = groups.map { item ->
+        val groupId = item["groupId"]?.s() ?: throw ValidationException("GroupId is missing")
+        val groupName = groupService.getGroupName(groupId)
+        mapOf("groupId" to groupId, "groupName" to groupName)
+      }
+
 
     val response = GetGroupsResponse(
-      groups = groups
+      groups = groupNames
     )
 
     return generateResponse(HttpStatusCode.OK.code, response, tokenManagementData.loginToken)

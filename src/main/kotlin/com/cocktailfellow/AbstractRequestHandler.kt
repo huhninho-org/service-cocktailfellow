@@ -14,7 +14,7 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
       handleBusinessLogic(input, context)
     } catch (e: Exception) {
       val errorResponse = getErrorResponse(e)
-      generateError(errorResponse.code, errorResponse.message)
+      generateError(errorResponse.code, errorResponse.type, errorResponse.message)
     }
   }
 
@@ -34,8 +34,8 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
     return ApiGatewayResponse.withBody(status, response)
   }
 
-  fun generateError(status: Int, message: String): ApiGatewayResponse {
-    return ApiGatewayResponse.error(status, message)
+  fun generateError(status: Int, type: String, message: String): ApiGatewayResponse {
+    return ApiGatewayResponse.error(status, type, message)
   }
 
   private fun getErrorResponse(e: Throwable): ErrorResponse {
@@ -71,16 +71,20 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
   }
 
   protected fun getPathParameterGroupId(input: Map<String, Any>): String {
-    return getPathParameters(input)?.get("groupId") as? String ?: throw ValidationException("Invalid group ID.") // todo: refactor
+    return getPathParameters(input)?.get("groupId") as? String
+      ?: throw ValidationException("Invalid group ID.") // todo: refactor
   }
 
   protected fun getPathParameterCocktailId(input: Map<String, Any>): String {
-    return getPathParameters(input)?.get("cocktailId") as? String ?: throw ValidationException("Invalid group ID.") // todo: refactor
+    return getPathParameters(input)?.get("cocktailId") as? String
+      ?: throw ValidationException("Invalid group ID.") // todo: refactor
   }
 
   protected fun getQueryParameterIngredients(input: Map<String, Any>): List<String> {
-    val queryStringParameters = input["queryStringParameters"] as? Map<String, String> ?: throw ValidationException("Missing query parameters.")
-    val ingredients = queryStringParameters["ingredients"] ?: throw ValidationException("Missing ingredients parameter.") // todo: refactor
+    val queryStringParameters =
+      input["queryStringParameters"] as? Map<String, String> ?: throw ValidationException("Missing query parameters.")
+    val ingredients = queryStringParameters["ingredients"]
+      ?: throw ValidationException("Missing ingredients parameter.") // todo: refactor
     return ingredients.split(",")
   }
 
