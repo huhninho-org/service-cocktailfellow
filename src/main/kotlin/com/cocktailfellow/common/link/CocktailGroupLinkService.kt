@@ -2,7 +2,6 @@ package com.cocktailfellow.common.link
 
 import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.cocktail.model.CocktailIngredients
-import com.cocktailfellow.common.link.CocktailGroupLinkRepository
 
 class CocktailGroupLinkService {
   private val cocktailGroupLinkRepository: CocktailGroupLinkRepository = CocktailGroupLinkRepository()
