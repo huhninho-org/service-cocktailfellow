@@ -4,25 +4,29 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.model.CocktailIngredients
-import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.token.TokenManagement
+import com.cocktailfellow.common.link.CocktailGroupLinkService
+import com.cocktailfellow.common.link.UserGroupLinkService
+import com.cocktailfellow.common.token.TokenManagement
 import kotlinx.serialization.Serializable
 
-class FilterIngredients : AbstractRequestHandler() {
-  private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService()
+class FilterIngredients (
+  private val tokenManagement: TokenManagement = TokenManagement(),
+  private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService(),
   private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
+) : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
     val ingredients = getQueryParameterIngredients(input)
 
-    val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
+    val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username
 
     val groups = userGroupLinkService.getGroups(username)
+    if (groups.isNullOrEmpty())
+      throw ValidationException("User has no groups.") // todo: refactor
 
     val allCocktails = groups.flatMap { group ->
       val groupId = group["groupId"]?.s() ?: throw ValidationException("GroupId is missing") // todo: refactor
