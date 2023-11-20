@@ -84,7 +84,8 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
     val queryStringParameters =
       input["queryStringParameters"] as? Map<String, String> ?: throw ValidationException("Missing query parameters.")
     val ingredients = queryStringParameters["ingredients"]
-      ?: throw ValidationException("Missing ingredients parameter.") // todo: refactor
+    if (ingredients.isNullOrEmpty())
+      throw ValidationException("Missing ingredients parameter.") // todo: refactor
     return ingredients.split(",")
   }
 

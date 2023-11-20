@@ -6,7 +6,7 @@ import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.link.UserGroupLinkService
-import com.cocktailfellow.token.TokenManagement
+import com.cocktailfellow.common.token.TokenManagementDeprecated
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import java.util.*
@@ -22,7 +22,7 @@ class CreateGroup: AbstractRequestHandler() {
     val request = JsonConfig.instance.decodeFromString<CreateGroupRequest>(body)
     val groupName = request.groupName
 
-    val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
+    val tokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username
 
     val groupId = UUID.randomUUID().toString()

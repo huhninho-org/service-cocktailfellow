@@ -5,7 +5,7 @@ import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.link.UserGroupLinkService
-import com.cocktailfellow.token.TokenManagement
+import com.cocktailfellow.common.token.TokenManagementDeprecated
 import com.cocktailfellow.user.common.UserService
 
 class DeleteUser(
@@ -15,7 +15,7 @@ class DeleteUser(
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
-    val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
+    val tokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
 
     userService.deleteUser(tokenManagementData.username)
     userGroupLinkService.deleteAllUserGroupLinks(tokenManagementData.username)

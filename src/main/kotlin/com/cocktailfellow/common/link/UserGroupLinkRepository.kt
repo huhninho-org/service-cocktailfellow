@@ -58,7 +58,7 @@ class UserGroupLinkRepository(
     }
   }
 
-  fun getGroups(userId: String): List<MutableMap<String, AttributeValue>> {
+  fun getGroups(userId: String): List<MutableMap<String, AttributeValue>>? {
     val scanRequest = ScanRequest.builder()
       .tableName(linkTable)
       .filterExpression("userId = :userIdValue")

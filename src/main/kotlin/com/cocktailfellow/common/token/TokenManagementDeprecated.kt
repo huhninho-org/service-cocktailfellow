@@ -1,4 +1,4 @@
-package com.cocktailfellow.token
+package com.cocktailfellow.common.token
 
 import com.cocktailfellow.common.ErrorType
 import com.cocktailfellow.common.HttpStatusCode
@@ -13,13 +13,14 @@ import org.apache.logging.log4j.Logger
 import java.security.Key
 import java.util.*
 
-class TokenManagement {
+// todo: use TokenManagement instead
+class TokenManagementDeprecated {
 
   companion object {
     private val key: Key = Keys.hmacShaKeyFor(TokenManagementConfig.appSecretKey.toByteArray())
     private val nowMillis = System.currentTimeMillis()
     private val now = Date(nowMillis)
-    private val log: Logger = LogManager.getLogger(TokenManagement::class.java)
+    private val log: Logger = LogManager.getLogger(TokenManagementDeprecated::class.java)
 
     fun validateTokenAndGetData(loginToken: String?): TokenManagementData {
       val bearerLoginToken = extractBearer(loginToken)
@@ -44,7 +45,9 @@ class TokenManagement {
 
     private fun extractBearer(token: String?): String {
       if (token.isNullOrBlank()) throw JwtTokenException("No token provided", ErrorType.JWT_INVALID_EXCEPTION)
-      return token.split(" ")[1]
+      val parts = token.split(" ")
+      if (parts.size < 2) throw JwtTokenException("Invalid token format", ErrorType.JWT_INVALID_EXCEPTION)
+      return parts[1]
     }
 
     private fun getUsername(token: String?): String {

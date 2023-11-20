@@ -7,7 +7,7 @@ import com.cocktailfellow.common.ErrorType
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.JwtTokenException
-import com.cocktailfellow.token.TokenManagement
+import com.cocktailfellow.common.token.TokenManagementDeprecated
 import com.cocktailfellow.user.common.UserService
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -31,7 +31,7 @@ class LoginUser(private val userService: UserService = UserService()) : Abstract
     val user = userService.getUser(username)
 
     if (BCrypt.checkpw(loginRequest.password, user.hashedPassword)) {
-      val loginToken = TokenManagement.createLoginToken(username)
+      val loginToken = TokenManagementDeprecated.createLoginToken(username)
       return generateResponse(HttpStatusCode.OK.code, loginToken)
     } else {
       throw JwtTokenException(

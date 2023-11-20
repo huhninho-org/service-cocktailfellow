@@ -8,8 +8,8 @@ import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.token.TokenManagement
-import com.cocktailfellow.token.TokenManagementData
+import com.cocktailfellow.common.token.TokenManagementDeprecated
+import com.cocktailfellow.common.token.TokenManagementData
 
 class DeleteCocktail(
   private val cocktailRepository: CocktailRepository = CocktailRepository()
@@ -23,7 +23,7 @@ class DeleteCocktail(
     val groupId = getPathParameterGroupId(input)
     val cocktailId = getPathParameterCocktailId(input)
 
-    val tokenManagementData: TokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
+    val tokenManagementData: TokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
 
     if (!userGroupLinkService.isMemberOfGroup(tokenManagementData.username, groupId)) {
       throw ValidationException("User is not member the group.") // todo: refactor

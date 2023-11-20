@@ -8,7 +8,7 @@ import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.group.GroupService
 import com.cocktailfellow.ingredient.model.Ingredient
-import com.cocktailfellow.token.TokenManagement
+import com.cocktailfellow.common.token.TokenManagementDeprecated
 import kotlinx.serialization.Serializable
 
 class GetCocktail(
@@ -21,7 +21,7 @@ class GetCocktail(
     val groupId = getPathParameterGroupId(input)
     val cocktailId = getPathParameterCocktailId(input)
 
-    val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
+    val tokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
 
     if (!groupService.doesGroupExist(groupId)) {
       throw ValidationException("Group does not exist.") // todo: refactor

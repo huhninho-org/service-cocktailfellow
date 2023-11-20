@@ -6,7 +6,7 @@ import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.token.TokenManagement
+import com.cocktailfellow.common.token.TokenManagementDeprecated
 import kotlinx.serialization.Serializable
 
 class GetGroups : AbstractRequestHandler() {
@@ -16,10 +16,12 @@ class GetGroups : AbstractRequestHandler() {
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
 
-    val tokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
+    val tokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username
 
     val groups = userGroupLinkService.getGroups(username)
+    if (groups.isNullOrEmpty())
+      throw ValidationException("User has no groups.") // todo: refactor
 
     val groupNames = groups.map { item ->
         val groupId = item["groupId"]?.s() ?: throw ValidationException("GroupId is missing")

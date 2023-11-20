@@ -39,7 +39,7 @@ class UserGroupLinkService {
     return userGroupLinkRepository.deleteUserToGroupLink(userGroupLink)
   }
 
-  fun getGroups(username: String): List<MutableMap<String, AttributeValue>> {
+  fun getGroups(username: String): List<MutableMap<String, AttributeValue>>? {
     val userId = userService.getUserId(username)
     return userGroupLinkRepository.getGroups(userId)
   }

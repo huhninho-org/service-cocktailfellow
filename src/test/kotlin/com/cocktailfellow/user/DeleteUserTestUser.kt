@@ -6,7 +6,7 @@ import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JwtTokenException
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.token.TokenManagement
+import com.cocktailfellow.common.token.TokenManagementDeprecated
 import com.cocktailfellow.user.common.UserService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -36,7 +36,7 @@ class DeleteUserTestUser : BaseTest() {
   fun `test handleBusinessLogic with valid request`() {
     // Given
     val username = "testUser"
-    val token = TokenManagement.createLoginToken(username)
+    val token = TokenManagementDeprecated.createLoginToken(username)
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer $token")
     )
@@ -54,7 +54,7 @@ class DeleteUserTestUser : BaseTest() {
   fun `test handleBusinessLogic with non-existing user`() {
     // Given
     val username = "nonExistingUser"
-    val token = TokenManagement.createLoginToken(username)
+    val token = TokenManagementDeprecated.createLoginToken(username)
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer $token")
     )

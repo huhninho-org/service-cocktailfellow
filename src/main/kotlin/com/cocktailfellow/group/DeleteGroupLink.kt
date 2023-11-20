@@ -6,8 +6,8 @@ import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.token.TokenManagement
-import com.cocktailfellow.token.TokenManagementData
+import com.cocktailfellow.common.token.TokenManagementDeprecated
+import com.cocktailfellow.common.token.TokenManagementData
 import com.cocktailfellow.user.common.UserService
 
 class DeleteGroupLink : AbstractRequestHandler() {
@@ -19,7 +19,7 @@ class DeleteGroupLink : AbstractRequestHandler() {
     val authorization = getAuthorizationHeader(input)
     val groupId = getPathParameterGroupId(input)
 
-    val tokenManagementData: TokenManagementData = TokenManagement.validateTokenAndGetData(authorization)
+    val tokenManagementData: TokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username
 
     if (!userService.doesUserExist(username)) {

@@ -1,4 +1,4 @@
-package com.cocktailfellow.token
+package com.cocktailfellow.common.token
 
 object TokenManagementConfig {
   val appSecretKey: String = System.getenv("APP_SECRET_KEY")
