@@ -90,7 +90,10 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
   }
 
   protected fun getBody(input: Map<String, Any>): String {
-    return input["body"] as String
+    val body: String? = input["body"] as? String
+    if (body.isNullOrEmpty() || body == "{}")
+      throw ValidationException("Missing body parameter.")
+    return body
   }
 }
 

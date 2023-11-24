@@ -59,7 +59,7 @@ class CreateUserTestUser : UserBaseTest() {
     }
 
     // Then
-    assertEquals("Invalid JSON body.", exception.message)
+    assertEquals("Missing body parameter.", exception.message)
   }
 
   @Test

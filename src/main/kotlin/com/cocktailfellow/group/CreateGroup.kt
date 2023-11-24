@@ -5,24 +5,32 @@ import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
+import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.link.UserGroupLinkService
-import com.cocktailfellow.common.token.TokenManagementDeprecated
+import com.cocktailfellow.common.token.TokenManagement
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import java.util.*
 
-class CreateGroup: AbstractRequestHandler() {
-  private val groupService = GroupService()
+class CreateGroup(
+  private val tokenManagement: TokenManagement = TokenManagement(),
+  private val groupService: GroupService = GroupService(),
   private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
 
+) : AbstractRequestHandler() {
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
     val body = getBody(input)
+    val group: CreateGroupRequest
 
-    val request = JsonConfig.instance.decodeFromString<CreateGroupRequest>(body)
-    val groupName = request.groupName
+    try {
+      group = JsonConfig.instance.decodeFromString(body)
+    } catch (e: Exception) {
+      throw ValidationException("Invalid JSON body.")
+    }
+    val groupName = group.groupName
 
-    val tokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
+    val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username
 
     val groupId = UUID.randomUUID().toString()

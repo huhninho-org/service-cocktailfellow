@@ -31,8 +31,7 @@ class CreateUser(private val userService: UserService = UserService()) : Abstrac
     )
 
     try {
-      user = body.let { JsonConfig.instance.decodeFromString(it) }
-        ?: throw ValidationException("No user found in the request body.")
+      user = JsonConfig.instance.decodeFromString(body)
     } catch (e: Exception) {
       throw ValidationException("Invalid JSON body.")
     }

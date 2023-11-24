@@ -5,19 +5,20 @@ import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
-import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.common.token.TokenManagementDeprecated
+import com.cocktailfellow.common.link.UserGroupLinkService
+import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
 import com.cocktailfellow.user.common.UserService
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 
-class CreateGroupLink : AbstractRequestHandler() {
-  private val groupService: GroupService = GroupService()
-  private val userService: UserService = UserService()
+class CreateGroupLink(
+  private val tokenManagement: TokenManagement = TokenManagement(),
+  private val groupService: GroupService = GroupService(),
+  private val userService: UserService = UserService(),
   private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
-
+) : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -27,7 +28,7 @@ class CreateGroupLink : AbstractRequestHandler() {
     val request = JsonConfig.instance.decodeFromString<CreateGroupLinkRequest>(body)
     val usernameToBeLinked = request.username
 
-    val tokenManagementData: TokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
+    val tokenManagementData: TokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
     if (!userService.doesUserExist(usernameToBeLinked)) {
       throw ValidationException("The specified user does not exist.") // todo: refactor

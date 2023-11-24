@@ -4,20 +4,22 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.common.token.TokenManagementDeprecated
+import com.cocktailfellow.common.link.UserGroupLinkService
+import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
 
-class DeleteGroup : AbstractRequestHandler() {
-  private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
+class DeleteGroup(
+  private val tokenManagement: TokenManagement = TokenManagement(),
+  private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService(),
   private val groupService: GroupService = GroupService()
+) : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
     val groupId = getPathParameterGroupId(input)
 
-    val tokenManagementData: TokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
+    val tokenManagementData: TokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
     if (!userGroupLinkService.isMemberOfGroup(tokenManagementData.username, groupId)) {
       throw ValidationException("User is not allowed to delete the group.") // todo: refactor
