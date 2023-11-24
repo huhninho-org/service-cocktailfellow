@@ -18,7 +18,7 @@ class TokenManagement {
   private val key: Key = Keys.hmacShaKeyFor(TokenManagementConfig.appSecretKey.toByteArray())
   private val nowMillis = System.currentTimeMillis()
   private val now = Date(nowMillis)
-  private val log: Logger = LogManager.getLogger(TokenManagementDeprecated::class.java)
+  private val log: Logger = LogManager.getLogger(TokenManagement::class.java)
 
   fun validateTokenAndGetData(loginToken: String?): TokenManagementData {
     val bearerLoginToken = extractBearer(loginToken)
@@ -74,3 +74,8 @@ class TokenManagement {
     }
   }
 }
+
+data class TokenManagementData(
+  val username: String,
+  val loginToken: String
+)

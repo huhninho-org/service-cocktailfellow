@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class TokenManagementDeprecatedTest : BaseTest() {
+class TokenManagementTest : BaseTest() {
+
+  private val tokenManagement = TokenManagement()
 
   @Test
   fun `test createLoginToken`() {
@@ -15,7 +17,7 @@ class TokenManagementDeprecatedTest : BaseTest() {
     val username = "testUser"
 
     // When
-    val token = TokenManagementDeprecated.createLoginToken(username)
+    val token = tokenManagement.createLoginToken(username)
 
     // Then
     assertNotNull(token)
@@ -25,10 +27,10 @@ class TokenManagementDeprecatedTest : BaseTest() {
   fun `test validateTokenAndGetData with valid token`() {
     // Given
     val username = "testUser"
-    val token = TokenManagementDeprecated.createLoginToken(username)
+    val token = tokenManagement.createLoginToken(username)
 
     // When
-    val data = TokenManagementDeprecated.validateTokenAndGetData("Bearer $token")
+    val data = tokenManagement.validateTokenAndGetData("Bearer $token")
 
     // Then
     assertEquals(username, data.username)
@@ -40,9 +42,9 @@ class TokenManagementDeprecatedTest : BaseTest() {
     // Given
     val token = "invalidToken"
 
-    // When / Then
+    // When Then
     assertThrows<JwtTokenException> {
-      TokenManagementDeprecated.validateTokenAndGetData("Bearer $token")
+      tokenManagement.validateTokenAndGetData("Bearer $token")
     }
   }
 
@@ -51,9 +53,9 @@ class TokenManagementDeprecatedTest : BaseTest() {
     // Given
     val token = null
 
-    // When / Then
+    // When Then
     assertThrows<JwtTokenException> {
-      TokenManagementDeprecated.validateTokenAndGetData("Bearer $token")
+      tokenManagement.validateTokenAndGetData("Bearer $token")
     }
   }
 
@@ -61,11 +63,11 @@ class TokenManagementDeprecatedTest : BaseTest() {
   fun `test validateTokenAndGetData with token without Bearer`() {
     // Given
     val username = "testUser"
-    val token = TokenManagementDeprecated.createLoginToken(username)
+    val token = tokenManagement.createLoginToken(username)
 
-    // When / Then
+    // When Then
     assertThrows<JwtTokenException> {
-      TokenManagementDeprecated.validateTokenAndGetData(token)
+      tokenManagement.validateTokenAndGetData(token)
     }
   }
 }
