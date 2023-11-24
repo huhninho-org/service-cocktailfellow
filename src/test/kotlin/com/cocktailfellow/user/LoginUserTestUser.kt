@@ -5,6 +5,7 @@ import com.cocktailfellow.UserBaseTest
 import com.cocktailfellow.common.EnvironmentVariables
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JwtTokenException
+import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.user.common.User
 import com.cocktailfellow.user.common.UserService
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,13 +20,15 @@ import org.mockito.kotlin.any
 class LoginUserTestUser : UserBaseTest()  {
   private lateinit var loginUser: LoginUser
   private lateinit var context: Context
+  private lateinit var tokenManagement: TokenManagement
   private lateinit var userService: UserService
 
   @BeforeEach
   fun setup() {
     context = Mockito.mock(Context::class.java)
+    tokenManagement = Mockito.mock(TokenManagement::class.java)
     userService = Mockito.mock(UserService::class.java)
-    loginUser = LoginUser(userService)
+    loginUser = LoginUser(tokenManagement, userService)
   }
 
   @Test
@@ -67,6 +70,7 @@ class LoginUserTestUser : UserBaseTest()  {
     )
 
     // When
+    `when`(tokenManagement.createLoginToken(any())).thenReturn("token")
     `when`(userService.getUser(any())).thenReturn(user)
     val response = loginUser.handleBusinessLogic(input, context)
 

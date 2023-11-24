@@ -7,13 +7,16 @@ import com.cocktailfellow.common.ErrorType
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.JwtTokenException
-import com.cocktailfellow.common.token.TokenManagementDeprecated
+import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.user.common.UserService
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import org.mindrot.jbcrypt.BCrypt
 
-class LoginUser(private val userService: UserService = UserService()) : AbstractRequestHandler() {
+class LoginUser(
+  private val tokenManagement: TokenManagement = TokenManagement(),
+  private val userService: UserService = UserService()
+) : AbstractRequestHandler() {
   private val requiredApiKey: String = System.getenv("APP_API_KEY")
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
@@ -31,7 +34,7 @@ class LoginUser(private val userService: UserService = UserService()) : Abstract
     val user = userService.getUser(username)
 
     if (BCrypt.checkpw(loginRequest.password, user.hashedPassword)) {
-      val loginToken = TokenManagementDeprecated.createLoginToken(username)
+      val loginToken = tokenManagement.createLoginToken(username)
       return generateResponse(HttpStatusCode.OK.code, loginToken)
     } else {
       throw JwtTokenException(
