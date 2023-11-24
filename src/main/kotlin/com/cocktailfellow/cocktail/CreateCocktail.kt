@@ -4,22 +4,23 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.database.CocktailRepository
-import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.link.CocktailGroupLinkService
+import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.group.GroupService
 import com.cocktailfellow.ingredient.model.Ingredient
-import com.cocktailfellow.common.token.TokenManagementDeprecated
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import java.util.*
 
 class CreateCocktail(
-  private val cocktailRepository: CocktailRepository = CocktailRepository()
-) : AbstractRequestHandler() {
-  private val groupService: GroupService = GroupService()
+  private val tokenManagement: TokenManagement = TokenManagement(),
+  private val cocktailRepository: CocktailRepository = CocktailRepository(),
+  private val groupService: GroupService = GroupService(),
   private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService()
+) : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -28,10 +29,14 @@ class CreateCocktail(
 
     val request = JsonConfig.instance.decodeFromString<CreateCocktailRequest>(body)
 
-    val tokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
+    val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
     if (!groupService.doesGroupExist(groupId)) {
       throw ValidationException("Group does not exist.") // todo: refactor
+    }
+
+    if (request.ingredients.isEmpty()) {
+      throw ValidationException("Ingredients list cannot be empty.")
     }
 
     val cocktailId = UUID.randomUUID().toString()

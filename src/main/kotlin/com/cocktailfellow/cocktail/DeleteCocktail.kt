@@ -4,26 +4,26 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.database.CocktailRepository
-import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.common.token.TokenManagementDeprecated
+import com.cocktailfellow.common.link.CocktailGroupLinkService
+import com.cocktailfellow.common.link.UserGroupLinkService
+import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
 
 class DeleteCocktail(
-  private val cocktailRepository: CocktailRepository = CocktailRepository()
-) : AbstractRequestHandler() {
-  private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService()
-
+  private val tokenManagement: TokenManagement = TokenManagement(),
+  private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService(),
+  private val cocktailRepository: CocktailRepository = CocktailRepository(),
   private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
+) : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
     val groupId = getPathParameterGroupId(input)
     val cocktailId = getPathParameterCocktailId(input)
 
-    val tokenManagementData: TokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
+    val tokenManagementData: TokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
     if (!userGroupLinkService.isMemberOfGroup(tokenManagementData.username, groupId)) {
       throw ValidationException("User is not member the group.") // todo: refactor

@@ -6,22 +6,23 @@ import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.database.CocktailRepository
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.group.GroupService
 import com.cocktailfellow.ingredient.model.Ingredient
-import com.cocktailfellow.common.token.TokenManagementDeprecated
 import kotlinx.serialization.Serializable
 
 class GetCocktail(
-  private val cocktailRepository: CocktailRepository = CocktailRepository()
-) : AbstractRequestHandler() {
+  private val tokenManagement: TokenManagement = TokenManagement(),
+  private val cocktailRepository: CocktailRepository = CocktailRepository(),
   private val groupService: GroupService = GroupService()
+) : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
     val groupId = getPathParameterGroupId(input)
     val cocktailId = getPathParameterCocktailId(input)
 
-    val tokenManagementData = TokenManagementDeprecated.validateTokenAndGetData(authorization)
+    val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
     if (!groupService.doesGroupExist(groupId)) {
       throw ValidationException("Group does not exist.") // todo: refactor

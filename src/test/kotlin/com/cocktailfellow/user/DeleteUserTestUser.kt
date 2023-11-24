@@ -3,17 +3,15 @@ package com.cocktailfellow.user
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.BaseTest
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
-import com.cocktailfellow.common.token.TokenManagementDeprecated
 import com.cocktailfellow.user.common.UserService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -40,15 +38,15 @@ class DeleteUserTestUser : BaseTest() {
   fun `test handleBusinessLogic with valid request`() {
     // Given
     val username = "testUser"
-    val token = TokenManagementDeprecated.createLoginToken(username)
     val input = mapOf(
-      "headers" to mapOf("Authorization" to "Bearer $token")
+      "headers" to mapOf("Authorization" to "Bearer token")
     )
 
     // When
-    `when`(tokenManagement.validateTokenAndGetData(ArgumentMatchers.any())).thenReturn(
-      TokenManagementData("username", "token")
+    `when`(tokenManagement.validateTokenAndGetData(any())).thenReturn(
+      TokenManagementData(username, "token")
     )
+    `when`(userService.doesUserExist(username)).thenReturn(false)
     val response = deleteUser.handleBusinessLogic(input, context)
 
     // Then
@@ -61,24 +59,26 @@ class DeleteUserTestUser : BaseTest() {
   fun `test handleBusinessLogic with non-existing user`() {
     // Given
     val username = "nonExistingUser"
-    val token = TokenManagementDeprecated.createLoginToken(username)
+    val token = "Bearer someToken"
     val input = mapOf(
-      "headers" to mapOf("Authorization" to "Bearer $token")
+      "headers" to mapOf("Authorization" to token)
     )
 
     // When
-    `when`(tokenManagement.validateTokenAndGetData(ArgumentMatchers.any())).thenReturn(
-      TokenManagementData("username", "token")
+    `when`(tokenManagement.validateTokenAndGetData(any())).thenReturn(
+      TokenManagementData(username, "token")
     )
-    `when`(userService.doesUserExist(any())).thenReturn(false)
-    `when`(userService.deleteUser(any())).thenThrow(ValidationException("The specified user does not exist."))
+    `when`(userService.doesUserExist(username)).thenReturn(false)
+    `when`(userService.deleteUser(username)).thenCallRealMethod()
+
+    // Then
     val exception = assertThrows<ValidationException> {
       deleteUser.handleBusinessLogic(input, context)
     }
 
-    // Then
-    assertEquals(HttpStatusCode.BAD_REQUEST, exception.statusCode)
+    assertEquals("The specified user does not exist.", exception.message)
   }
+
 
   @Test
   fun `test handleBusinessLogic with invalid token`() {
