@@ -1,11 +1,11 @@
 org: lhoerhan
 app: cocktail-fellow
-service: backend
+service: cocktail-fellow
 
 frameworkVersion: "3.35.2"
 
 custom:
-  teamPrefix: cocktail-fellow
+  teamPrefix: cocktail_fellow
   stage: ${opt:stage, self:provider.stage}
   region: eu-central-1
   tables:
@@ -214,6 +214,7 @@ functions:
           - dynamodb:DeleteItem
           - dynamodb:Scan
           - dynamodb:Query
+          - dynamodb:GetItem
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
@@ -256,7 +257,7 @@ functions:
 
 resources:
   Resources:
-    users:
+    user:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tables.user}
@@ -281,7 +282,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-    groups:
+    group:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tables.group}
@@ -294,7 +295,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-    userGroupLinks:
+    userGroupLink:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tables.userGroupLink}
@@ -319,7 +320,7 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
-    cocktails:
+    cocktail:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tables.cocktail}
@@ -332,7 +333,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-    cocktailGroupLinks:
+    cocktailGroupLink:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tables.cocktailGroupLink}
