@@ -31,10 +31,11 @@ provider:
     USER_GROUP_LINK_TABLE: ${self:custom.tables.userGroupLink}
     COCKTAIL_TABLE: ${self:custom.tables.cocktail}
     COCKTAIL_GROUP_LINK_TABLE: ${self:custom.tables.cocktailGroupLink}
-
-    APP_SECRET_KEY: "yourSuperStrongSecretKeyHereMakeSureItIsAtLeast32CharactersLong"
-    APP_API_KEY: "V8mjtjn1Kv9TofGELg7ZZL0lHODIlnLl"
-    JWT_TTL: 1800000 # 30 minutes
+    # jet
+    JWT_TTL: ${param:jwt-ttl}
+    # secrets
+    APP_SECRET_KEY: ${param:app-secret-key}
+    APP_API_KEY: ${param:app-api-key}
 
 package:
   artifact: build/libs/cocktail-fellow-dev-all.jar
