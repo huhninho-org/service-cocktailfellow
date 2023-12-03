@@ -9,7 +9,7 @@
 		},
 		{
 			"key": "app-api-key",
-			"value": "atSjw042sTZL0lofGFoOmD2LnLEL0g7Z",
+			"value": "",
 			"type": "secret",
 			"enabled": true
 		},

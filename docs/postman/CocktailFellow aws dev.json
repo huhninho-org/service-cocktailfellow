@@ -3,14 +3,14 @@
 	"values": [
 		{
 			"key": "api-base-url",
-			"value": "https://egi3y2en5d.execute-api.eu-central-1.amazonaws.com",
-			"type": "default",
+			"value": "",
+			"type": "secret",
 			"enabled": true
 		},
 		{
 			"key": "app-api-key",
-			"value": "atSjw042sTZL0lofGFoOmD2LnLEL0g7Z",
-			"type": "default",
+			"value": "",
+			"type": "secret",
 			"enabled": true
 		},
 		{
