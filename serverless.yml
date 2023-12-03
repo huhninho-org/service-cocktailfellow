@@ -19,6 +19,18 @@ custom:
     local: http://localhost:8000
     dev: https://dynamodb.${self:custom.region}.amazonaws.com
     prod: https://dynamodb.${self:custom.region}.amazonaws.com
+  jwtTtl:
+    local: 1800000
+    dev: ${param:jwt-ttl, 'default-jwt-ttl-value-for-dev'}
+    prod: ${param:jwt-ttl, 'default-jwt-ttl-value-for-prod'}
+  appSecretKey:
+    local: 'DUMMY-pXdsNbWpY+p7wkCi51iUzoTzECSVNxXo+KJPtKTVo='
+    dev: ${param:app-secret-key, 'default-app-secret-key-for-dev'}
+    prod: ${param:app-secret-key, 'default-app-secret-key-for-prod'}
+  appApiKey:
+    local: 'MY-APP-API-KEY'
+    dev: ${param:app-api-key, 'default-app-api-key-for-dev'}
+    prod: ${param:app-api-key, 'default-app-api-key-for-prod'}
   serverless-dynamodb:
     stages:
       - local
@@ -47,10 +59,10 @@ provider:
     COCKTAIL_TABLE: ${self:custom.tables.cocktail}
     COCKTAIL_GROUP_LINK_TABLE: ${self:custom.tables.cocktailGroupLink}
     # jet
-    JWT_TTL: 1800000
+    JWT_TTL: ${self:custom.jwtTtl.${self:provider.stage}, 1800000}
     # secrets
-    APP_SECRET_KEY: Frhh8MgemYlUovz3GiGMOwHE4e6_iiBtiTouqkcw7Usx6FtIwqi8bDpm7Lawuz2FoknGGYQ4hnr-2Dk22mih
-    APP_API_KEY: atSjw042sTZL0lofGFoOmD2LnLEL0g7Z
+    APP_SECRET_KEY: ${self:custom.appSecretKey.${self:provider.stage}, 'DUMMY-pXdsNbWpY+p7wkCi51iUzoTzECSVNxXo+KJPtKTVo='}
+    APP_API_KEY: ${self:custom.appApiKey.${self:provider.stage}, 'MY-APP-API-KEY'}
     # local set-up
     DYNAMODB_ENDPOINT: ${self:custom.dynamodbEndpoint.${self:provider.stage}, 'https://dynamodb.${self:provider.region}.amazonaws.com'}
 
