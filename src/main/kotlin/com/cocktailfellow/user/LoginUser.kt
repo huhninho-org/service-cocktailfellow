@@ -11,6 +11,8 @@ import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.user.common.UserService
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.mindrot.jbcrypt.BCrypt
 
 class LoginUser(
@@ -18,6 +20,7 @@ class LoginUser(
   private val userService: UserService = UserService()
 ) : AbstractRequestHandler() {
   private val requiredApiKey: String = System.getenv("APP_API_KEY")
+  private val log: Logger = LogManager.getLogger(LoginUser::class.java)
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val body = getBody(input)
@@ -31,7 +34,9 @@ class LoginUser(
       HttpStatusCode.FORBIDDEN
     )
 
+    log.info("User '$username' is trying to log in")
     val user = userService.getUser(username)
+    log.info("User '$username' login successful")
 
     if (BCrypt.checkpw(loginRequest.password, user.hashedPassword)) {
       val loginToken = tokenManagement.createLoginToken(username)

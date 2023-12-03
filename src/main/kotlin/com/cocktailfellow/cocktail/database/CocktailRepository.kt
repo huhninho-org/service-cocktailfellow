@@ -3,6 +3,7 @@ package com.cocktailfellow.cocktail.database
 import com.cocktailfellow.cocktail.model.Cocktail
 import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.cocktail.model.CocktailIngredients
+import com.cocktailfellow.common.DynamoDbClientProvider
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.ingredient.model.Ingredient
 import org.apache.logging.log4j.LogManager
@@ -13,7 +14,9 @@ import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 
-class CocktailRepository(private val dynamoDb: DynamoDbClient = DynamoDbClient.create()) {
+class CocktailRepository(
+  private val dynamoDbClient: DynamoDbClient = DynamoDbClientProvider.get()
+) {
   private val log: Logger = LogManager.getLogger(CocktailRepository::class.java)
   private val cocktailTable: String = System.getenv("COCKTAIL_TABLE")
 
@@ -41,7 +44,7 @@ class CocktailRepository(private val dynamoDb: DynamoDbClient = DynamoDbClient.c
       .item(item)
       .build()
 
-    dynamoDb.putItem(putCocktailRequest)
+    dynamoDbClient.putItem(putCocktailRequest)
     log.info("Cocktail '${name}' created.")
   }
 
@@ -51,7 +54,7 @@ class CocktailRepository(private val dynamoDb: DynamoDbClient = DynamoDbClient.c
       .key(mapOf("cocktailId" to AttributeValue.builder().s(cocktailId).build()))
       .build()
 
-    val item = dynamoDb.getItem(itemRequest).item()
+    val item = dynamoDbClient.getItem(itemRequest).item()
 
     val ingredientStrings = item["ingredients"]?.ss()
     val ingredients = ingredientStrings?.map {
@@ -85,7 +88,7 @@ class CocktailRepository(private val dynamoDb: DynamoDbClient = DynamoDbClient.c
       .expressionAttributeNames(expressionAttributeNames)
       .build()
 
-    val item = dynamoDb.getItem(itemRequest).item()
+    val item = dynamoDbClient.getItem(itemRequest).item()
 
     return CocktailInfo(
       cocktailId = item["cocktailId"]?.s()!!,
@@ -110,7 +113,7 @@ class CocktailRepository(private val dynamoDb: DynamoDbClient = DynamoDbClient.c
       .expressionAttributeNames(expressionAttributeNames)
       .build()
 
-    val item = dynamoDb.getItem(itemRequest).item()
+    val item = dynamoDbClient.getItem(itemRequest).item()
 
     val ingredientStrings = item["ingredients"]?.ss()
     val ingredients = ingredientStrings?.map {
@@ -131,7 +134,7 @@ class CocktailRepository(private val dynamoDb: DynamoDbClient = DynamoDbClient.c
       .key(mapOf("cocktailId" to AttributeValue.builder().s(cocktailId).build()))
       .build()
 
-    val response = dynamoDb.getItem(request)
+    val response = dynamoDbClient.getItem(request)
     return response.item().isNotEmpty()
   }
 
@@ -146,7 +149,7 @@ class CocktailRepository(private val dynamoDb: DynamoDbClient = DynamoDbClient.c
       .build()
 
     try {
-      dynamoDb.deleteItem(deleteItemRequest)
+      dynamoDbClient.deleteItem(deleteItemRequest)
       log.info("Cocktail with id '$cocktailId' deleted.")
     } catch (e: Exception) {
       throw ValidationException("Failed to delete cocktail with id '$cocktailId'.") // todo: refactor exception

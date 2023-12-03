@@ -3,6 +3,7 @@ package com.cocktailfellow.common.link
 import com.cocktailfellow.cocktail.database.CocktailRepository
 import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.cocktail.model.CocktailIngredients
+import com.cocktailfellow.common.DynamoDbClientProvider
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.LinkException
 import com.cocktailfellow.common.ValidationException
@@ -12,7 +13,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.*
 
 class CocktailGroupLinkRepository(
-  private val dynamoDb: DynamoDbClient = DynamoDbClient.create(),
+  private val dynamoDbClient: DynamoDbClient = DynamoDbClientProvider.get(),
   private val cocktailRepository: CocktailRepository = CocktailRepository()
 ) {
   private val log: Logger = LogManager.getLogger(CocktailGroupLinkRepository::class.java)
@@ -40,7 +41,7 @@ class CocktailGroupLinkRepository(
       .build()
 
     try {
-      dynamoDb.putItem(putGroupRequest)
+      dynamoDbClient.putItem(putGroupRequest)
       log.info("Linked cocktail '$cocktailId' to group '$groupId'.")
     } catch (e: ConditionalCheckFailedException) {
       log.error("Link between cocktail '$cocktailId' and group '$groupId' already exists.")
@@ -62,7 +63,7 @@ class CocktailGroupLinkRepository(
       .key(mapOf("id" to AttributeValue.builder().s(link).build()))
       .build()
 
-    val response = dynamoDb.getItem(itemRequest)
+    val response = dynamoDbClient.getItem(itemRequest)
     return response.item().isNotEmpty()
   }
 
@@ -93,7 +94,7 @@ class CocktailGroupLinkRepository(
       .expressionAttributeValues(mapOf(":groupIdValue" to AttributeValue.builder().s(groupId).build()))
       .build()
 
-    val response = dynamoDb.scan(scanRequest)
+    val response = dynamoDbClient.scan(scanRequest)
 
     return response.items() ?: mutableListOf()
   }
@@ -110,7 +111,7 @@ class CocktailGroupLinkRepository(
       .build()
 
     try {
-      dynamoDb.deleteItem(itemRequest)
+      dynamoDbClient.deleteItem(itemRequest)
     } catch (e: Exception) {
       log.error("Failed to delete link with id '$userGroupLink'. error: ${e.message}")
       throw LinkException("Failed to delete link with id '$userGroupLink'.", HttpStatusCode.INTERNAL_SERVER_ERROR)

@@ -2,7 +2,7 @@ org: lhoerhan
 app: cocktail-fellow
 service: cocktail-fellow
 
-frameworkVersion: "3.35.2"
+frameworkVersion: "3.38.0"
 
 custom:
   teamPrefix: cocktail_fellow
@@ -14,13 +14,28 @@ custom:
     userGroupLink: ${self:custom.teamPrefix}_${self:custom.stage}_userGroupLink
     cocktail: ${self:custom.teamPrefix}_${self:custom.stage}_cocktail
     cocktailGroupLink: ${self:custom.teamPrefix}_${self:custom.stage}_cocktailGroupLink
+  # local set-up
+  dynamodbEndpoint:
+    local: http://localhost:8000
+    dev: https://dynamodb.${self:custom.region}.amazonaws.com
+    prod: https://dynamodb.${self:custom.region}.amazonaws.com
+  serverless-dynamodb:
+    stages:
+      - local
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: true
+      convertEmptyValues: true
 
 provider:
   name: aws
-  snapStart: true
   runtime: java11
   region: ${self:custom.region}
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   timeout: 10
   memorySize: 3004
   environment:
@@ -32,10 +47,12 @@ provider:
     COCKTAIL_TABLE: ${self:custom.tables.cocktail}
     COCKTAIL_GROUP_LINK_TABLE: ${self:custom.tables.cocktailGroupLink}
     # jet
-    JWT_TTL: ${param:jwt-ttl}
+    JWT_TTL: 1800000
     # secrets
-    APP_SECRET_KEY: ${param:app-secret-key}
-    APP_API_KEY: ${param:app-api-key}
+    APP_SECRET_KEY: Frhh8MgemYlUovz3GiGMOwHE4e6_iiBtiTouqkcw7Usx6FtIwqi8bDpm7Lawuz2FoknGGYQ4hnr-2Dk22mih
+    APP_API_KEY: atSjw042sTZL0lofGFoOmD2LnLEL0g7Z
+    # local set-up
+    DYNAMODB_ENDPOINT: ${self:custom.dynamodbEndpoint.${self:provider.stage}, 'https://dynamodb.${self:provider.region}.amazonaws.com'}
 
 package:
   artifact: build/libs/cocktail-fellow-dev-all.jar
@@ -68,6 +85,7 @@ functions:
           - dynamodb:DeleteItem
           - dynamodb:Scan
           - dynamodb:Query
+          - dynamodb:GetItem
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
@@ -362,5 +380,5 @@ resources:
 
 plugins:
   - serverless-iam-roles-per-function
+  - serverless-dynamodb
   - serverless-offline
-  - serverless-dynamodb-local

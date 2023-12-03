@@ -1,5 +1,6 @@
 package com.cocktailfellow.common.link
 
+import com.cocktailfellow.common.DynamoDbClientProvider
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.LinkException
 import org.apache.logging.log4j.LogManager
@@ -8,7 +9,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.*
 
 class UserGroupLinkRepository(
-  private val dynamoDb: DynamoDbClient = DynamoDbClient.create()
+  private val dynamoDbClient: DynamoDbClient = DynamoDbClientProvider.get()
 ) {
   private val log: Logger = LogManager.getLogger(UserGroupLinkRepository::class.java)
   private val linkTable: String = System.getenv("USER_GROUP_LINK_TABLE")
@@ -27,7 +28,7 @@ class UserGroupLinkRepository(
       .build()
 
     try {
-      dynamoDb.putItem(putGroupRequest)
+      dynamoDbClient.putItem(putGroupRequest)
       log.info("Linked user '$userId' to group '$groupId'.")
     } catch (e: ConditionalCheckFailedException) {
       log.error("Link between user '$userId' and group '$groupId' already exists.")
@@ -49,7 +50,7 @@ class UserGroupLinkRepository(
       .build()
 
     try {
-      dynamoDb.deleteItem(itemRequest)
+      dynamoDbClient.deleteItem(itemRequest)
     } catch (e: Exception) {
       throw LinkException(
         "Remove link '$userGroupLink' failed.",
@@ -58,14 +59,14 @@ class UserGroupLinkRepository(
     }
   }
 
-  fun getGroups(userId: String): List<MutableMap<String, AttributeValue>>? {
+  fun getGroups(userId: String): List<MutableMap<String, AttributeValue>> {
     val scanRequest = ScanRequest.builder()
       .tableName(linkTable)
       .filterExpression("userId = :userIdValue")
       .expressionAttributeValues(mapOf(":userIdValue" to AttributeValue.builder().s(userId).build()))
       .build()
 
-    return dynamoDb.scan(scanRequest).items() ?: emptyList()
+    return dynamoDbClient.scan(scanRequest).items() ?: emptyList()
   }
 
   fun deleteAllLinksForGroup(groupId: String) {
@@ -75,7 +76,7 @@ class UserGroupLinkRepository(
       .expressionAttributeValues(mapOf(":groupIdVal" to AttributeValue.builder().s(groupId).build()))
       .build()
 
-    deleteDataset(dynamoDb.scan(scanRequest))
+    deleteDataset(dynamoDbClient.scan(scanRequest))
   }
 
   fun deleteAllLinksForUser(userId: String) {
@@ -85,7 +86,7 @@ class UserGroupLinkRepository(
       .expressionAttributeValues(mapOf(":userIdVal" to AttributeValue.builder().s(userId).build()))
       .build()
 
-    deleteDataset(dynamoDb.scan(scanRequest))
+    deleteDataset(dynamoDbClient.scan(scanRequest))
   }
 
   fun isMemberOfGroup(userGroupLink: String): Boolean {
@@ -98,7 +99,7 @@ class UserGroupLinkRepository(
       .key(mapOf("id" to AttributeValue.builder().s(link).build()))
       .build()
 
-    val response = dynamoDb.getItem(itemRequest)
+    val response = dynamoDbClient.getItem(itemRequest)
     return response.item().isNotEmpty()
   }
 
@@ -112,7 +113,7 @@ class UserGroupLinkRepository(
           .build()
 
         try {
-          dynamoDb.deleteItem(deleteRequest)
+          dynamoDbClient.deleteItem(deleteRequest)
         } catch (e: Exception) {
           log.error("Failed to delete link with id '$linkId'. error: ${e.message}")
           throw LinkException("Failed to delete link with id '$linkId'.", HttpStatusCode.INTERNAL_SERVER_ERROR)

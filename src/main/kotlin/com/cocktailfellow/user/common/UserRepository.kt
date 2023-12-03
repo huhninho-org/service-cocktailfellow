@@ -1,5 +1,6 @@
 package com.cocktailfellow.user.common
 
+import com.cocktailfellow.common.DynamoDbClientProvider
 import com.cocktailfellow.common.ValidationException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -7,7 +8,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.*
 
 class UserRepository(
-  private val dynamoDb: DynamoDbClient = DynamoDbClient.create()
+  private val dynamoDbClient: DynamoDbClient = DynamoDbClientProvider.get()
 ) {
   private val log: Logger = LogManager.getLogger(UserRepository::class.java)
   private val userTable: String = System.getenv("USER_TABLE")
@@ -26,7 +27,7 @@ class UserRepository(
       .build()
 
     try {
-      dynamoDb.putItem(putItemRequest)
+      dynamoDbClient.putItem(putItemRequest)
     } catch (e: ConditionalCheckFailedException) {
       throw ValidationException("Username '${userCreate.username}' already exists.")
     }
@@ -40,7 +41,7 @@ class UserRepository(
       .expressionAttributeValues(mapOf(":usernameVal" to AttributeValue.builder().s(username).build()))
       .build()
 
-    val queryResponse = dynamoDb.query(queryRequest)
+    val queryResponse = dynamoDbClient.query(queryRequest)
     return queryResponse.count() > 0
   }
 
@@ -51,7 +52,7 @@ class UserRepository(
       .expressionAttributeValues(mapOf(":usernameValue" to AttributeValue.builder().s(username).build()))
       .build()
 
-    val response = dynamoDb.scan(scanRequest)
+    val response = dynamoDbClient.scan(scanRequest)
 
     val items = response.items()
     if (items.isEmpty()) {
@@ -71,7 +72,7 @@ class UserRepository(
       .key(mapOf("userId" to AttributeValue.builder().s(userId).build()))
       .build()
 
-    val response = dynamoDb.getItem(itemRequest)
+    val response = dynamoDbClient.getItem(itemRequest)
     val item = response.item()
 
     return User(
@@ -88,7 +89,7 @@ class UserRepository(
       .key(mapOf("userId" to AttributeValue.builder().s(userId).build()))
       .build()
 
-    val response = dynamoDb.getItem(itemRequest)
+    val response = dynamoDbClient.getItem(itemRequest)
     return response.item().isNotEmpty()
   }
 
@@ -105,7 +106,7 @@ class UserRepository(
       .build()
 
     try {
-      dynamoDb.deleteItem(deleteItemRequest)
+      dynamoDbClient.deleteItem(deleteItemRequest)
       log.info("User with id '$userId' deleted.")
     } catch (e: Exception) {
       throw ValidationException("Failed to delete user with ID '$userId'.") // todo: refactor exception

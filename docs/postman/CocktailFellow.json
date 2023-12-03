@@ -1,0 +1,630 @@
+{
+	"info": {
+		"name": "CocktailFellow",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "users",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "{{app-api-key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"Lukas\",\n    \"password\":\"mypw\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/users",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/users",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"loginToken\", responseJson.loginToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "{{app-api-key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"Lukas\",\n    \"password\":\"mypw\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/login",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "groups",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"groupId\", responseJson.result.groupId);",
+							"pm.collectionVariables.set(\"loginToken\", responseJson.loginToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"groupName\":\"my group\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/groups",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "groups",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"groupId\", responseJson.result.groups[0].groupId);",
+							"pm.collectionVariables.set(\"loginToken\", responseJson.loginToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/groups",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "groups",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/groups/{{groupId}}",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"groups",
+						"{{groupId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "groups link",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"loginToken\", responseJson.loginToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\":\"Lukas2\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/groups/{{groupId}}/link",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"groups",
+						"{{groupId}}",
+						"link"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "groups link",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"loginToken\", responseJson.loginToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/groups/{{groupId}}/link",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"groups",
+						"{{groupId}}",
+						"link"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cocktails",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"cocktailId\", responseJson.result.cocktail);",
+							"pm.collectionVariables.set(\"loginToken\", responseJson.loginToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Mojito\",\n  \"method\": \"Muddle mint leaves with sugar and lime juice. Add a splash of soda water and fill the glass with cracked ice. Pour the rum over the ice, and fill the glass with soda water. Garnish with mint leaves.\",\n  \"story\": \"The Mojito is a traditional Cuban cocktail, and legend has it that this drink was a favorite of Ernest Hemingway while he stayed in Havana.\",\n  \"notes\": \"Best served in a tall glass and enjoyed on a hot summer day.\",\n  \"ingredients\": [\n    {\n      \"ingredientName\": \"White Rum\",\n      \"amount\": \"50ml\"\n    },\n    {\n      \"ingredientName\": \"Lime Juice\",\n      \"amount\": \"20ml\"\n    },\n    {\n      \"ingredientName\": \"Sugar\",\n      \"amount\": \"2 tsp\"\n    },\n    {\n      \"ingredientName\": \"Mint Leaves\",\n      \"amount\": \"10 leaves\"\n    },\n    {\n      \"ingredientName\": \"Soda Water\",\n      \"amount\": \"100ml\"\n    }\n  ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/groups/{{groupId}}/cocktails",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"groups",
+						"{{groupId}}",
+						"cocktails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cocktails Basil Smash",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"groupId\", responseJson.result.groupId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Basil Smash\",\n  \"method\": \"In a cocktail shaker, muddle fresh basil leaves and sugar. Add lemon juice and gin to the shaker. Fill the shaker with ice cubes and shake vigorously. Strain the mixture into a chilled cocktail glass. Garnish with a fresh basil leaf.\",\n  \"story\": \"The Basil Smash is a modern cocktail known for its refreshing and herbal flavors. It's a popular choice for those who appreciate a unique twist on classic cocktails.\",\n  \"notes\": \"Serve in a chilled cocktail glass for the best taste experience.\",\n  \"ingredients\": [\n    {\n      \"ingredientName\": \"Fresh Basil Leaves\",\n      \"amount\": \"8-10 leaves\"\n    },\n    {\n      \"ingredientName\": \"Granulated Sugar\",\n      \"amount\": \"2 tsp\"\n    },\n    {\n      \"ingredientName\": \"Lemon Juice\",\n      \"amount\": \"50ml\"\n    },\n    {\n      \"ingredientName\": \"Gin\",\n      \"amount\": \"60ml\"\n    },\n    {\n      \"ingredientName\": \"Ice Cubes\",\n      \"amount\": \"As needed\"\n    },\n    {\n      \"ingredientName\": \"Fresh Basil Leaf\",\n      \"amount\": \"For garnish\"\n    }\n  ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/groups/{{groupId}}/cocktails",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"groups",
+						"{{groupId}}",
+						"cocktails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cocktails White Rum Basil Smash",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"groupId\", responseJson.result.groupId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"White Rum Basil Smash\",\n  \"method\": \"In a cocktail shaker, muddle fresh basil leaves and sugar. Add lemon juice and gin to the shaker. Fill the shaker with ice cubes and shake vigorously. Strain the mixture into a chilled cocktail glass. Garnish with a fresh basil leaf.\",\n  \"story\": \"The Basil Smash is a modern cocktail known for its refreshing and herbal flavors. It's a popular choice for those who appreciate a unique twist on classic cocktails.\",\n  \"notes\": \"Serve in a chilled cocktail glass for the best taste experience.\",\n  \"ingredients\": [\n    {\n      \"ingredientName\": \"Fresh Basil Leaves\",\n      \"amount\": \"8-10 leaves\"\n    },\n    {\n      \"ingredientName\": \"Granulated Sugar\",\n      \"amount\": \"2 tsp\"\n    },\n    {\n      \"ingredientName\": \"Lemon Juice\",\n      \"amount\": \"50ml\"\n    },\n    {\n      \"ingredientName\": \"White Rum\",\n      \"amount\": \"60ml\"\n    },\n    {\n      \"ingredientName\": \"Ice Cubes\",\n      \"amount\": \"As needed\"\n    },\n    {\n      \"ingredientName\": \"Fresh Basil Leaf\",\n      \"amount\": \"For garnish\"\n    }\n  ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/groups/{{groupId}}/cocktails",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"groups",
+						"{{groupId}}",
+						"cocktails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cocktails",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"cocktailId\", responseJson.result.cocktails[0].cocktailId);",
+							"pm.collectionVariables.set(\"loginToken\", responseJson.loginToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/groups/{{groupId}}/cocktails",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"groups",
+						"{{groupId}}",
+						"cocktails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cocktail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"loginToken\", responseJson.loginToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/groups/{{groupId}}/cocktails/{{cocktailId}}",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"groups",
+						"{{groupId}}",
+						"cocktails",
+						"{{cocktailId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ingredients",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"cocktailId\", responseJson.result.cocktails[0].cocktailId);",
+							"pm.collectionVariables.set(\"loginToken\", responseJson.loginToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/ingredients?ingredients=Basil,Gin",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"ingredients"
+					],
+					"query": [
+						{
+							"key": "ingredients",
+							"value": "Basil,Gin"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cocktail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"loginToken\", responseJson.loginToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{loginToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{api-base-url}}/{{stage}}/groups/{{groupId}}/cocktails/{{cocktailId}}",
+					"host": [
+						"{{api-base-url}}"
+					],
+					"path": [
+						"{{stage}}",
+						"groups",
+						"{{groupId}}",
+						"cocktails",
+						"{{cocktailId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "loginToken",
+			"value": ""
+		},
+		{
+			"key": "groupId",
+			"value": ""
+		},
+		{
+			"key": "cocktailId",
+			"value": ""
+		}
+	]
+}

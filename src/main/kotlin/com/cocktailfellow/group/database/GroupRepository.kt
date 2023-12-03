@@ -1,5 +1,6 @@
 package com.cocktailfellow.group.database
 
+import com.cocktailfellow.common.DynamoDbClientProvider
 import com.cocktailfellow.common.ValidationException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -10,7 +11,7 @@ import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 
 class GroupRepository(
-  private val dynamoDb: DynamoDbClient = DynamoDbClient.create()
+  private val dynamoDbClient: DynamoDbClient = DynamoDbClientProvider.get()
 ) {
   private val log: Logger = LogManager.getLogger(GroupRepository::class.java)
 
@@ -27,7 +28,7 @@ class GroupRepository(
       .item(item)
       .build()
 
-    dynamoDb.putItem(putGroupRequest)
+    dynamoDbClient.putItem(putGroupRequest)
     log.info("Group '${groupName}' created.")
   }
 
@@ -37,7 +38,7 @@ class GroupRepository(
       .key(mapOf("groupId" to AttributeValue.builder().s(groupId).build()))
       .build()
 
-    val response = dynamoDb.getItem(itemRequest)
+    val response = dynamoDbClient.getItem(itemRequest)
     val groupItem = response.item()
 
     val groupName = groupItem["groupname"]?.s()
@@ -50,7 +51,7 @@ class GroupRepository(
       .key(mapOf("groupId" to AttributeValue.builder().s(groupId).build()))
       .build()
 
-    val response = dynamoDb.getItem(request)
+    val response = dynamoDbClient.getItem(request)
     return response.item().isNotEmpty()
   }
 
@@ -65,7 +66,7 @@ class GroupRepository(
       .build()
 
     try {
-      dynamoDb.deleteItem(deleteItemRequest)
+      dynamoDbClient.deleteItem(deleteItemRequest)
       log.info("Group with id '$groupId' deleted.")
     } catch (e: Exception) {
       throw ValidationException("Failed to delete group with ID '$groupId'.") // todo: refactor exception

@@ -1,0 +1,23 @@
+{
+	"name": "CocktailFellow dev",
+	"values": [
+		{
+			"key": "api-base-url",
+			"value": "http://localhost:3000",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "app-api-key",
+			"value": "atSjw042sTZL0lofGFoOmD2LnLEL0g7Z",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "stage",
+			"value": "dev",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment"
+}
