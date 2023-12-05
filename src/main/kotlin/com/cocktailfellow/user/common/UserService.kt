@@ -1,5 +1,7 @@
 package com.cocktailfellow.user.common
 
+import com.cocktailfellow.common.NotFoundException
+import com.cocktailfellow.common.Type
 import com.cocktailfellow.common.ValidationException
 
 class UserService {
@@ -34,7 +36,7 @@ class UserService {
 
   private fun validateUser(username: String) {
     if (!doesUserExist(username)) {
-      throw ValidationException("The specified user does not exist.") // todo: refactor
+      throw NotFoundException(Type.USER)
     }
   }
 }

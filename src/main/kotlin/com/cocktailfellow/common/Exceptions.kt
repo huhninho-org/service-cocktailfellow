@@ -5,11 +5,11 @@ import kotlinx.serialization.Serializable
 enum class ErrorType {
   VALIDATION_EXCEPTION,
   BAD_REQUEST,
+  RESOURCE_NOT_FOUND,
   JWT_EXPIRED_EXCEPTION,
   JWT_INVALID_SIGNATURE_EXCEPTION,
   JWT_INVALID_EXCEPTION,
   LINK_EXCEPTION,
-
   UNKNOWN_EXCEPTION;
 
   open fun toLowerCase(): String {
@@ -18,7 +18,7 @@ enum class ErrorType {
 }
 
 @Serializable
-data class ErrorResponse(val code: Int, val type: String, val message: String)
+data class ErrorResponse(val code: Int, val type: ErrorType, val message: String)
 
 open class CustomException(
   override val message: String, val statusCode: HttpStatusCode, val errorType: ErrorType
@@ -28,6 +28,18 @@ class ValidationException(
   message: String
 ) : CustomException(
   message = message, statusCode = HttpStatusCode.BAD_REQUEST, errorType = ErrorType.VALIDATION_EXCEPTION
+)
+
+class NotFoundException(
+  item: Type
+) : CustomException(
+  message = "'${item.name}' not found.", statusCode = HttpStatusCode.NOT_FOUND, errorType = ErrorType.RESOURCE_NOT_FOUND
+)
+
+class BadRequestException(
+  message: String
+) : CustomException(
+  message = message, statusCode = HttpStatusCode.BAD_REQUEST, errorType = ErrorType.BAD_REQUEST
 )
 
 class LinkException(

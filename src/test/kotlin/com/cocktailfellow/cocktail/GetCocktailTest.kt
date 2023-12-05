@@ -5,7 +5,7 @@ import com.cocktailfellow.BaseTest
 import com.cocktailfellow.cocktail.database.CocktailRepository
 import com.cocktailfellow.cocktail.model.Cocktail
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.NotFoundException
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
 import com.cocktailfellow.group.GroupService
@@ -75,12 +75,12 @@ class GetCocktailTest : BaseTest() {
     `when`(groupService.doesGroupExist(groupId)).thenReturn(false)
 
     // When
-    val exception = assertThrows<ValidationException> {
+    val exception = assertThrows<NotFoundException> {
       getCocktail.handleBusinessLogic(input, context)
     }
 
     // Then
-    assertEquals("Group does not exist.", exception.message)
+    assertEquals("'GROUP' not found.", exception.message)
   }
 
   @Test
@@ -100,11 +100,11 @@ class GetCocktailTest : BaseTest() {
     `when`(cocktailRepository.doesCocktailExist(cocktailId)).thenReturn(false)
 
     // When
-    val exception = assertThrows<ValidationException> {
+    val exception = assertThrows<NotFoundException> {
       getCocktail.handleBusinessLogic(input, context)
     }
 
     // Then
-    assertEquals("Cocktail does not exist.", exception.message)
+    assertEquals("'COCKTAIL' not found.", exception.message)
   }
 }

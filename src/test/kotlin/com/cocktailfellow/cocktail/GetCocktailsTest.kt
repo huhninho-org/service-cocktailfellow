@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.BaseTest
 import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.NotFoundException
 import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
@@ -73,11 +73,11 @@ class GetCocktailsTest : BaseTest() {
     `when`(groupService.doesGroupExist(groupId)).thenReturn(false)
 
     // When
-    val exception = assertThrows<ValidationException> {
+    val exception = assertThrows<NotFoundException> {
       getCocktails.handleBusinessLogic(input, context)
     }
 
     // Then
-    assertEquals("Group does not exist.", exception.message)
+    assertEquals("'GROUP' not found.", exception.message)
   }
 }

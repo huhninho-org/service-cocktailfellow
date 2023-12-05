@@ -114,6 +114,7 @@ class UserGroupLinkRepository(
 
         try {
           dynamoDbClient.deleteItem(deleteRequest)
+          log.info("Link with id '$linkId' deleted.")
         } catch (e: Exception) {
           log.error("Failed to delete link with id '$linkId'. error: ${e.message}")
           throw LinkException("Failed to delete link with id '$linkId'.", HttpStatusCode.INTERNAL_SERVER_ERROR)

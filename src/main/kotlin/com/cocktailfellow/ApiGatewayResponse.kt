@@ -1,5 +1,6 @@
 package com.cocktailfellow
 
+import com.cocktailfellow.common.ErrorType
 import com.cocktailfellow.common.JsonConfig
 import kotlinx.serialization.encodeToString
 
@@ -22,8 +23,8 @@ class ApiGatewayResponse(
       return ApiGatewayResponse(statusCode = status)
     }
 
-    fun error(status: Int, type: String, message: String): ApiGatewayResponse {
-      val body = JsonConfig.instance.encodeToString(mapOf("type" to type, "error" to message))
+    fun error(status: Int, type: ErrorType, message: String): ApiGatewayResponse {
+      val body = JsonConfig.instance.encodeToString(mapOf("type" to type.toLowerCase(), "error" to message))
       return ApiGatewayResponse(statusCode = status, body = body)
     }
   }

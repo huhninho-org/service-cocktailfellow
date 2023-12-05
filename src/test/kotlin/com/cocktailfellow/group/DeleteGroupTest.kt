@@ -2,8 +2,8 @@ package com.cocktailfellow.group
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.BaseTest
+import com.cocktailfellow.common.BadRequestException
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
@@ -64,9 +64,9 @@ class DeleteGroupTest : BaseTest() {
     Mockito.`when`(userGroupLinkService.isMemberOfGroup(Mockito.anyString(), Mockito.anyString())).thenReturn(false)
 
     // When/Then
-    val exception = assertThrows<ValidationException> {
+    val exception = assertThrows<BadRequestException> {
       deleteGroup.handleBusinessLogic(input, context)
     }
-    assertEquals("User is not allowed to delete the group.", exception.message)
+    assertEquals("User is not member of the given group.", exception.message)
   }
 }

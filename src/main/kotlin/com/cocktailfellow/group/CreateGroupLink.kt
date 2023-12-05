@@ -3,9 +3,7 @@ package com.cocktailfellow.group
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
-import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.JsonConfig
-import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.*
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
@@ -31,10 +29,10 @@ class CreateGroupLink(
     val tokenManagementData: TokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
     if (!userService.doesUserExist(usernameToBeLinked)) {
-      throw ValidationException("The specified user does not exist.") // todo: refactor
+      throw NotFoundException(Type.USER)
     }
     if (!groupService.doesGroupExist(groupId)) {
-      throw ValidationException("The specified group does not exist.") // todo: refactor
+      throw NotFoundException(Type.GROUP)
     }
 
     userGroupLinkService.createUserToGroupLink(usernameToBeLinked, groupId)

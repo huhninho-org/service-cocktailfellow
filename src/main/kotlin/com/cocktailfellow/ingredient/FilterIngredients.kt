@@ -4,8 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.model.CocktailIngredients
-import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.*
 import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
@@ -26,10 +25,10 @@ class FilterIngredients (
 
     val groups = userGroupLinkService.getGroups(username)
     if (groups.isNullOrEmpty())
-      throw ValidationException("User has no groups.") // todo: refactor
+      throw BadRequestException("User has no linked groups.")
 
     val allCocktails = groups.flatMap { group ->
-      val groupId = group["groupId"]?.s() ?: throw ValidationException("GroupId is missing") // todo: refactor
+      val groupId = group["groupId"]?.s() ?: throw NotFoundException(Type.GROUP)
       cocktailGroupLinkService.getCocktailsIngredients(groupId)
     }
 

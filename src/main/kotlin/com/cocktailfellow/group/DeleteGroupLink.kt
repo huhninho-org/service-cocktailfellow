@@ -4,7 +4,8 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.NotFoundException
+import com.cocktailfellow.common.Type
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
@@ -25,10 +26,10 @@ class DeleteGroupLink(
     val username = tokenManagementData.username
 
     if (!userService.doesUserExist(username)) {
-      throw ValidationException("The specified user does not exist.") // todo: refactor
+      throw NotFoundException(Type.USER)
     }
     if (!groupService.doesGroupExist(groupId)) {
-      throw ValidationException("The specified group does not exist.") // todo: refactor
+      throw NotFoundException(Type.GROUP)
     }
 
     userGroupLinkService.deleteUserToGroupLink(username, groupId)

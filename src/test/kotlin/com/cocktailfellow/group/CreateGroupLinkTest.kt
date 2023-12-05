@@ -3,6 +3,7 @@ package com.cocktailfellow.group
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.BaseTest
 import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.NotFoundException
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
@@ -96,12 +97,12 @@ class CreateGroupLinkTest : BaseTest() {
     `when`(userService.doesUserExist(username)).thenReturn(false)
 
     // When
-    val exception = assertThrows<ValidationException> {
+    val exception = assertThrows<NotFoundException> {
       createGroupLink.handleBusinessLogic(input, context)
     }
 
     // Then
-    assertEquals("The specified user does not exist.", exception.message)
+    assertEquals("'USER' not found.", exception.message)
   }
 
   @Test
@@ -122,11 +123,11 @@ class CreateGroupLinkTest : BaseTest() {
     `when`(groupService.doesGroupExist(groupId)).thenReturn(false)
 
     // When
-    val exception = assertThrows<ValidationException> {
+    val exception = assertThrows<NotFoundException> {
       createGroupLink.handleBusinessLogic(input, context)
     }
 
     // Then
-    assertEquals("The specified group does not exist.", exception.message)
+    assertEquals("'GROUP' not found.", exception.message)
   }
 }

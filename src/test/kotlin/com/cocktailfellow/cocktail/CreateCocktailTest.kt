@@ -8,6 +8,7 @@ import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.cocktail.database.CocktailRepository
+import com.cocktailfellow.common.NotFoundException
 import com.cocktailfellow.common.token.TokenManagementData
 import com.cocktailfellow.group.GroupService
 import com.cocktailfellow.ingredient.model.Ingredient
@@ -79,12 +80,12 @@ class CreateCocktailTest : BaseTest() {
     `when`(groupService.doesGroupExist(groupId)).thenReturn(false)
 
     // When
-    val exception = assertThrows<ValidationException> {
+    val exception = assertThrows<NotFoundException> {
       createCocktail.handleBusinessLogic(input, context)
     }
 
     // Then
-    assertEquals("Group does not exist.", exception.message)
+    assertEquals("'GROUP' not found.", exception.message)
   }
 
   @Test

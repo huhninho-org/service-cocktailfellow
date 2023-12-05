@@ -2,6 +2,7 @@ package com.cocktailfellow.group
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.BaseTest
+import com.cocktailfellow.common.BadRequestException
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
@@ -94,12 +95,12 @@ class GetGroupsTest : BaseTest() {
     `when`(userGroupLinkService.getGroups("username")).thenReturn(emptyList())
 
     // When
-    val exception = assertThrows<ValidationException> {
+    val exception = assertThrows<BadRequestException> {
       getGroups.handleBusinessLogic(input, context)
     }
 
     // Then
-    assertEquals("User has no groups.", exception.message)
+    assertEquals("User has no linked groups.", exception.message)
   }
 
   @Serializable

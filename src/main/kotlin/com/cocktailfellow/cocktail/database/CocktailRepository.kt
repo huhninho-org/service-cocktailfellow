@@ -4,7 +4,6 @@ import com.cocktailfellow.cocktail.model.Cocktail
 import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.cocktail.model.CocktailIngredients
 import com.cocktailfellow.common.DynamoDbClientProvider
-import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.ingredient.model.Ingredient
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -152,7 +151,8 @@ class CocktailRepository(
       dynamoDbClient.deleteItem(deleteItemRequest)
       log.info("Cocktail with id '$cocktailId' deleted.")
     } catch (e: Exception) {
-      throw ValidationException("Failed to delete cocktail with id '$cocktailId'.") // todo: refactor exception
+      log.error("Failed to delete cocktail with id '$cocktailId'. error: ${e.message}")
+      throw Exception("Failed to delete cocktail with id '$cocktailId'.")
     }
   }
 

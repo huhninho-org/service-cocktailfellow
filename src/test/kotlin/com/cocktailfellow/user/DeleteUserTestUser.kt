@@ -3,6 +3,7 @@ package com.cocktailfellow.user
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.BaseTest
 import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.NotFoundException
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
@@ -72,11 +73,11 @@ class DeleteUserTestUser : BaseTest() {
     `when`(userService.deleteUser(username)).thenCallRealMethod()
 
     // Then
-    val exception = assertThrows<ValidationException> {
+    val exception = assertThrows<NotFoundException> {
       deleteUser.handleBusinessLogic(input, context)
     }
 
-    assertEquals("The specified user does not exist.", exception.message)
+    assertEquals("'USER' not found.", exception.message)
   }
 
 

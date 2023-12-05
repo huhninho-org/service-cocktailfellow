@@ -3,6 +3,7 @@ package com.cocktailfellow.group
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
+import com.cocktailfellow.common.BadRequestException
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.link.UserGroupLinkService
@@ -23,7 +24,7 @@ class GetGroups(
 
     val groups = userGroupLinkService.getGroups(username)
     if (groups.isNullOrEmpty())
-      throw ValidationException("User has no groups.") // todo: refactor
+      throw BadRequestException("User has no linked groups.")
 
     val groupNames = groups.map { item ->
       val groupId = item["groupId"]?.s() ?: throw ValidationException("GroupId is missing")

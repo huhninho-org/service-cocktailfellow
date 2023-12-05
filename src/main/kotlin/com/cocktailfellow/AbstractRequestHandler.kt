@@ -34,7 +34,7 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
     return ApiGatewayResponse.withBody(status, response)
   }
 
-  fun generateError(status: Int, type: String, message: String): ApiGatewayResponse {
+  private fun generateError(status: Int, type: ErrorType, message: String): ApiGatewayResponse {
     return ApiGatewayResponse.error(status, type, message)
   }
 
@@ -42,13 +42,13 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
     return if (e is CustomException) {
       ErrorResponse(
         code = e.statusCode.code,
-        type = e.errorType.toLowerCase(),
+        type = e.errorType,
         message = e.message
       )
     } else {
       ErrorResponse(
         code = HttpStatusCode.INTERNAL_SERVER_ERROR.code,
-        type = ErrorType.UNKNOWN_EXCEPTION.toLowerCase(),
+        type = ErrorType.UNKNOWN_EXCEPTION,
         message = e.message ?: "An error occurred."
       )
     }
@@ -72,12 +72,12 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
 
   protected fun getPathParameterGroupId(input: Map<String, Any>): String {
     return getPathParameters(input)?.get("groupId") as? String
-      ?: throw ValidationException("Invalid group ID.") // todo: refactor
+      ?: throw ValidationException("Invalid group ID.")
   }
 
   protected fun getPathParameterCocktailId(input: Map<String, Any>): String {
     return getPathParameters(input)?.get("cocktailId") as? String
-      ?: throw ValidationException("Invalid group ID.") // todo: refactor
+      ?: throw ValidationException("Invalid cocktail ID.")
   }
 
   protected fun getQueryParameterIngredients(input: Map<String, Any>): List<String> {
@@ -85,7 +85,7 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
       input["queryStringParameters"] as? Map<String, String> ?: throw ValidationException("Missing query parameters.")
     val ingredients = queryStringParameters["ingredients"]
     if (ingredients.isNullOrEmpty())
-      throw ValidationException("Missing ingredients parameter.") // todo: refactor
+      throw ValidationException("Missing ingredients parameter.")
     return ingredients.split(",")
   }
 

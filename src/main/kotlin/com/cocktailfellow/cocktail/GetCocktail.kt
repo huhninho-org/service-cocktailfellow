@@ -5,7 +5,8 @@ import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.database.CocktailRepository
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.NotFoundException
+import com.cocktailfellow.common.Type
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.group.GroupService
 import com.cocktailfellow.ingredient.model.Ingredient
@@ -25,10 +26,10 @@ class GetCocktail(
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
     if (!groupService.doesGroupExist(groupId)) {
-      throw ValidationException("Group does not exist.") // todo: refactor
+      throw NotFoundException(Type.GROUP)
     }
     if (!cocktailRepository.doesCocktailExist(cocktailId)) {
-      throw ValidationException("Cocktail does not exist.") // todo: refactor
+      throw NotFoundException(Type.COCKTAIL)
     }
 
     val cocktail = cocktailRepository.getCocktail(cocktailId)

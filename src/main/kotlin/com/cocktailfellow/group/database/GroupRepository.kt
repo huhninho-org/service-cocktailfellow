@@ -1,7 +1,8 @@
 package com.cocktailfellow.group.database
 
 import com.cocktailfellow.common.DynamoDbClientProvider
-import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.NotFoundException
+import com.cocktailfellow.common.Type
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
@@ -42,7 +43,7 @@ class GroupRepository(
     val groupItem = response.item()
 
     val groupName = groupItem["groupname"]?.s()
-    return groupName ?: throw ValidationException("No group id found.") // todo: refactor exception
+    return groupName ?: throw NotFoundException(Type.GROUP)
   }
 
   fun doesGroupExist(groupId: String): Boolean {
@@ -69,7 +70,8 @@ class GroupRepository(
       dynamoDbClient.deleteItem(deleteItemRequest)
       log.info("Group with id '$groupId' deleted.")
     } catch (e: Exception) {
-      throw ValidationException("Failed to delete group with ID '$groupId'.") // todo: refactor exception
+      log.error("Failed to delete group with id '$groupId'. error: ${e.message}")
+      throw Exception("Failed to delete group with id '$groupId'.")
     }
   }
 }

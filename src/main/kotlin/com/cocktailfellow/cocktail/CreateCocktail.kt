@@ -4,9 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.database.CocktailRepository
-import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.JsonConfig
-import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.*
 import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.group.GroupService
@@ -32,7 +30,7 @@ class CreateCocktail(
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
     if (!groupService.doesGroupExist(groupId)) {
-      throw ValidationException("Group does not exist.") // todo: refactor
+      throw NotFoundException(Type.GROUP)
     }
 
     if (request.ingredients.isEmpty()) {

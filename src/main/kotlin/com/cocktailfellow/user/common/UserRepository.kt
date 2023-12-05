@@ -1,6 +1,8 @@
 package com.cocktailfellow.user.common
 
 import com.cocktailfellow.common.DynamoDbClientProvider
+import com.cocktailfellow.common.NotFoundException
+import com.cocktailfellow.common.Type
 import com.cocktailfellow.common.ValidationException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -55,13 +57,11 @@ class UserRepository(
     val response = dynamoDbClient.scan(scanRequest)
 
     val items = response.items()
-    if (items.isEmpty()) {
-      throw ValidationException("No user found for username: $username")
+    if (items.isEmpty() || items[0]["userId"]?.s().isNullOrEmpty()) {
+      throw NotFoundException(Type.USER)
     }
 
-    val userItem = items[0]
-    return userItem["userId"]?.s()
-      ?: throw ValidationException("No user id found for username: $username.") // todo: refactor exception
+    return items[0]["userId"]?.s()!!
   }
 
   fun getUser(username: String): User {
@@ -109,7 +109,8 @@ class UserRepository(
       dynamoDbClient.deleteItem(deleteItemRequest)
       log.info("User with id '$userId' deleted.")
     } catch (e: Exception) {
-      throw ValidationException("Failed to delete user with ID '$userId'.") // todo: refactor exception
+      log.error("Failed to delete user with id '$userId'.")
+      throw Exception("Failed to delete user with id '$userId'.")
     }
   }
 }
