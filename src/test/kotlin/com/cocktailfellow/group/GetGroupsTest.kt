@@ -2,7 +2,6 @@ package com.cocktailfellow.group
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.BaseTest
-import com.cocktailfellow.common.BadRequestException
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
@@ -12,6 +11,7 @@ import com.cocktailfellow.common.token.TokenManagementData
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -66,8 +66,28 @@ class GetGroupsTest : BaseTest() {
     assertEquals(HttpStatusCode.OK.code, response.statusCode)
     val responseObj = response.body?.let { JsonConfig.instance.decodeFromString<GetGroupsFullResponse>(it) }
 
-    val actualCocktails = responseObj?.result!!
-    assertEquals(expectedGroups, actualCocktails.groups)
+    val actualGroups = responseObj?.result!!
+    assertEquals(expectedGroups, actualGroups.groups)
+  }
+
+  @Test
+  fun `test handleBusinessLogic with no groups for user`() {
+    // Given
+    val input = mapOf("headers" to mapOf("Authorization" to "Bearer valid-token"))
+    `when`(tokenManagement.validateTokenAndGetData(ArgumentMatchers.any())).thenReturn(
+        TokenManagementData("username", "token")
+    )
+    `when`(userGroupLinkService.getGroups("username")).thenReturn(emptyList())
+
+    // When
+    val response = getGroups.handleBusinessLogic(input, context)
+
+    // Then
+    assertEquals(HttpStatusCode.OK.code, response.statusCode)
+    val responseObj = response.body?.let { JsonConfig.instance.decodeFromString<GetGroupsFullResponse>(it) }
+
+    val actualGroups = responseObj?.result!!
+    assertTrue(actualGroups.groups.isNullOrEmpty(), "Expected groups to be empty but was ${actualGroups.groups}")
   }
 
   @Test
@@ -83,24 +103,6 @@ class GetGroupsTest : BaseTest() {
 
     // Then
     assertEquals("Invalid token", exception.message)
-  }
-
-  @Test
-  fun `test handleBusinessLogic with no groups for user`() {
-    // Given
-    val input = mapOf("headers" to mapOf("Authorization" to "Bearer valid-token"))
-    `when`(tokenManagement.validateTokenAndGetData(ArgumentMatchers.any())).thenReturn(
-      TokenManagementData("username", "token")
-    )
-    `when`(userGroupLinkService.getGroups("username")).thenReturn(emptyList())
-
-    // When
-    val exception = assertThrows<BadRequestException> {
-      getGroups.handleBusinessLogic(input, context)
-    }
-
-    // Then
-    assertEquals("User has no linked groups.", exception.message)
   }
 
   @Serializable

@@ -63,7 +63,11 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
   }
 
   protected fun getAuthorizationHeader(input: Map<String, Any>): String? {
-    return getInputHeaders(input)?.get("Authorization") as? String
+    val headers = getInputHeaders(input)
+    val authorizationHeader = headers?.keys
+        ?.filterIsInstance<String>()
+        ?.firstOrNull { it.equals("Authorization", ignoreCase = true) }
+    return authorizationHeader?.let { headers[it] as? String }
   }
 
   protected fun getApiKeyHeader(input: Map<String, Any>): String? {

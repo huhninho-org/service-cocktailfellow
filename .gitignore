@@ -17836,3 +17836,5 @@ replay_pid*
 /.serverless/cloudformation-template-update-stack.json
 /.serverless/serverless-state.json
 /.vscode/
+/.dynamodb/dynamodb-local-metadata.json
+/.serverless/
