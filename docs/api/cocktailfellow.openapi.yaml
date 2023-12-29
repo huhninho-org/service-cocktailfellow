@@ -476,12 +476,18 @@ paths:
       operationId: filterIngredients
       description: Returns cocktails filtered given the ingredients provided
       parameters:
-        - in: query
-          name: ingredients
+        - name: ingredients
           schema:
             type: string
+          in: query
           required: true
           description: Comma separated list of ingredients
+        - name: groupId
+          schema:
+            type: string
+          in: query
+          required: false
+          description: Unique identifier of the group. If not set, cocktails of all linked groups are filtered.
       responses:
         '200':
           description: A list of filtered cocktails
