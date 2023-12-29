@@ -32,6 +32,14 @@ class FilterIngredientsTest : BaseTest() {
   private lateinit var userGroupLinkService: UserGroupLinkService
   private lateinit var context: Context
 
+  private val username = "username"
+  private val token = "Bearer token"
+  private val method = """
+        Muddle mint leaves with sugar and lime juice. Add a splash of soda water and
+        fill the glass with cracked ice. Pour the rum over the ice, and fill the glass
+        with soda water. Garnish with mint leaves.
+    """.trimIndent()
+
   @BeforeEach
   fun setUp() {
     tokenManagement = Mockito.mock(TokenManagement::class.java)
@@ -39,38 +47,44 @@ class FilterIngredientsTest : BaseTest() {
     userGroupLinkService = Mockito.mock(UserGroupLinkService::class.java)
     context = Mockito.mock(Context::class.java)
     filterIngredients = FilterIngredients(tokenManagement, cocktailService, userGroupLinkService)
+
+    `when`(tokenManagement.validateTokenAndGetData(ArgumentMatchers.any())).thenReturn(
+      TokenManagementData(username, token)
+    )
   }
+
+  private fun createGroup(groupId: String): MutableMap<String, AttributeValue> =
+    mutableMapOf("groupId" to AttributeValue.builder().s(groupId).build())
+
+  private fun createIngredients(ingredient1: String = "ingredient1", ingredient2: String = "ingredient2"): List<Ingredient> =
+    listOf(Ingredient(ingredient1, "1cl"), Ingredient(ingredient2, "1cl"))
+
+  private fun createCocktails(ingredients: List<Ingredient>, vararg cocktailNames: String): List<CocktailIngredients> =
+    cocktailNames.map { name -> CocktailIngredients(name, name, method, ingredients) }
+
 
   @Test
   fun `test handleBusinessLogic with valid input`() {
     // Given
+    val username = "username"
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer token"),
       "queryStringParameters" to mapOf("ingredients" to "ingredient1,ingredient2")
     )
     val groups = listOf(
-      mutableMapOf("groupId" to AttributeValue.builder().s("group1").build()),
-      mutableMapOf("groupId" to AttributeValue.builder().s("group2").build())
+      createGroup("group1"),
+      createGroup("group2")
     )
-    val ingredients = listOf(
-      Ingredient("ingredient1", "1cl"),
-      Ingredient("ingredient2", "1cl")
-    )
-    val cocktails1 = listOf(
-      CocktailIngredients("cocktail1", "Cocktail 1", ingredients),
-      CocktailIngredients("cocktail2", "Cocktail 2", ingredients)
-    )
-    val cocktails2 = listOf(
-      CocktailIngredients("cocktail3", "Cocktail 3", ingredients),
-      CocktailIngredients("cocktail4", "Cocktail 4", ingredients)
-    )
+    val ingredients =createIngredients()
+    val cocktails1 = createCocktails(ingredients, "cocktail1", "cocktail2")
+    val cocktails2 = createCocktails(ingredients, "cocktail3", "cocktail4")
 
     val expectedCocktailsForBothGroups = cocktails1 + cocktails2
 
     `when`(tokenManagement.validateTokenAndGetData(ArgumentMatchers.any())).thenReturn(
-      TokenManagementData("username", "token")
+      TokenManagementData(username, "token")
     )
-    `when`(userGroupLinkService.getGroups("username")).thenReturn(groups)
+    `when`(userGroupLinkService.getGroups(username)).thenReturn(groups)
     `when`(cocktailService.getCocktailsIngredients("group1")).thenReturn(cocktails1)
     `when`(cocktailService.getCocktailsIngredients("group2")).thenReturn(cocktails2)
 
@@ -84,6 +98,39 @@ class FilterIngredientsTest : BaseTest() {
 
     val actualCocktails = responseObj?.result?.cocktails!!
     assertEquals(expectedCocktailsForBothGroups, actualCocktails)
+
+    Mockito.verify(userGroupLinkService, Mockito.atLeastOnce()).getGroups(username)
+    Mockito.verify(cocktailService).getCocktailsIngredients("group1")
+    Mockito.verify(cocktailService).getCocktailsIngredients("group2")
+  }
+
+  @Test
+  fun `test handleBusinessLogic with groupId parameter`() {
+    // Given
+    val groupId = "specific_group_id"
+    val input = mapOf(
+      "headers" to mapOf("Authorization" to "Bearer token"),
+      "queryStringParameters" to mapOf("ingredients" to "ingredient1,ingredient2", "groupId" to "specific_group_id")
+    )
+    val ingredients =createIngredients()
+    val cocktails = createCocktails(ingredients, "cocktail1", "cocktail2")
+
+    `when`(cocktailService.getCocktailsIngredients(groupId)).thenReturn(cocktails)
+
+    // When
+    val response = filterIngredients.handleBusinessLogic(input, context)
+
+    // Then
+    assertEquals(HttpStatusCode.OK.code, response.statusCode)
+    val responseObj =
+      response.body?.let { JsonConfig.instance.decodeFromString<SearchCocktailsByIngredientsFullResponse>(it) }
+
+    val actualCocktails = responseObj?.result?.cocktails!!
+    assertEquals(cocktails, actualCocktails)
+
+    Mockito.verify(cocktailService).getCocktailsIngredients(groupId)
+
+    Mockito.verify(userGroupLinkService, Mockito.never()).getGroups(any())
   }
 
   @Test
@@ -125,9 +172,6 @@ class FilterIngredientsTest : BaseTest() {
       "headers" to mapOf("Authorization" to "Bearer valid_token"),
       "queryStringParameters" to mapOf("ingredients" to "ingredient1,ingredient2")
     )
-    `when`(tokenManagement.validateTokenAndGetData(ArgumentMatchers.any())).thenReturn(
-      TokenManagementData("username", "token")
-    )
     `when`(userGroupLinkService.getGroups(any())).thenReturn(emptyList())
 
     // When
@@ -149,9 +193,6 @@ class FilterIngredientsTest : BaseTest() {
     val groups = listOf(
       mutableMapOf("groupId" to AttributeValue.builder().s("group1").build()),
       mutableMapOf("groupId" to AttributeValue.builder().s("group2").build())
-    )
-    `when`(tokenManagement.validateTokenAndGetData(ArgumentMatchers.any())).thenReturn(
-      TokenManagementData("username", "token")
     )
     `when`(userGroupLinkService.getGroups("username")).thenReturn(groups)
 
@@ -176,11 +217,8 @@ class FilterIngredientsTest : BaseTest() {
       mutableMapOf("groupId" to AttributeValue.builder().s("group2").build())
     )
     val expectedResponse = """
-      {"result":{"cocktails":[]},"loginToken":"token"}
+      {"result":{"cocktails":[]},"loginToken":"Bearer token"}
       """.trimIndent()
-    `when`(tokenManagement.validateTokenAndGetData(ArgumentMatchers.any())).thenReturn(
-      TokenManagementData("username", "token")
-    )
     `when`(userGroupLinkService.getGroups("username")).thenReturn(groups)
     `when`(cocktailService.getCocktailsIngredients(any())).thenReturn(emptyList())
 

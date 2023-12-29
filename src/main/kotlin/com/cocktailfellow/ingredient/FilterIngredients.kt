@@ -13,7 +13,7 @@ import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import kotlinx.serialization.Serializable
 
-class FilterIngredients (
+class FilterIngredients(
   private val tokenManagement: TokenManagement = TokenManagement(),
   private val cocktailService: CocktailService = CocktailService(),
   private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
@@ -21,22 +21,27 @@ class FilterIngredients (
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
-    val ingredients = getQueryParameterIngredients(input)
+    val filterIngredients = getQueryParameterIngredients(input)
+    val filterGroupId = getOptionalQueryParameterGroupId(input)
 
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username
 
-    val groups = userGroupLinkService.getGroups(username)
-    if (groups.isNullOrEmpty())
-      throw BadRequestException("User has no linked groups.")
+    val unfilteredCocktails = if (filterGroupId.isNullOrEmpty()) {
+      val groups = userGroupLinkService.getGroups(username)
+      if (groups.isEmpty())
+        throw BadRequestException("User has no linked groups.")
 
-    val allCocktails = groups.flatMap { group ->
-      val groupId = group["groupId"]?.s() ?: throw NotFoundException(Type.GROUP)
-      cocktailService.getCocktailsIngredients(groupId)
+      groups.flatMap { group ->
+        val groupId = group["groupId"]?.s() ?: throw NotFoundException(Type.GROUP)
+        cocktailService.getCocktailsIngredients(groupId)
+      }
+    } else {
+      cocktailService.getCocktailsIngredients(filterGroupId)
     }
 
-    val filteredCocktails = allCocktails.filter { cocktail ->
-      ingredients.all { ingredient ->
+    val filteredCocktails = unfilteredCocktails.filter { cocktail ->
+      filterIngredients.all { ingredient ->
         cocktail.ingredients.any { it.ingredientName.contains(ingredient, ignoreCase = true) }
       }
     }

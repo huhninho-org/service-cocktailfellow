@@ -24,5 +24,6 @@ data class CocktailInfo(
 data class CocktailIngredients(
   val cocktailId: String,
   val name: String,
+  val method: String,
   val ingredients: List<Ingredient>
 )

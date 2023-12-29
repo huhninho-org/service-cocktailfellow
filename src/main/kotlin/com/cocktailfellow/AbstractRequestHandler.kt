@@ -65,8 +65,8 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
   protected fun getAuthorizationHeader(input: Map<String, Any>): String? {
     val headers = getInputHeaders(input)
     val authorizationHeader = headers?.keys
-        ?.filterIsInstance<String>()
-        ?.firstOrNull { it.equals("Authorization", ignoreCase = true) }
+      ?.filterIsInstance<String>()
+      ?.firstOrNull { it.equals("Authorization", ignoreCase = true) }
     return authorizationHeader?.let { headers[it] as? String }
   }
 
@@ -92,6 +92,13 @@ abstract class AbstractRequestHandler : RequestHandler<Map<String, Any>, ApiGate
       throw ValidationException("Missing ingredients parameter.")
     return ingredients.split(",")
   }
+
+  protected fun getOptionalQueryParameterGroupId(input: Map<String, Any>): String? {
+    val queryStringParameters =
+      input["queryStringParameters"] as? Map<String, String>
+    return queryStringParameters?.get("groupId")
+  }
+
 
   protected fun getBody(input: Map<String, Any>): String {
     val body: String? = input["body"] as? String
