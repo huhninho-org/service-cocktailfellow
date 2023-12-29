@@ -2,7 +2,6 @@ package com.cocktailfellow.cocktail
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.BaseTest
-import com.cocktailfellow.cocktail.database.CocktailRepository
 import com.cocktailfellow.common.BadRequestException
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.link.CocktailGroupLinkService
@@ -22,7 +21,7 @@ class DeleteCocktailTest : BaseTest() {
   private lateinit var deleteCocktail: DeleteCocktail
   private lateinit var context: Context
   private lateinit var tokenManagement: TokenManagement
-  private lateinit var cocktailRepository: CocktailRepository
+  private lateinit var cocktailService: CocktailService
   private lateinit var cocktailGroupLinkService: CocktailGroupLinkService
   private lateinit var userGroupLinkService: UserGroupLinkService
 
@@ -30,10 +29,10 @@ class DeleteCocktailTest : BaseTest() {
   fun setup() {
     context = Mockito.mock(Context::class.java)
     tokenManagement = Mockito.mock(TokenManagement::class.java)
-    cocktailRepository = Mockito.mock(CocktailRepository::class.java)
+    cocktailService = Mockito.mock(CocktailService::class.java)
     cocktailGroupLinkService = Mockito.mock(CocktailGroupLinkService::class.java)
     userGroupLinkService = Mockito.mock(UserGroupLinkService::class.java)
-    deleteCocktail = DeleteCocktail(tokenManagement, cocktailGroupLinkService, cocktailRepository, userGroupLinkService)
+    deleteCocktail = DeleteCocktail(tokenManagement, cocktailGroupLinkService, cocktailService, userGroupLinkService)
   }
 
   @Test

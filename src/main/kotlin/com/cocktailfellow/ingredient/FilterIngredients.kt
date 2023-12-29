@@ -3,16 +3,19 @@ package com.cocktailfellow.ingredient
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
+import com.cocktailfellow.cocktail.CocktailService
 import com.cocktailfellow.cocktail.model.CocktailIngredients
-import com.cocktailfellow.common.*
-import com.cocktailfellow.common.link.CocktailGroupLinkService
+import com.cocktailfellow.common.BadRequestException
+import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.NotFoundException
+import com.cocktailfellow.common.Type
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import kotlinx.serialization.Serializable
 
 class FilterIngredients (
   private val tokenManagement: TokenManagement = TokenManagement(),
-  private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService(),
+  private val cocktailService: CocktailService = CocktailService(),
   private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
 ) : AbstractRequestHandler() {
 
@@ -29,7 +32,7 @@ class FilterIngredients (
 
     val allCocktails = groups.flatMap { group ->
       val groupId = group["groupId"]?.s() ?: throw NotFoundException(Type.GROUP)
-      cocktailGroupLinkService.getCocktailsIngredients(groupId)
+      cocktailService.getCocktailsIngredients(groupId)
     }
 
     val filteredCocktails = allCocktails.filter { cocktail ->

@@ -6,8 +6,7 @@ import com.cocktailfellow.common.EnvironmentVariables
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JwtTokenException
 import com.cocktailfellow.common.token.TokenManagement
-import com.cocktailfellow.user.common.User
-import com.cocktailfellow.user.common.UserService
+import com.cocktailfellow.user.model.User
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

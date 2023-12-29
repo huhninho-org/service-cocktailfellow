@@ -8,7 +8,6 @@ import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.JwtTokenException
 import com.cocktailfellow.common.token.TokenManagement
-import com.cocktailfellow.user.common.UserService
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import org.apache.logging.log4j.LogManager

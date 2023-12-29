@@ -5,7 +5,6 @@ import com.cocktailfellow.BaseTest
 import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.NotFoundException
-import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
 import com.cocktailfellow.group.GroupService
@@ -22,16 +21,16 @@ class GetCocktailsTest : BaseTest() {
   private lateinit var getCocktails: GetCocktails
   private lateinit var context: Context
   private lateinit var tokenManagement: TokenManagement
+  private lateinit var cocktailService: CocktailService
   private lateinit var groupService: GroupService
-  private lateinit var cocktailGroupLinkService: CocktailGroupLinkService
 
   @BeforeEach
   fun setup() {
     context = Mockito.mock(Context::class.java)
     tokenManagement = Mockito.mock(TokenManagement::class.java)
+    cocktailService = Mockito.mock(CocktailService::class.java)
     groupService = Mockito.mock(GroupService::class.java)
-    cocktailGroupLinkService = Mockito.mock(CocktailGroupLinkService::class.java)
-    getCocktails = GetCocktails(tokenManagement, groupService, cocktailGroupLinkService)
+      getCocktails = GetCocktails(tokenManagement, cocktailService, groupService)
   }
 
   @Test
@@ -48,7 +47,7 @@ class GetCocktailsTest : BaseTest() {
       TokenManagementData("username", "token")
     )
     `when`(groupService.doesGroupExist(groupId)).thenReturn(true)
-    `when`(cocktailGroupLinkService.getCocktails(groupId)).thenReturn(cocktailsList)
+    `when`(cocktailService.getCocktails(groupId)).thenReturn(cocktailsList)
 
     // When
     val response = getCocktails.handleBusinessLogic(input, context)

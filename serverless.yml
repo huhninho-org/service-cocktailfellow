@@ -203,6 +203,21 @@ functions:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktailGroupLink}
+  updateCocktail:
+    handler: com.cocktailfellow.cocktail.UpdateCocktail
+    events:
+      - http:
+          path: groups/{groupId}/cocktails/{cocktailId}
+          method: patch
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+          - dynamodb:Query
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
   getCocktails:
     handler: com.cocktailfellow.cocktail.GetCocktails
     events:

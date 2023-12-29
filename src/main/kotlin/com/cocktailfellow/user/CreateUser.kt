@@ -4,8 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.*
-import com.cocktailfellow.user.common.UserCreate
-import com.cocktailfellow.user.common.UserService
+import com.cocktailfellow.user.model.UserCreate
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import org.apache.logging.log4j.LogManager

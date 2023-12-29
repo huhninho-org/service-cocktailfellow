@@ -1,9 +1,11 @@
-package com.cocktailfellow.user.common
+package com.cocktailfellow.user.database
 
 import com.cocktailfellow.common.DynamoDbClientProvider
 import com.cocktailfellow.common.NotFoundException
 import com.cocktailfellow.common.Type
 import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.user.model.User
+import com.cocktailfellow.user.model.UserCreate
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
