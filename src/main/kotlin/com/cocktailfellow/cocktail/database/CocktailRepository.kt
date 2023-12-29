@@ -97,11 +97,12 @@ class CocktailRepository(
   }
 
   fun getCocktailIngredients(cocktailId: String): CocktailIngredients {
-    val projectionExpression = "#ci, #n, #i"
+    val projectionExpression = "#ci, #n, #m, #i"
 
     val expressionAttributeNames = mapOf(
       "#ci" to "cocktailId",
       "#n" to "name",
+      "#m" to "method",
       "#i" to "ingredients"
     )
 
@@ -123,6 +124,7 @@ class CocktailRepository(
     return CocktailIngredients(
       cocktailId = item["cocktailId"]?.s()!!,
       name = item["name"]?.s()!!,
+      method = item["method"]?.s()!!,
       ingredients = ingredients
     )
   }
