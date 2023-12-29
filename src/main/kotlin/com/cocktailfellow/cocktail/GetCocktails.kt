@@ -7,15 +7,14 @@ import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.NotFoundException
 import com.cocktailfellow.common.Type
-import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.group.GroupService
 import kotlinx.serialization.Serializable
 
 class GetCocktails(
   private val tokenManagement: TokenManagement = TokenManagement(),
-  private val groupService: GroupService = GroupService(),
-  private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService()
+  private val cocktailService: CocktailService = CocktailService(),
+  private val groupService: GroupService = GroupService()
 ) : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
@@ -28,7 +27,7 @@ class GetCocktails(
       throw NotFoundException(Type.GROUP)
     }
 
-    val cocktails = cocktailGroupLinkService.getCocktails(groupId)
+    val cocktails = cocktailService.getCocktails(groupId)
     val response = GetCocktailsResponse(
       cocktails = cocktails
     )

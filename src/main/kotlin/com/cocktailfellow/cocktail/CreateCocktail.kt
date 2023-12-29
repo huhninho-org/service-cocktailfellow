@@ -3,9 +3,8 @@ package com.cocktailfellow.cocktail
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
-import com.cocktailfellow.cocktail.database.CocktailRepository
+import com.cocktailfellow.cocktail.model.Cocktail
 import com.cocktailfellow.common.*
-import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.group.GroupService
 import com.cocktailfellow.ingredient.model.Ingredient
@@ -15,9 +14,8 @@ import java.util.*
 
 class CreateCocktail(
   private val tokenManagement: TokenManagement = TokenManagement(),
-  private val cocktailRepository: CocktailRepository = CocktailRepository(),
-  private val groupService: GroupService = GroupService(),
-  private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService()
+  private val cocktailService: CocktailService = CocktailService(),
+  private val groupService: GroupService = GroupService()
 ) : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
@@ -38,15 +36,16 @@ class CreateCocktail(
     }
 
     val cocktailId = UUID.randomUUID().toString()
-    cocktailRepository.createCocktail(
-      cocktailId,
-      request.name,
-      request.method,
-      request.story,
-      request.notes,
-      request.ingredients
+    cocktailService.createCocktail(
+      groupId, Cocktail(
+        cocktailId,
+        request.name,
+        request.method,
+        request.story,
+        request.notes,
+        request.ingredients
+      )
     )
-    cocktailGroupLinkService.createCocktailToGroupLink(groupId, cocktailId)
 
     val response = CreateCocktailResponse(
       groupId = groupId,

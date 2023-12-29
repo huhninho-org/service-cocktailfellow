@@ -3,7 +3,6 @@ package com.cocktailfellow.cocktail
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
-import com.cocktailfellow.cocktail.database.CocktailRepository
 import com.cocktailfellow.common.BadRequestException
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.link.CocktailGroupLinkService
@@ -14,7 +13,7 @@ import com.cocktailfellow.common.token.TokenManagementData
 class DeleteCocktail(
   private val tokenManagement: TokenManagement = TokenManagement(),
   private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService(),
-  private val cocktailRepository: CocktailRepository = CocktailRepository(),
+  private val cocktailService: CocktailService = CocktailService(),
   private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
 ) : AbstractRequestHandler() {
 
@@ -32,7 +31,7 @@ class DeleteCocktail(
       throw BadRequestException("Cocktail is not member of the given group.")
     }
 
-    cocktailRepository.deleteCocktail(cocktailId)
+    cocktailService.deleteCocktail(cocktailId)
     cocktailGroupLinkService.deleteLink(cocktailId, groupId)
 
     return generateResponse(HttpStatusCode.OK.code, tokenManagementData.loginToken)

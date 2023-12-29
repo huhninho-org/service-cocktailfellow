@@ -2,12 +2,12 @@ package com.cocktailfellow.ingredient
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.BaseTest
+import com.cocktailfellow.cocktail.CocktailService
 import com.cocktailfellow.cocktail.model.CocktailIngredients
 import com.cocktailfellow.common.BadRequestException
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.common.link.CocktailGroupLinkService
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
@@ -27,7 +27,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 class FilterIngredientsTest : BaseTest() {
 
   private lateinit var filterIngredients: FilterIngredients
-  private lateinit var cocktailGroupLinkService: CocktailGroupLinkService
+  private lateinit var cocktailService: CocktailService
   private lateinit var tokenManagement: TokenManagement
   private lateinit var userGroupLinkService: UserGroupLinkService
   private lateinit var context: Context
@@ -35,10 +35,10 @@ class FilterIngredientsTest : BaseTest() {
   @BeforeEach
   fun setUp() {
     tokenManagement = Mockito.mock(TokenManagement::class.java)
-    cocktailGroupLinkService = Mockito.mock(CocktailGroupLinkService::class.java)
+    cocktailService = Mockito.mock(CocktailService::class.java)
     userGroupLinkService = Mockito.mock(UserGroupLinkService::class.java)
     context = Mockito.mock(Context::class.java)
-    filterIngredients = FilterIngredients(tokenManagement, cocktailGroupLinkService, userGroupLinkService)
+    filterIngredients = FilterIngredients(tokenManagement, cocktailService, userGroupLinkService)
   }
 
   @Test
@@ -71,8 +71,8 @@ class FilterIngredientsTest : BaseTest() {
       TokenManagementData("username", "token")
     )
     `when`(userGroupLinkService.getGroups("username")).thenReturn(groups)
-    `when`(cocktailGroupLinkService.getCocktailsIngredients("group1")).thenReturn(cocktails1)
-    `when`(cocktailGroupLinkService.getCocktailsIngredients("group2")).thenReturn(cocktails2)
+    `when`(cocktailService.getCocktailsIngredients("group1")).thenReturn(cocktails1)
+    `when`(cocktailService.getCocktailsIngredients("group2")).thenReturn(cocktails2)
 
     // When
     val response = filterIngredients.handleBusinessLogic(input, context)
@@ -182,7 +182,7 @@ class FilterIngredientsTest : BaseTest() {
       TokenManagementData("username", "token")
     )
     `when`(userGroupLinkService.getGroups("username")).thenReturn(groups)
-    `when`(cocktailGroupLinkService.getCocktailsIngredients(any())).thenReturn(emptyList())
+    `when`(cocktailService.getCocktailsIngredients(any())).thenReturn(emptyList())
 
     // When
     val response = filterIngredients.handleBusinessLogic(input, context)

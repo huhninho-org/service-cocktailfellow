@@ -1,8 +1,11 @@
-package com.cocktailfellow.user.common
+package com.cocktailfellow.user
 
 import com.cocktailfellow.common.NotFoundException
 import com.cocktailfellow.common.Type
 import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.user.model.User
+import com.cocktailfellow.user.model.UserCreate
+import com.cocktailfellow.user.database.UserRepository
 
 class UserService {
   private val userRepository: UserRepository = UserRepository()

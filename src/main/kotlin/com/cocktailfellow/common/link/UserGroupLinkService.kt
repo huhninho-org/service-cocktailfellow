@@ -1,7 +1,7 @@
 package com.cocktailfellow.common.link
 
 import com.cocktailfellow.common.LinkException
-import com.cocktailfellow.user.common.UserService
+import com.cocktailfellow.user.UserService
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 class UserGroupLinkService {
@@ -39,7 +39,7 @@ class UserGroupLinkService {
     return userGroupLinkRepository.deleteUserToGroupLink(userGroupLink)
   }
 
-  fun getGroups(username: String): List<MutableMap<String, AttributeValue>>? {
+  fun getGroups(username: String): List<MutableMap<String, AttributeValue>> {
     val userId = userService.getUserId(username)
     return userGroupLinkRepository.getGroups(userId)
   }

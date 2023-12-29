@@ -3,15 +3,14 @@ package com.cocktailfellow.cocktail
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
-import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.NotFoundException
-import com.cocktailfellow.common.Type
+import com.cocktailfellow.common.*
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.group.GroupService
 import com.cocktailfellow.ingredient.model.Ingredient
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 
-class GetCocktail(
+class UpdateCocktail(
   private val tokenManagement: TokenManagement = TokenManagement(),
   private val cocktailService: CocktailService = CocktailService(),
   private val groupService: GroupService = GroupService()
@@ -21,33 +20,59 @@ class GetCocktail(
     val authorization = getAuthorizationHeader(input)
     val groupId = getPathParameterGroupId(input)
     val cocktailId = getPathParameterCocktailId(input)
+    val body = getBody(input)
+
+    val request = JsonConfig.instance.decodeFromString<UpdateCocktailRequest>(body)
 
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
     if (!groupService.doesGroupExist(groupId)) {
       throw NotFoundException(Type.GROUP)
     }
-    if (!cocktailService.doesCocktailExist(cocktailId)) {
-      throw NotFoundException(Type.COCKTAIL)
+
+    if (request.ingredients.isEmpty()) {
+      throw ValidationException("Ingredients list cannot be empty.")
     }
 
-    val cocktail = cocktailService.getCocktail(cocktailId)
-    val response = GetCocktailResponse(
-      cocktailId = cocktail.cocktailId,
-      name = cocktail.name,
-      method = cocktail.method,
-      story = cocktail.story,
-      notes = cocktail.notes,
-      ingredients = cocktail.ingredients
+    // todo: implement updateCocktail
+    /*
+    cocktailService.updateCocktail(
+      cocktailId,
+      request.name,
+      request.method,
+      request.story,
+      request.notes,
+      request.ingredients
+    )
+     */
+
+    val response = UpdateCocktailResponse(
+      groupId = groupId,
+      cocktailId = cocktailId,
+      name = request.name,
+      method = request.method,
+      story = request.story,
+      notes = request.notes,
+      ingredients = request.ingredients
     )
 
-    return generateResponse(HttpStatusCode.OK.code, response, tokenManagementData.loginToken)
+    return generateResponse(HttpStatusCode.CREATED.code, response, tokenManagementData.loginToken)
   }
 }
 
 @Serializable
-data class GetCocktailResponse(
+data class UpdateCocktailRequest(
+  val name: String,
+  val method: String? = null,
+  val story: String? = null,
+  val notes: String? = null,
+  val ingredients: List<Ingredient>
+)
+
+@Serializable
+data class UpdateCocktailResponse(
   val cocktailId: String,
+  val groupId: String,
   val name: String,
   val method: String?,
   val story: String?,

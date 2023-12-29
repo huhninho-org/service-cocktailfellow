@@ -1,20 +1,15 @@
 package com.cocktailfellow.common.link
 
-import com.cocktailfellow.cocktail.database.CocktailRepository
-import com.cocktailfellow.cocktail.model.CocktailInfo
-import com.cocktailfellow.cocktail.model.CocktailIngredients
 import com.cocktailfellow.common.DynamoDbClientProvider
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.LinkException
-import com.cocktailfellow.common.ValidationException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.*
 
 class CocktailGroupLinkRepository(
-  private val dynamoDbClient: DynamoDbClient = DynamoDbClientProvider.get(),
-  private val cocktailRepository: CocktailRepository = CocktailRepository()
+  private val dynamoDbClient: DynamoDbClient = DynamoDbClientProvider.get()
 ) {
   private val log: Logger = LogManager.getLogger(CocktailGroupLinkRepository::class.java)
 
@@ -67,27 +62,7 @@ class CocktailGroupLinkRepository(
     return response.item().isNotEmpty()
   }
 
-  fun getCocktails(groupId: String): List<CocktailInfo> {
-    val items = fetchItems(groupId)
-
-    return items.map { item ->
-      val cocktailId =
-        item["cocktailId"]?.s() ?: throw ValidationException("CocktailId is missing for group: $groupId")
-      cocktailRepository.getCocktailInfo(cocktailId)
-    }
-  }
-
-  fun getCocktailsIngredients(groupId: String): List<CocktailIngredients> {
-    val cocktails = fetchItems(groupId)
-
-    return cocktails.map { cocktail ->
-      val cocktailId =
-        cocktail["cocktailId"]?.s() ?: throw ValidationException("CocktailId is missing for group: $groupId")
-      cocktailRepository.getCocktailIngredients(cocktailId)
-    }
-  }
-
-  private fun fetchItems(groupId: String): MutableList<MutableMap<String, AttributeValue>> {
+  fun fetchItems(groupId: String): MutableList<MutableMap<String, AttributeValue>> {
     val scanRequest = ScanRequest.builder()
       .tableName(linkTable)
       .filterExpression("groupId = :groupIdValue")

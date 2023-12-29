@@ -4,7 +4,6 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.UserBaseTest
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.ValidationException
-import com.cocktailfellow.user.common.UserService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
