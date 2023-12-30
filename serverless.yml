@@ -405,6 +405,7 @@ resources:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
 
+
 plugins:
   - serverless-iam-roles-per-function
   - serverless-dynamodb

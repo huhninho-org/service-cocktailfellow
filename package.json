@@ -1,10 +1,8 @@
 {
   "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-dynamodb": "^0.2.47",
     "serverless-iam-roles-per-function": "^3.2.0",
     "serverless-offline": "^13.3.0"
-  },
-  "dependencies": {
-    "aws-dynamodb-local": "^0.0.11",
-    "serverless-dynamodb": "^0.2.47"
   }
 }
