@@ -3,9 +3,14 @@ package com.cocktailfellow.cocktail
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
-import com.cocktailfellow.common.*
+import com.cocktailfellow.cocktail.model.Cocktail
+import com.cocktailfellow.common.BadRequestException
+import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.JsonConfig
+import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.link.CocktailGroupLinkService
+import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
-import com.cocktailfellow.group.GroupService
 import com.cocktailfellow.ingredient.model.Ingredient
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -13,7 +18,8 @@ import kotlinx.serialization.decodeFromString
 class UpdateCocktail(
   private val tokenManagement: TokenManagement = TokenManagement(),
   private val cocktailService: CocktailService = CocktailService(),
-  private val groupService: GroupService = GroupService()
+  private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService(),
+  private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService()
 ) : AbstractRequestHandler() {
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
@@ -26,25 +32,28 @@ class UpdateCocktail(
 
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
-    if (!groupService.doesGroupExist(groupId)) {
-      throw NotFoundException(Type.GROUP)
+    if (!userGroupLinkService.isMemberOfGroup(tokenManagementData.username, groupId)) {
+      throw BadRequestException("User is not member of the given group.")
+    }
+
+    if (!cocktailGroupLinkService.isMemberOfGroup(cocktailId, groupId)) {
+      throw BadRequestException("Cocktail is not member of the given group.")
     }
 
     if (request.ingredients.isEmpty()) {
       throw ValidationException("Ingredients list cannot be empty.")
     }
 
-    // todo: implement updateCocktail
-    /*
     cocktailService.updateCocktail(
-      cocktailId,
-      request.name,
-      request.method,
-      request.story,
-      request.notes,
-      request.ingredients
+      Cocktail(
+        cocktailId,
+        request.name,
+        request.method,
+        request.story,
+        request.notes,
+        request.ingredients
+      )
     )
-     */
 
     val response = UpdateCocktailResponse(
       groupId = groupId,

@@ -9,7 +9,7 @@ paths:
   /users:
     post:
       tags:
-        - Users
+        - Accounts
       summary: Create a new user
       description: Adds a new user to the database.
       requestBody:
@@ -38,11 +38,11 @@ paths:
               schema:
                 type: object
       security:
-        - api_key: [ ]
+        - apiKey: [ ]
 
     delete:
       tags:
-        - Users
+        - Accounts
       summary: Delete the authenticated user
       description: Deletes the user who is currently authenticated.
       responses:
@@ -64,7 +64,7 @@ paths:
   /login:
     post:
       tags:
-        - Login
+        - Accounts
       summary: Log in a user
       description: Authenticates a user and returns a login token (jwt).
       requestBody:
@@ -440,6 +440,75 @@ paths:
       security:
         - BearerAuth: [ ]
 
+    patch:
+      tags:
+        - Cocktails
+      summary: Update an existing cocktail
+      description: Updates an already existing cocktail of the specified group.
+      parameters:
+        - name: groupId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: Unique identifier of the group
+        - name: cocktailId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: Unique identifier of the cocktail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCocktailRequest'
+      responses:
+        '200':
+          description: Cocktail successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      cocktailId:
+                        type: string
+                        example: "8b0c8fc7-2fec-4310-b5cc-5fc61d791467"
+                      groupId:
+                        type: string
+                        example: "7dcbc1c9-fb89-4db0-84cf-09a660196e75"
+                      name:
+                        type: string
+                        example: "Basil Smash UPDATED"
+                      method:
+                        type: string
+                        example: "In a cocktail shaker, muddle fresh basil leaves and sugar. Add lemon juice and gin to the shaker. Fill the shaker with ice cubes and shake vigorously. Strain the mixture into a chilled cocktail glass. Garnish with a fresh basil leaf."
+                      story:
+                        type: string
+                        example: "The Basil Smash is a modern cocktail known for its refreshing and herbal flavors. It's a popular choice for those who appreciate a unique twist on classic cocktails."
+                      notes:
+                        type: string
+                        example: "Serve in a chilled cocktail glass for the best taste experience."
+                      ingredients:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Ingredient'
+                  loginToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJMdWthcyIsImlhdCI6MTY5Nzg5NzI1NywiZXhwIjoxNjk3ODk5MDU3LCJ1c2VybmFtZSI6Ikx1a2FzIn0.vZdnc226Cz_t4_O6YfMuvzCyYTHGH44edvoX0PBkw9Y"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: [ ]
+
     delete:
       tags:
         - Cocktails
@@ -508,7 +577,7 @@ paths:
               schema:
                 type: object
       security:
-        - api_key: [ ]
+        - apiKey: [ ]
 
 components:
   schemas:
@@ -564,15 +633,24 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Ingredient'
-    ApiResponse:
+    UpdateCocktailRequest:
       type: object
+      required:
+        - name
+        - ingredients
       properties:
-        result:
-          oneOf:
-            - $ref: '#/components/schemas/CreateCocktailResponse'
-            - $ref: '#/components/schemas/GetCocktailsResponse'
-        loginToken:
+        name:
           type: string
+        method:
+          type: string
+        story:
+          type: string
+        notes:
+          type: string
+        ingredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
     GetCocktailsResponse:
       type: object
       properties:
@@ -591,23 +669,6 @@ components:
           type: string
         method:
           type: string
-    CreateCocktailResponse:
-      type: object
-      properties:
-        cocktailId:
-          type: string
-        groupId:
-          type: string
-        name:
-          type: string
-        method:
-          type: string
-        story:
-          type: string
-        notes:
-          type: string
-        ingredients:
-          $ref: '#/components/schemas/IngredientList'
     IngredientList:
       type: array
       items:
@@ -670,7 +731,7 @@ components:
           description: Name of the group
           example: "my new group"
   securitySchemes:
-    api_key:
+    apiKey:
       type: apiKey
       name: API_KEY
       in: header
