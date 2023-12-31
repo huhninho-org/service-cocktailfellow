@@ -108,13 +108,21 @@ npm install serverless-dynamodb
 To run the app locally, you have to build the service and start the serverless offline plugin. Afterwords, you can use
 the postman collection to test the endpoints.
 
-##### Build the service
+Build and start the application, run the [startLocal.sh](startLocal.sh) script in your root directory.
+
+```bash
+sh startLocal.sh
+```
+
+As an alternative, you can run build and run the application manually.
+
+**Build the service**
 
 ```bash
 ./gradlew clean build
 ```
 
-##### Start the serverless offline plugin
+**Start the serverless offline plugin**
 
 ```bash
 serverless offline start --stage=local
