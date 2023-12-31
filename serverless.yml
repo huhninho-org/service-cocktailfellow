@@ -215,8 +215,10 @@ functions:
           - dynamodb:UpdateItem
           - dynamodb:GetItem
           - dynamodb:Query
+          - dynamodb:Scan
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktailGroupLink}
   getCocktails:
     handler: com.cocktailfellow.cocktail.GetCocktails
