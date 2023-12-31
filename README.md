@@ -28,6 +28,7 @@ accessing cocktail recipes effectively.
   - _delete_ a group.
 - **Cocktail management:**
   - _add_ cocktails to a group.
+  - _update_ an already existing cocktail.
   - _get all_ cocktails of a group as well as get a _detailed description_ of a cocktail.
   - _delete_ a cocktail from a group.
 - **Ingredient-based cocktail filtering:**

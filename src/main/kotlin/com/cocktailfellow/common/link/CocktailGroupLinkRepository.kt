@@ -49,6 +49,7 @@ class CocktailGroupLinkRepository(
 
   fun isMemberOfGroup(cocktailId: String, groupId: String): Boolean {
     val userGroupLink = String.format(ID_PATTERN, cocktailId, groupId)
+    print("DEBUG: userGroupLink: $userGroupLink")
     return doesLinkAlreadyExist(userGroupLink)
   }
 

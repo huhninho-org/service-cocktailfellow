@@ -8,10 +8,7 @@ import com.cocktailfellow.ingredient.model.Ingredient
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest
-import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
-import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
+import software.amazon.awssdk.services.dynamodb.model.*
 
 class CocktailRepository(
   private val dynamoDbClient: DynamoDbClient = DynamoDbClientProvider.get()
@@ -45,6 +42,57 @@ class CocktailRepository(
 
     dynamoDbClient.putItem(putCocktailRequest)
     log.info("Cocktail '${name}' created.")
+  }
+
+  fun updateCocktail(cocktail: Cocktail) {
+    val ingredientStrings = cocktail.ingredients.map { "${it.ingredientName}:${it.amount}" }
+
+    val updateExpression = StringBuilder("SET #n = :name, #i = :ingredients")
+    val expressionAttributeNames = mutableMapOf<String, String>(
+      "#n" to "name",
+      "#i" to "ingredients"
+    )
+    val expressionAttributeValues = mutableMapOf<String, AttributeValue>(
+      ":name" to AttributeValue.builder().s(cocktail.name).build(),
+      ":ingredients" to AttributeValue.builder().ss(ingredientStrings).build()
+    )
+
+    cocktail.method?.let {
+      updateExpression.append(", #m = :method")
+      expressionAttributeNames["#m"] = "method"
+      expressionAttributeValues[":method"] = AttributeValue.builder().s(it).build()
+    }
+
+    cocktail.story?.let {
+      updateExpression.append(", #s = :story")
+      expressionAttributeNames["#s"] = "story"
+      expressionAttributeValues[":story"] = AttributeValue.builder().s(it).build()
+    }
+
+    cocktail.notes?.let {
+      updateExpression.append(", #no = :notes")
+      expressionAttributeNames["#no"] = "notes"
+      expressionAttributeValues[":notes"] = AttributeValue.builder().s(it).build()
+    }
+
+    val conditionExpression = "attribute_exists(cocktailId)"
+
+    val updateItemRequest = UpdateItemRequest.builder()
+      .tableName(cocktailTable)
+      .key(mapOf("cocktailId" to AttributeValue.builder().s(cocktail.cocktailId).build()))
+      .updateExpression(updateExpression.toString())
+      .expressionAttributeNames(expressionAttributeNames)
+      .expressionAttributeValues(expressionAttributeValues)
+      .conditionExpression(conditionExpression)
+      .build()
+
+    try {
+      dynamoDbClient.updateItem(updateItemRequest)
+      log.info("Cocktail '${cocktail.name}' updated.")
+    } catch (e: Exception) {
+      log.error("Failed to update cocktail '${cocktail.name}'. Error: ${e.message}")
+      throw Exception("Failed to update cocktail '${cocktail.name}'.")
+    }
   }
 
   fun getCocktail(cocktailId: String): Cocktail {

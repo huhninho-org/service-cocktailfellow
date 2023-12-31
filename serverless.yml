@@ -212,12 +212,12 @@ functions:
     iamRoleStatements:
       - Effect: "Allow"
         Action:
-          - dynamodb:PutItem
+          - dynamodb:UpdateItem
           - dynamodb:GetItem
           - dynamodb:Query
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
-          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktailGroupLink}
   getCocktails:
     handler: com.cocktailfellow.cocktail.GetCocktails
     events:

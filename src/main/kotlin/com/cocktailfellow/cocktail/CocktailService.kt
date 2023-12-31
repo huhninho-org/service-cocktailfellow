@@ -24,6 +24,10 @@ class CocktailService {
     cocktailGroupLinkRepository.createCocktailToGroupLink(groupId, cocktail.cocktailId)
   }
 
+  fun updateCocktail(cocktail: Cocktail) {
+    cocktailRepository.updateCocktail(cocktail)
+  }
+
   fun getCocktails(groupId: String): List<CocktailInfo> {
     val items = cocktailGroupLinkRepository.fetchItems(groupId)
 
@@ -55,5 +59,4 @@ class CocktailService {
   fun deleteCocktail(cocktailId: String) {
     return cocktailRepository.deleteCocktail(cocktailId)
   }
-
 }
