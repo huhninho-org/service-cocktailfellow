@@ -13,14 +13,7 @@ class CocktailService {
 
   fun createCocktail(groupId: String, cocktail: Cocktail) {
 
-    cocktailRepository.createCocktail(
-      cocktail.cocktailId,
-      cocktail.name,
-      cocktail.method,
-      cocktail.story,
-      cocktail.notes,
-      cocktail.ingredients
-    )
+    cocktailRepository.createCocktail(cocktail)
     cocktailGroupLinkRepository.createCocktailToGroupLink(groupId, cocktail.cocktailId)
   }
 
@@ -34,12 +27,13 @@ class CocktailService {
     return items.map { item ->
       val cocktailId =
         item["cocktailId"]?.s() ?: throw ValidationException("CocktailId is missing for group: $groupId")
-      cocktailRepository.getCocktailInfo(cocktailId)
+      val cocktail: Cocktail = cocktailRepository.getCocktail(cocktailId)
+      CocktailInfo(
+        cocktailId = cocktail.cocktailId,
+        name = cocktail.name,
+        method = cocktail.method
+      )
     }
-  }
-
-  fun doesCocktailExist(cocktailId: String): Boolean {
-    return cocktailRepository.doesCocktailExist(cocktailId)
   }
 
   fun getCocktail(cocktailId: String): Cocktail {
@@ -52,7 +46,11 @@ class CocktailService {
     return cocktails.map { cocktail ->
       val cocktailId =
         cocktail["cocktailId"]?.s() ?: throw ValidationException("CocktailId is missing for group: $groupId")
-      cocktailRepository.getCocktailIngredients(cocktailId)
+      val cocktailResponse: Cocktail = cocktailRepository.getCocktail(cocktailId)
+      CocktailIngredients(cocktailId = cocktailResponse.cocktailId,
+        name = cocktailResponse.name,
+        method = cocktailResponse.method!!,
+        ingredients = cocktailResponse.ingredients)
     }
   }
 
