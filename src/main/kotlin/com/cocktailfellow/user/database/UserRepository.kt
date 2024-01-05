@@ -1,11 +1,8 @@
 package com.cocktailfellow.user.database
 
+import com.cocktailfellow.common.CreateItemException
 import com.cocktailfellow.common.DynamoDbClientProvider
-import com.cocktailfellow.common.NotFoundException
-import com.cocktailfellow.common.Type
-import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.user.model.User
-import com.cocktailfellow.user.model.UserCreate
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
@@ -17,9 +14,8 @@ class UserRepository(
   private val log: Logger = LogManager.getLogger(UserRepository::class.java)
   private val userTable: String = System.getenv("USER_TABLE")
 
-  fun persistUser(userCreate: UserCreate) {
+  fun persistUser(userCreate: User) {
     val item = mapOf(
-      "userId" to AttributeValue.builder().s(userCreate.userId).build(),
       "username" to AttributeValue.builder().s(userCreate.username).build(),
       "password" to AttributeValue.builder().s(userCreate.hashedPassword).build()
     )
@@ -29,49 +25,19 @@ class UserRepository(
       .item(item)
       .conditionExpression("attribute_not_exists(username)")
       .build()
-
     try {
       dynamoDbClient.putItem(putItemRequest)
     } catch (e: ConditionalCheckFailedException) {
-      throw ValidationException("Username '${userCreate.username}' already exists.")
+      throw CreateItemException("Username '${userCreate.username}' already exists.")
+    } catch (e: Exception) {
+      throw CreateItemException("Create '${userCreate.username}' failed.")
     }
-  }
-
-  fun usernameAlreadyExists(username: String): Boolean {
-    val queryRequest = QueryRequest.builder()
-      .tableName(userTable)
-      .indexName("username-index")
-      .keyConditionExpression("username = :usernameVal")
-      .expressionAttributeValues(mapOf(":usernameVal" to AttributeValue.builder().s(username).build()))
-      .build()
-
-    val queryResponse = dynamoDbClient.query(queryRequest)
-    return queryResponse.count() > 0
-  }
-
-  fun getUserId(username: String): String {
-    val scanRequest = ScanRequest.builder()
-      .tableName(userTable)
-      .filterExpression("username = :usernameValue")
-      .expressionAttributeValues(mapOf(":usernameValue" to AttributeValue.builder().s(username).build()))
-      .build()
-
-    val response = dynamoDbClient.scan(scanRequest)
-
-    val items = response.items()
-    if (items.isEmpty() || items[0]["userId"]?.s().isNullOrEmpty()) {
-      throw NotFoundException(Type.USER)
-    }
-
-    return items[0]["userId"]?.s()!!
   }
 
   fun getUser(username: String): User {
-    val userId: String = getUserId(username)
-
     val itemRequest = GetItemRequest.builder()
       .tableName(userTable)
-      .key(mapOf("userId" to AttributeValue.builder().s(userId).build()))
+      .key(mapOf("username" to AttributeValue.builder().s(username).build()))
       .build()
 
     val response = dynamoDbClient.getItem(itemRequest)
@@ -84,11 +50,9 @@ class UserRepository(
   }
 
   fun doesUserExist(username: String): Boolean {
-    val userId: String = getUserId(username)
-
     val itemRequest = GetItemRequest.builder()
       .tableName(userTable)
-      .key(mapOf("userId" to AttributeValue.builder().s(userId).build()))
+      .key(mapOf("username" to AttributeValue.builder().s(username).build()))
       .build()
 
     val response = dynamoDbClient.getItem(itemRequest)
@@ -96,10 +60,9 @@ class UserRepository(
   }
 
   fun deleteUser(username: String) {
-    val userId = getUserId(username)
 
     val keyMap = mapOf(
-      "userId" to AttributeValue.builder().s(userId).build()
+      "username" to AttributeValue.builder().s(username).build()
     )
 
     val deleteItemRequest = DeleteItemRequest.builder()
@@ -109,10 +72,10 @@ class UserRepository(
 
     try {
       dynamoDbClient.deleteItem(deleteItemRequest)
-      log.info("User with id '$userId' deleted.")
+      log.info("User with id '$username' deleted.")
     } catch (e: Exception) {
-      log.error("Failed to delete user with id '$userId'.")
-      throw Exception("Failed to delete user with id '$userId'.")
+      log.error("Failed to delete user with id '$username'.")
+      throw Exception("Failed to delete user with id '$username'.")
     }
   }
 }

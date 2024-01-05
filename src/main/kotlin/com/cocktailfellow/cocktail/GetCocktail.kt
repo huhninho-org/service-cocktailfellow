@@ -27,9 +27,6 @@ class GetCocktail(
     if (!groupService.doesGroupExist(groupId)) {
       throw NotFoundException(Type.GROUP)
     }
-    if (!cocktailService.doesCocktailExist(cocktailId)) {
-      throw NotFoundException(Type.COCKTAIL)
-    }
 
     val cocktail = cocktailService.getCocktail(cocktailId)
     val response = GetCocktailResponse(

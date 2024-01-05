@@ -311,23 +311,11 @@ resources:
       Properties:
         TableName: ${self:custom.tables.user}
         AttributeDefinitions:
-          - AttributeName: userId
-            AttributeType: S
           - AttributeName: username
             AttributeType: S
         KeySchema:
-          - AttributeName: userId
+          - AttributeName: username
             KeyType: HASH
-        GlobalSecondaryIndexes:
-          - IndexName: username-index
-            KeySchema:
-              - AttributeName: username
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1

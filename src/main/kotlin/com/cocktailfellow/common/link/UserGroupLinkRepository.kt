@@ -14,10 +14,10 @@ class UserGroupLinkRepository(
   private val log: Logger = LogManager.getLogger(UserGroupLinkRepository::class.java)
   private val linkTable: String = System.getenv("USER_GROUP_LINK_TABLE")
 
-  fun createUserToGroupLink(userGroupLink: String, userId: String, groupId: String) {
+  fun createUserToGroupLink(userGroupLink: String, username: String, groupId: String) {
     val item = mapOf(
       "id" to AttributeValue.builder().s(userGroupLink).build(),
-      "userId" to AttributeValue.builder().s(userId).build(),
+      "username" to AttributeValue.builder().s(username).build(),
       "groupId" to AttributeValue.builder().s(groupId).build()
     )
 
@@ -29,12 +29,12 @@ class UserGroupLinkRepository(
 
     try {
       dynamoDbClient.putItem(putGroupRequest)
-      log.info("Linked user '$userId' to group '$groupId'.")
+      log.info("Linked user '$username' to group '$groupId'.")
     } catch (e: ConditionalCheckFailedException) {
-      log.error("Link between user '$userId' and group '$groupId' already exists.")
+      log.error("Link between user '$username' and group '$groupId' already exists.")
       throw LinkException("User is already linked to this group.")
     } catch (e: Exception) {
-      log.error("Linking user '$userId' to group '$groupId' failed. ${e.message}")
+      log.error("Linking user '$username' to group '$groupId' failed. ${e.message}")
       throw LinkException("Linking user to group failed.")
     }
   }
@@ -59,11 +59,11 @@ class UserGroupLinkRepository(
     }
   }
 
-  fun getGroups(userId: String): List<MutableMap<String, AttributeValue>> {
+  fun getGroups(username: String): List<MutableMap<String, AttributeValue>> {
     val scanRequest = ScanRequest.builder()
       .tableName(linkTable)
-      .filterExpression("userId = :userIdValue")
-      .expressionAttributeValues(mapOf(":userIdValue" to AttributeValue.builder().s(userId).build()))
+      .filterExpression("username = :usernameValue")
+      .expressionAttributeValues(mapOf(":usernameValue" to AttributeValue.builder().s(username).build()))
       .build()
 
     return dynamoDbClient.scan(scanRequest).items() ?: emptyList()
@@ -79,11 +79,11 @@ class UserGroupLinkRepository(
     deleteDataset(dynamoDbClient.scan(scanRequest))
   }
 
-  fun deleteAllLinksForUser(userId: String) {
+  fun deleteAllLinksForUser(username: String) {
     val scanRequest = ScanRequest.builder()
       .tableName(linkTable)
-      .filterExpression("userId = :userIdVal")
-      .expressionAttributeValues(mapOf(":userIdVal" to AttributeValue.builder().s(userId).build()))
+      .filterExpression("username = :usernameVal")
+      .expressionAttributeValues(mapOf(":usernameVal" to AttributeValue.builder().s(username).build()))
       .build()
 
     deleteDataset(dynamoDbClient.scan(scanRequest))

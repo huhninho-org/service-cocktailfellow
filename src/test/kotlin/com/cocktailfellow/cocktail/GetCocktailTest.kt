@@ -5,6 +5,7 @@ import com.cocktailfellow.BaseTest
 import com.cocktailfellow.cocktail.model.Cocktail
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.NotFoundException
+import com.cocktailfellow.common.Type
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
 import com.cocktailfellow.group.GroupService
@@ -48,7 +49,6 @@ class GetCocktailTest : BaseTest() {
       TokenManagementData("username", "token")
     )
     `when`(groupService.doesGroupExist(groupId)).thenReturn(true)
-    `when`(cocktailService.doesCocktailExist(cocktailId)).thenReturn(true)
     `when`(cocktailService.getCocktail(cocktailId)).thenReturn(cocktail)
 
     // When
@@ -96,7 +96,7 @@ class GetCocktailTest : BaseTest() {
       TokenManagementData("username", "token")
     )
     `when`(groupService.doesGroupExist(groupId)).thenReturn(true)
-    `when`(cocktailService.doesCocktailExist(cocktailId)).thenReturn(false)
+    `when`(cocktailService.getCocktail(cocktailId)).thenThrow(NotFoundException(Type.COCKTAIL))
 
     // When
     val exception = assertThrows<NotFoundException> {
