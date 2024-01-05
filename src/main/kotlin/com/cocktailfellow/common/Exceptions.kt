@@ -52,7 +52,7 @@ class LinkException(
 class JwtTokenException(
   message: String,
   errorType: ErrorType,
-  statusCode: HttpStatusCode = HttpStatusCode.BAD_REQUEST
+  statusCode: HttpStatusCode = HttpStatusCode.UNAUTHORIZED
 ) : CustomException(
   message = message, statusCode = statusCode, errorType = errorType
 )
