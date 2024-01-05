@@ -1,16 +1,14 @@
 package com.cocktailfellow.common.link
 
 import com.cocktailfellow.common.LinkException
-import com.cocktailfellow.user.UserService
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 class UserGroupLinkService {
   private val userGroupLinkRepository: UserGroupLinkRepository = UserGroupLinkRepository()
-  private val userService: UserService = UserService()
   private val ID_PATTERN: String = "%s-%s"
 
-  fun deleteAllUserGroupLinks(userId: String) {
-    return userGroupLinkRepository.deleteAllLinksForUser(userId)
+  fun deleteAllUserGroupLinks(username: String) {
+    return userGroupLinkRepository.deleteAllLinksForUser(username)
   }
 
   fun deleteAllLinksForGroup(groupId: String) {
@@ -18,29 +16,25 @@ class UserGroupLinkService {
   }
 
   fun isMemberOfGroup(username: String, groupId: String): Boolean {
-    val userId = userService.getUserId(username)
-    val userGroupLink = String.format(ID_PATTERN, userId, groupId)
+    val userGroupLink = String.format(ID_PATTERN, username, groupId)
     return userGroupLinkRepository.isMemberOfGroup(userGroupLink)
   }
 
   fun createUserToGroupLink(username: String, groupId: String) {
-    val userId = userService.getUserId(username)
-    val userGroupLink = String.format(ID_PATTERN, userId, groupId)
+    val userGroupLink = String.format(ID_PATTERN, username, groupId)
 
     if (userGroupLinkRepository.doesLinkAlreadyExist(userGroupLink)) {
       throw LinkException("The user is already linked to the group.")
     }
-    return userGroupLinkRepository.createUserToGroupLink(userGroupLink, userId, groupId)
+    return userGroupLinkRepository.createUserToGroupLink(userGroupLink, username, groupId)
   }
 
   fun deleteUserToGroupLink(username: String, groupId: String) {
-    val userId = userService.getUserId(username)
-    val userGroupLink = String.format(ID_PATTERN, userId, groupId)
+    val userGroupLink = String.format(ID_PATTERN, username, groupId)
     return userGroupLinkRepository.deleteUserToGroupLink(userGroupLink)
   }
 
   fun getGroups(username: String): List<MutableMap<String, AttributeValue>> {
-    val userId = userService.getUserId(username)
-    return userGroupLinkRepository.getGroups(userId)
+    return userGroupLinkRepository.getGroups(username)
   }
 }

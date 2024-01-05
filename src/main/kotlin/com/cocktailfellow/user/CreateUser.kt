@@ -4,13 +4,12 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.*
-import com.cocktailfellow.user.model.UserCreate
+import com.cocktailfellow.user.model.User
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.mindrot.jbcrypt.BCrypt
-import java.util.*
 
 class CreateUser(private val userService: UserService = UserService()) : AbstractRequestHandler() {
   private val log: Logger = LogManager.getLogger(CreateUser::class.java)
@@ -35,11 +34,9 @@ class CreateUser(private val userService: UserService = UserService()) : Abstrac
       throw ValidationException("Invalid JSON body.")
     }
 
-    val userId = UUID.randomUUID().toString()
     val hashedPassword = BCrypt.hashpw(user.password, BCrypt.gensalt())
 
-    val createUser = UserCreate(
-      userId = userId,
+    val createUser = User(
       username = user.username,
       hashedPassword = hashedPassword
     )
