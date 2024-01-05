@@ -3,11 +3,9 @@ package com.cocktailfellow.user
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
-import com.cocktailfellow.common.ErrorType
-import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.JsonConfig
-import com.cocktailfellow.common.JwtTokenException
+import com.cocktailfellow.common.*
 import com.cocktailfellow.common.token.TokenManagement
+import com.cocktailfellow.user.model.User
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import org.apache.logging.log4j.LogManager
@@ -25,29 +23,50 @@ class LoginUser(
     val body = getBody(input)
     val loginRequest = JsonConfig.instance.decodeFromString<LoginRequest>(body)
     val username = loginRequest.username
-    val apiKey = getApiKeyHeader(input)
 
-    if (apiKey == null || apiKey != requiredApiKey) throw JwtTokenException(
-      HttpStatusCode.FORBIDDEN.reason,
-      ErrorType.JWT_INVALID_EXCEPTION,
-      HttpStatusCode.FORBIDDEN
-    )
+    validateApiKey(getApiKeyHeader(input))
 
     log.info("User '$username' is trying to log in")
-    val user = userService.getUser(username)
-    log.info("User '$username' login successful")
+    val user = getUserOrThrow(loginRequest.username)
+    validatePassword(loginRequest.password, user.hashedPassword)
 
-    if (BCrypt.checkpw(loginRequest.password, user.hashedPassword)) {
-      val loginToken = tokenManagement.createLoginToken(username)
-      return generateResponse(HttpStatusCode.OK.code, loginToken)
-    } else {
+    log.info("User '$username' login successful")
+    val loginToken = tokenManagement.createLoginToken(loginRequest.username)
+
+    return generateResponse(HttpStatusCode.OK.code, loginToken)
+  }
+
+  private fun validateApiKey(apiKey: String?) {
+    if (apiKey == null || apiKey != requiredApiKey) {
       throw JwtTokenException(
-        HttpStatusCode.UNAUTHORIZED.reason,
+        HttpStatusCode.FORBIDDEN.reason,
         ErrorType.JWT_INVALID_EXCEPTION,
-        HttpStatusCode.UNAUTHORIZED
+        HttpStatusCode.FORBIDDEN
       )
     }
   }
+
+  private fun getUserOrThrow(username: String): User {
+    return try {
+      userService.getUser(username)
+    } catch (_: NotFoundException) {
+      throw throwJwtTokenException()
+    }
+  }
+
+  private fun validatePassword(inputPassword: String, storedHashedPassword: String?) {
+    if (!BCrypt.checkpw(inputPassword, storedHashedPassword)) {
+      throw throwJwtTokenException()
+    }
+  }
+}
+
+private fun throwJwtTokenException(): Throwable {
+  throw JwtTokenException(
+    "${HttpStatusCode.UNAUTHORIZED.reason}. Invalid credentials.",
+    ErrorType.JWT_INVALID_EXCEPTION,
+    HttpStatusCode.UNAUTHORIZED
+  )
 }
 
 @Serializable

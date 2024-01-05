@@ -1,7 +1,6 @@
 package com.cocktailfellow.common.token
 
 import com.cocktailfellow.common.ErrorType
-import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JwtTokenException
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
@@ -42,9 +41,9 @@ class TokenManagement {
   }
 
   private fun extractBearer(token: String?): String {
-    if (token.isNullOrBlank()) throw JwtTokenException("No token provided", ErrorType.JWT_INVALID_EXCEPTION)
+    if (token.isNullOrBlank()) throw JwtTokenException("No token provided.", ErrorType.JWT_INVALID_EXCEPTION)
     val parts = token.split(" ")
-    if (parts.size < 2) throw JwtTokenException("Invalid token format", ErrorType.JWT_INVALID_EXCEPTION)
+    if (parts.size < 2) throw JwtTokenException("Invalid token format.", ErrorType.JWT_INVALID_EXCEPTION)
     return parts[1]
   }
 
@@ -66,11 +65,11 @@ class TokenManagement {
         .body
         .get("username", String::class.java)
     } catch (exception: SignatureException) {
-      throw JwtTokenException("Invalid token signature", ErrorType.JWT_INVALID_SIGNATURE_EXCEPTION)
+      throw JwtTokenException("Invalid token signature. Please try again lager", ErrorType.JWT_INVALID_SIGNATURE_EXCEPTION)
     } catch (exception: ExpiredJwtException) {
-      throw JwtTokenException("Token expired", ErrorType.JWT_EXPIRED_EXCEPTION)
+      throw JwtTokenException("Session expired. Please log in again.", ErrorType.JWT_EXPIRED_EXCEPTION)
     } catch (exception: Exception) {
-      throw JwtTokenException("Invalid Token", ErrorType.JWT_INVALID_EXCEPTION, HttpStatusCode.UNAUTHORIZED)
+      throw JwtTokenException("Invalid Token.", ErrorType.JWT_INVALID_EXCEPTION)
     }
   }
 }
