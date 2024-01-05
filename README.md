@@ -182,6 +182,5 @@ For support or to engage in community discussions, feel free to reach out:
 
 - **Cocktail Fellow GitHub Issues**: Visit
   our [GitHub issues](https://github.com/huhninho/service-cocktailfellow/issues) to report issues.
-- **Email Support**: For direct support or inquiries, email us at [huhninho@gmail.com](mailto:huhninho@gmail.com).
 
 We welcome your questions, feedback, and contributions!
