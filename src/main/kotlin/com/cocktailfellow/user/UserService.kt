@@ -31,7 +31,11 @@ class UserService {
     return userRepository.deleteUser(username)
   }
 
-  private fun validateUser(username: String) {
+  fun updatePasswordUser(user: User) {
+    return userRepository.updateUserPassword(user)
+  }
+
+  private fun validateExistingUser(username: String) {
     if (!doesUserExist(username)) {
       throw NotFoundException(Type.USER)
     }

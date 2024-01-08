@@ -2,6 +2,7 @@ package com.cocktailfellow.user.database
 
 import com.cocktailfellow.common.CreateItemException
 import com.cocktailfellow.common.DynamoDbClientProvider
+import com.cocktailfellow.common.UpdateItemException
 import com.cocktailfellow.user.model.User
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -49,6 +50,26 @@ class UserRepository(
     )
   }
 
+  fun updateUserPassword(user: User) {
+    val item = mapOf(
+      "username" to AttributeValue.builder().s(user.username).build(),
+      "password" to AttributeValue.builder().s(user.hashedPassword).build()
+    )
+
+    val putItemRequest = PutItemRequest.builder()
+      .tableName(userTable)
+      .item(item)
+      .conditionExpression("attribute_exists(username)")
+      .build()
+    try {
+      dynamoDbClient.putItem(putItemRequest)
+    } catch (e: ConditionalCheckFailedException) {
+      throw UpdateItemException("Username '${user.username}' does not exists.")
+    } catch (e: Exception) {
+      throw UpdateItemException("Update password of '${user.username}' failed.")
+    }
+  }
+
   fun doesUserExist(username: String): Boolean {
     val itemRequest = GetItemRequest.builder()
       .tableName(userTable)
@@ -60,7 +81,6 @@ class UserRepository(
   }
 
   fun deleteUser(username: String) {
-
     val keyMap = mapOf(
       "username" to AttributeValue.builder().s(username).build()
     )
