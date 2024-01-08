@@ -4,16 +4,21 @@ import com.cocktailfellow.common.NotFoundException
 import com.cocktailfellow.common.Type
 import com.cocktailfellow.user.database.UserRepository
 import com.cocktailfellow.user.model.User
+import org.mindrot.jbcrypt.BCrypt
 
 class UserService {
   private val userRepository: UserRepository = UserRepository()
+
+  fun encryptPassword(password: String): String {
+    return BCrypt.hashpw(password, BCrypt.gensalt())
+  }
 
   fun persistUser(userCreate: User) {
     return userRepository.persistUser(userCreate)
   }
 
   fun getUser(username: String): User {
-    validateUser(username)
+    validateExistingUser(username)
     return userRepository.getUser(username)
   }
 
@@ -22,7 +27,7 @@ class UserService {
   }
 
   fun deleteUser(username: String) {
-    validateUser(username)
+    validateExistingUser(username)
     return userRepository.deleteUser(username)
   }
 

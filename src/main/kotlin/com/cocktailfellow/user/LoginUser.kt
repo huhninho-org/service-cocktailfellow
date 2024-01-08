@@ -7,10 +7,10 @@ import com.cocktailfellow.common.*
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.user.model.User
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.mindrot.jbcrypt.BCrypt
+import javax.validation.constraints.Size
 
 class LoginUser(
   private val tokenManagement: TokenManagement = TokenManagement(),
@@ -20,11 +20,9 @@ class LoginUser(
   private val log: Logger = LogManager.getLogger(LoginUser::class.java)
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
-    val body = getBody(input)
-    val loginRequest = JsonConfig.instance.decodeFromString<LoginRequest>(body)
-    val username = loginRequest.username
-
     validateApiKey(getApiKeyHeader(input))
+    val loginRequest = ValidationUtil.deserializeAndValidate(getBody(input), LoginRequest::class)
+    val username = loginRequest.username
 
     log.info("User '$username' is trying to log in")
     val user = getUserOrThrow(loginRequest.username)
@@ -71,6 +69,8 @@ private fun throwJwtTokenException(): Throwable {
 
 @Serializable
 data class LoginRequest(
+  @field:Size(min = 3, message = "Username must be at least 6 characters.")
   val username: String,
+  @field:Size(min = 6, message = "Password must be at least 6 characters.")
   val password: String
 )

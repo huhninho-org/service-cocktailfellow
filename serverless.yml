@@ -85,6 +85,18 @@ functions:
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}/index/username-index
+  updatePasswordUser:
+    handler: com.cocktailfellow.user.UpdatePasswordUser
+    events:
+      - http:
+          path: users
+          method: patch
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
   deleteUser:
     handler: com.cocktailfellow.user.DeleteUser
     events:
