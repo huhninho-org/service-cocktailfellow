@@ -7,6 +7,7 @@ enum class ErrorType {
   BAD_REQUEST,
   RESOURCE_NOT_FOUND,
   CREATE_ITEM_EXCEPTION,
+  UPDATE_ITEM_EXCEPTION,
   JWT_EXPIRED_EXCEPTION,
   JWT_INVALID_SIGNATURE_EXCEPTION,
   JWT_INVALID_EXCEPTION,
@@ -35,6 +36,12 @@ class CreateItemException(
   message: String
 ) : CustomException(
   message = message, statusCode = HttpStatusCode.BAD_REQUEST, errorType = ErrorType.CREATE_ITEM_EXCEPTION
+)
+
+class UpdateItemException(
+  message: String
+) : CustomException(
+  message = message, statusCode = HttpStatusCode.BAD_REQUEST, errorType = ErrorType.UPDATE_ITEM_EXCEPTION
 )
 
 class NotFoundException(
