@@ -16,6 +16,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
@@ -46,7 +49,8 @@ class CreateCocktailTest : BaseTest() {
   fun `test handleBusinessLogic with valid input`() {
     // Given
     val groupId = "group1"
-    val cocktailRequest = CreateCocktailRequest("Cocktail", "Method", "Story", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
+    val cocktailRequest =
+      CreateCocktailRequest("Cocktail", "Method", "Story", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer token"),
       "pathParameters" to mapOf("groupId" to groupId),
@@ -69,7 +73,8 @@ class CreateCocktailTest : BaseTest() {
   fun `test handleBusinessLogic with non-existent group`() {
     // Given
     val groupId = "nonexistentGroup"
-    val cocktailRequest = CreateCocktailRequest("Cocktail", "Method", "Story", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
+    val cocktailRequest =
+      CreateCocktailRequest("Cocktail", "Method", "Story", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer token"),
       "pathParameters" to mapOf("groupId" to groupId),
@@ -97,7 +102,6 @@ class CreateCocktailTest : BaseTest() {
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer token"),
       "pathParameters" to mapOf("groupId" to groupId)
-      // Note: No body is provided here
     )
 
     `when`(tokenManagement.validateTokenAndGetData(any())).thenReturn(
@@ -128,7 +132,10 @@ class CreateCocktailTest : BaseTest() {
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer token"),
       "pathParameters" to mapOf("groupId" to groupId),
-      "body" to JsonConfig.instance.encodeToString(CreateCocktailRequest.serializer(), cocktailRequestWithoutIngredients)
+      "body" to JsonConfig.instance.encodeToString(
+        CreateCocktailRequest.serializer(),
+        cocktailRequestWithoutIngredients
+      )
     )
 
     `when`(tokenManagement.validateTokenAndGetData(any())).thenReturn(
@@ -145,4 +152,68 @@ class CreateCocktailTest : BaseTest() {
     assertEquals("Ingredients list cannot be empty.", exception.message)
   }
 
+  @ParameterizedTest
+  @MethodSource("invalidLengthTestData")
+  fun `test handleBusinessLogic with invalid field lengths`(field: String, value: String, expectedMessage: String) {
+    // Given
+    val groupId = "group1"
+    val ingredients = listOf(
+      Ingredient("White Rum", "50ml"),
+      Ingredient("Lime Juice", "20ml")
+    )
+
+    val cocktailRequest = when (field) {
+      "name" -> CreateCocktailRequest(value, "some name", "Some Story.", "Some Notes.", ingredients)
+      "method" -> CreateCocktailRequest("some name", value, "Some Story.", "Some Notes.", ingredients)
+      "story" -> CreateCocktailRequest("some name", "Some Method.", value, "Some Notes.", ingredients)
+      "notes" -> CreateCocktailRequest("some name", "Some Method.", "Some Story.", value, ingredients)
+      "ingredient" -> CreateCocktailRequest(
+        "some name", "Some Method.", "Some Story.", "Some Notes.", listOf(
+          Ingredient(value, "50ml")
+        )
+      )
+
+      "amount" -> CreateCocktailRequest(
+        "some name", "Some Method.", "Some Story.", "Some Notes.", listOf(
+          Ingredient("White Rum", value)
+        )
+      )
+
+      else -> throw IllegalArgumentException("Invalid field for test")
+    }
+    val bodyJson = JsonConfig.instance.encodeToString(CreateCocktailRequest.serializer(), cocktailRequest)
+
+    val input = mapOf(
+      "headers" to mapOf("x-api-key" to "your-api-key"),
+      "pathParameters" to mapOf("groupId" to groupId),
+      "body" to bodyJson
+    )
+
+    // When
+    `when`(tokenManagement.validateTokenAndGetData(any())).thenReturn(
+      TokenManagementData("username", "token")
+    )
+    `when`(groupService.doesGroupExist(groupId)).thenReturn(true)
+
+    // Then
+    val exception = assertThrows<ValidationException> {
+      createCocktail.handleBusinessLogic(input, context)
+    }
+    assertEquals(expectedMessage, exception.message)
+  }
+
+  companion object {
+    @JvmStatic
+    fun invalidLengthTestData() = listOf(
+      Arguments.of("name", "a".repeat(51), "'name' length should be within 3 to 50 characters."),
+      Arguments.of("name", "12", "'name' length should be within 3 to 50 characters."),
+      Arguments.of("method", "a".repeat(256), "'method' exceeds the limit of 255 characters."),
+      Arguments.of("story", "a".repeat(256), "'story' exceeds the limit of 255 characters."),
+      Arguments.of("notes", "a".repeat(256), "'notes' exceeds the limit of 255 characters."),
+      Arguments.of("ingredient", "", "must not be empty"),
+      Arguments.of("ingredient", "a".repeat(51), "'ingredientName' exceeds the limit of 50 characters."),
+      Arguments.of("amount", "", "must not be empty"),
+      Arguments.of("amount", "a".repeat(51), "'amount' exceeds the limit of 50 characters.")
+    )
+  }
 }

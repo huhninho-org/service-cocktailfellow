@@ -6,7 +6,10 @@ import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.ErrorType
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JwtTokenException
-import com.cocktailfellow.common.ValidationUtil
+import com.cocktailfellow.common.validation.Validation
+import com.cocktailfellow.common.validation.Validation.CREDENTIALS_MAX
+import com.cocktailfellow.common.validation.Validation.PASSWORD_MIN
+import com.cocktailfellow.common.validation.Validation.USERNAME_MIN
 import com.cocktailfellow.user.model.User
 import kotlinx.serialization.Serializable
 import org.apache.logging.log4j.LogManager
@@ -27,7 +30,8 @@ class CreateUser(private val userService: UserService = UserService()) : Abstrac
       HttpStatusCode.FORBIDDEN
     )
 
-    val createUserRequest: CreateUserRequest = ValidationUtil.deserializeAndValidate(getBody(input), CreateUserRequest::class)
+    val createUserRequest: CreateUserRequest =
+      Validation.deserializeAndValidate(getBody(input), CreateUserRequest::class)
     val hashedPassword = userService.encryptPassword(createUserRequest.password)
 
     val createUser = User(
@@ -44,8 +48,16 @@ class CreateUser(private val userService: UserService = UserService()) : Abstrac
 
 @Serializable
 data class CreateUserRequest(
-  @field:Size(min = 3, message = "Username must be at least 6 characters.")
+  @field:Size(
+    min = USERNAME_MIN,
+    max = CREDENTIALS_MAX,
+    message = "'username' length should be within $USERNAME_MIN to $CREDENTIALS_MAX characters."
+  )
   val username: String,
-  @field:Size(min = 6, message = "Password must be at least 6 characters.")
+  @field:Size(
+    min = PASSWORD_MIN,
+    max = CREDENTIALS_MAX,
+    message = "'password' length should be within $PASSWORD_MIN to $CREDENTIALS_MAX characters."
+  )
   val password: String
 )

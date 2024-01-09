@@ -4,13 +4,14 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.JsonConfig
-import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
+import com.cocktailfellow.common.validation.Validation
+import com.cocktailfellow.common.validation.Validation.DEFAULT_MAX
+import com.cocktailfellow.common.validation.Validation.DEFAULT_MIN
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import java.util.*
+import javax.validation.constraints.Size
 
 class CreateGroup(
   private val tokenManagement: TokenManagement = TokenManagement(),
@@ -20,14 +21,8 @@ class CreateGroup(
 ) : AbstractRequestHandler() {
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
-    val body = getBody(input)
-    val group: CreateGroupRequest
 
-    try {
-      group = JsonConfig.instance.decodeFromString(body)
-    } catch (e: Exception) {
-      throw ValidationException("Invalid JSON body.")
-    }
+    val group = Validation.deserializeAndValidate(getBody(input), CreateGroupRequest::class)
     val groupName = group.groupName
 
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
@@ -49,6 +44,9 @@ class CreateGroup(
 
 @Serializable
 data class CreateGroupRequest(
+  @field:Size(
+    min = DEFAULT_MIN, max = DEFAULT_MAX, message = "'groupName' length should be within $DEFAULT_MIN to $DEFAULT_MAX characters."
+  )
   val groupName: String
 )
 

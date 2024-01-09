@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 
@@ -93,9 +96,39 @@ class CreateGroupTest : BaseTest() {
     assertEquals("Invalid JSON body.", exception.message)
   }
 
+  @ParameterizedTest
+  @MethodSource("groupNameTestData")
+  fun `test handleBusinessLogic with invalid groupName lengths`(groupName: String, expectedMessage: String) {
+    // Given
+    val bodyJson = """
+        {
+          "groupName":"$groupName"
+        }
+    """.trimIndent()
+    val input = mapOf(
+      "headers" to mapOf("x-api-key" to "your-api-key"),
+      "body" to bodyJson
+    )
+
+    // Then
+    val exception = assertThrows<ValidationException> {
+      createGroup.handleBusinessLogic(input, context)
+    }
+
+    assertEquals(expectedMessage, exception.message)
+  }
+
   @Serializable
   data class CreateGroupFullResponse(
     val result: CreateGroupResponse,
     val loginToken: String
   )
+
+  companion object {
+    @JvmStatic
+    fun groupNameTestData() = listOf(
+      Arguments.of("12", "'groupName' length should be within 3 to 50 characters."),
+      Arguments.of("a".repeat(51), "'groupName' length should be within 3 to 50 characters.")
+    )
+  }
 }
