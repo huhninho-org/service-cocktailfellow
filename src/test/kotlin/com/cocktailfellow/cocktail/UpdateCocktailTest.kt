@@ -14,6 +14,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -161,4 +164,53 @@ class UpdateCocktailTest {
     assertEquals("Ingredients list cannot be empty.", exception.message)
   }
 
+  @ParameterizedTest
+  @MethodSource("invalidLengthTestData")
+  fun `test handleBusinessLogic with invalid field lengths`(field: String, value: String, expectedMessage: String) {
+    // Given
+    val groupId = "group1"
+    val cocktailId = "cocktail1"
+    val ingredients = listOf(
+      Ingredient("White Rum", "50ml"),
+      Ingredient("Lime Juice", "20ml")
+    )
+
+    val cocktailRequest = when (field) {
+      "name" -> CreateCocktailRequest(value , "some method", "Some Story.", "Some Notes.", ingredients)
+      "method" -> CreateCocktailRequest("some name", value, "Some Story.", "Some Notes.", ingredients)
+      "story" -> CreateCocktailRequest("some name", "Some Method.", value, "Some Notes.", ingredients)
+      "notes" -> CreateCocktailRequest("some name", "Some Method.", "Some Story.", value, ingredients)
+      else -> throw IllegalArgumentException("Invalid field for test")
+    }
+    val bodyJson = JsonConfig.instance.encodeToString(CreateCocktailRequest.serializer(), cocktailRequest)
+
+    val input = mapOf(
+      "headers" to mapOf("x-api-key" to "your-api-key"),
+      "pathParameters" to mapOf("groupId" to groupId, "cocktailId" to cocktailId),
+      "body" to bodyJson
+    )
+
+    // When
+    Mockito.`when`(tokenManagement.validateTokenAndGetData(any())).thenReturn(
+      TokenManagementData("username", "token")
+    )
+    Mockito.`when`(userGroupLinkService.isMemberOfGroup("username", groupId)).thenReturn(false)
+
+    // Then
+    val exception = assertThrows<ValidationException> {
+      updateCocktail.handleBusinessLogic(input, context)
+    }
+    assertEquals(expectedMessage, exception.message)
+  }
+
+  companion object {
+    @JvmStatic
+    fun invalidLengthTestData() = listOf(
+      Arguments.of("name", "a".repeat(51), "'name' length should be within 3 to 50 characters."),
+      Arguments.of("name", "12", "'name' length should be within 3 to 50 characters."),
+      Arguments.of("method", "a".repeat(256), "'method' exceeds the limit of 255 characters."),
+      Arguments.of("story", "a".repeat(256), "'story' exceeds the limit of 255 characters."),
+      Arguments.of("notes", "a".repeat(256), "'notes' exceeds the limit of 255 characters.")
+    )
+  }
 }

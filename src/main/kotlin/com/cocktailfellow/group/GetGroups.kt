@@ -22,7 +22,7 @@ class GetGroups(
 
     val groups = userGroupLinkService.getGroups(username)
 
-    val responseGroups = if (!groups.isNullOrEmpty()) {
+    val responseGroups = if (groups.isNotEmpty()) {
       groups.map { item ->
         val groupId = item["groupId"]?.s() ?: throw ValidationException("GroupId is missing")
         val groupName = groupService.getGroupName(groupId)

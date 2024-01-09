@@ -4,13 +4,21 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.model.Cocktail
-import com.cocktailfellow.common.*
+import com.cocktailfellow.common.HttpStatusCode
+import com.cocktailfellow.common.NotFoundException
+import com.cocktailfellow.common.Type
+import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.token.TokenManagement
+import com.cocktailfellow.common.validation.Validation
+import com.cocktailfellow.common.validation.Validation.DEFAULT_MAX
+import com.cocktailfellow.common.validation.Validation.DEFAULT_MIN
+import com.cocktailfellow.common.validation.Validation.MULTILINE_FIELDS
 import com.cocktailfellow.group.GroupService
 import com.cocktailfellow.ingredient.model.Ingredient
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import java.util.*
+import javax.validation.Valid
+import javax.validation.constraints.Size
 
 class CreateCocktail(
   private val tokenManagement: TokenManagement = TokenManagement(),
@@ -21,9 +29,8 @@ class CreateCocktail(
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
     val groupId = getPathParameterGroupId(input)
-    val body = getBody(input)
 
-    val request = JsonConfig.instance.decodeFromString<CreateCocktailRequest>(body)
+    val request = Validation.deserializeAndValidate(getBody(input), CreateCocktailRequest::class)
 
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
@@ -63,10 +70,25 @@ class CreateCocktail(
 
 @Serializable
 data class CreateCocktailRequest(
+  @field:Size(
+    min = DEFAULT_MIN,
+    max = DEFAULT_MAX,
+    message = "'name' length should be within $DEFAULT_MIN to $DEFAULT_MAX characters."
+  )
   val name: String,
+  @field:Size(
+    max = MULTILINE_FIELDS, message = "'method' exceeds the limit of $MULTILINE_FIELDS characters."
+  )
   val method: String? = null,
+  @field:Size(
+    max = MULTILINE_FIELDS, message = "'story' exceeds the limit of $MULTILINE_FIELDS characters."
+  )
   val story: String? = null,
+  @field:Size(
+    max = MULTILINE_FIELDS, message = "'notes' exceeds the limit of $MULTILINE_FIELDS characters."
+  )
   val notes: String? = null,
+  @field:Valid
   val ingredients: List<Ingredient>
 )
 

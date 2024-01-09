@@ -56,7 +56,10 @@ class FilterIngredientsTest : BaseTest() {
   private fun createGroup(groupId: String): MutableMap<String, AttributeValue> =
     mutableMapOf("groupId" to AttributeValue.builder().s(groupId).build())
 
-  private fun createIngredients(ingredient1: String = "ingredient1", ingredient2: String = "ingredient2"): List<Ingredient> =
+  private fun createIngredients(
+    ingredient1: String = "ingredient1",
+    ingredient2: String = "ingredient2"
+  ): List<Ingredient> =
     listOf(Ingredient(ingredient1, "1cl"), Ingredient(ingredient2, "1cl"))
 
   private fun createCocktails(ingredients: List<Ingredient>, vararg cocktailNames: String): List<CocktailIngredients> =
@@ -75,7 +78,7 @@ class FilterIngredientsTest : BaseTest() {
       createGroup("group1"),
       createGroup("group2")
     )
-    val ingredients =createIngredients()
+    val ingredients = createIngredients()
     val cocktails1 = createCocktails(ingredients, "cocktail1", "cocktail2")
     val cocktails2 = createCocktails(ingredients, "cocktail3", "cocktail4")
 
@@ -112,7 +115,7 @@ class FilterIngredientsTest : BaseTest() {
       "headers" to mapOf("Authorization" to "Bearer token"),
       "queryStringParameters" to mapOf("ingredients" to "ingredient1,ingredient2", "groupId" to "specific_group_id")
     )
-    val ingredients =createIngredients()
+    val ingredients = createIngredients()
     val cocktails = createCocktails(ingredients, "cocktail1", "cocktail2")
 
     `when`(cocktailService.getCocktailsIngredients(groupId)).thenReturn(cocktails)

@@ -4,8 +4,10 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.ValidationUtil
 import com.cocktailfellow.common.token.TokenManagement
+import com.cocktailfellow.common.validation.Validation
+import com.cocktailfellow.common.validation.Validation.CREDENTIALS_MAX
+import com.cocktailfellow.common.validation.Validation.PASSWORD_MIN
 import com.cocktailfellow.user.model.User
 import kotlinx.serialization.Serializable
 import javax.validation.constraints.Size
@@ -18,7 +20,7 @@ class UpdatePasswordUser(
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
-    val updatePasswordRequest = ValidationUtil.deserializeAndValidate(getBody(input), UpdatePasswordRequest::class)
+    val updatePasswordRequest = Validation.deserializeAndValidate(getBody(input), UpdatePasswordRequest::class)
 
     val hashedPassword = userService.encryptPassword(updatePasswordRequest.password)
 
@@ -30,6 +32,10 @@ class UpdatePasswordUser(
 
 @Serializable
   data class UpdatePasswordRequest(
-  @field:Size(min = 6, message = "Password must be at least 6 characters.")
+  @field:Size(
+    min = PASSWORD_MIN,
+    max = CREDENTIALS_MAX,
+    message = "'password' length should be within $PASSWORD_MIN to $CREDENTIALS_MAX characters."
+  )
   val password: String
 )

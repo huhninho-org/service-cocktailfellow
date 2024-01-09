@@ -1,16 +1,16 @@
 package com.cocktailfellow.user
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.NotFoundException
-import com.cocktailfellow.common.Type
-import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.*
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
@@ -111,29 +111,7 @@ class UpdatePasswordUserTest {
       updatePasswordUser.handleBusinessLogic(input, context)
     }
 
-    assertEquals("Password must be at least 6 characters.", exception.message)
-  }
-
-  @Test
-  fun `test handleBusinessLogic with password too short`() {
-    // Given
-    val username = "testUser"
-    val input = mapOf(
-      "headers" to mapOf("Authorization" to "Bearer token"),
-      "body" to "{\"password\":\"12345\"}"
-    )
-
-    // When
-    `when`(tokenManagement.validateTokenAndGetData(any())).thenReturn(
-      TokenManagementData(username, "token")
-    )
-
-    // Then
-    val exception = assertThrows<ValidationException> {
-      updatePasswordUser.handleBusinessLogic(input, context)
-    }
-
-    assertEquals("Password must be at least 6 characters.", exception.message)
+    assertEquals("'password' length should be within 6 to 20 characters.", exception.message)
   }
 
   @Test
@@ -173,5 +151,34 @@ class UpdatePasswordUserTest {
 
     // Then
     assertEquals("Invalid JSON body.", exception.message)
+  }
+
+  @ParameterizedTest
+  @MethodSource("invalidLengthTestData")
+  fun `test handleBusinessLogic with invalid field lengths`(value: String, expectedMessage: String) {
+    // Given
+    val createUserRequest = CreateUserRequest("username", value)
+
+    val bodyJson = JsonConfig.instance.encodeToString(CreateUserRequest.serializer(), createUserRequest)
+
+    val input = mapOf(
+      "headers" to mapOf("x-api-key" to "your-api-key"),
+      "body" to bodyJson
+    )
+
+    // Then
+    val exception = assertThrows<ValidationException> {
+      updatePasswordUser.handleBusinessLogic(input, context)
+    }
+
+    assertEquals(expectedMessage, exception.message)
+  }
+
+  companion object {
+    @JvmStatic
+    fun invalidLengthTestData() = listOf(
+      Arguments.of("12345", "'password' length should be within 6 to 20 characters."),
+      Arguments.of("123456789012345678901", "'password' length should be within 6 to 20 characters.")
+    )
   }
 }

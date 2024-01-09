@@ -1,12 +1,22 @@
-package com.cocktailfellow.common
+package com.cocktailfellow.common.validation
 
+import com.cocktailfellow.common.JsonConfig
+import com.cocktailfellow.common.ValidationException
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializer
 import javax.validation.Validation
 import javax.validation.Validator
 import kotlin.reflect.KClass
 
-object ValidationUtil {
+object Validation {
+
+  const val USERNAME_MIN: Int = 3
+  const val PASSWORD_MIN: Int = 6
+  const val CREDENTIALS_MAX: Int = 20
+  const val DEFAULT_MIN: Int = 3
+  const val DEFAULT_MAX: Int = 50
+  const val MULTILINE_FIELDS: Int = 255
+
   private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
 
   @OptIn(InternalSerializationApi::class)
