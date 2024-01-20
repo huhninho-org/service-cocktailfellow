@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.CocktailService
-import com.cocktailfellow.cocktail.model.CocktailIngredients
+import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.common.BadRequestException
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.NotFoundException
@@ -34,10 +34,10 @@ class FilterIngredients(
 
       groups.flatMap { group ->
         val groupId = group["groupId"]?.s() ?: throw NotFoundException(Type.GROUP)
-        cocktailService.getCocktailsIngredients(groupId)
+        cocktailService.getCocktails(groupId)
       }
     } else {
-      cocktailService.getCocktailsIngredients(filterGroupId)
+      cocktailService.getCocktails(filterGroupId)
     }
 
     val filteredCocktails = unfilteredCocktails.filter { cocktail ->
@@ -56,5 +56,5 @@ class FilterIngredients(
 
 @Serializable
 data class SearchCocktailsByIngredientsResponse(
-  val cocktails: List<CocktailIngredients>
+  val cocktails: List<CocktailInfo>
 )

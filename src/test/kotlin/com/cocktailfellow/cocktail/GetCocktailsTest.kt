@@ -8,6 +8,7 @@ import com.cocktailfellow.common.NotFoundException
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
 import com.cocktailfellow.group.GroupService
+import com.cocktailfellow.ingredient.model.Ingredient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,14 +31,19 @@ class GetCocktailsTest : BaseTest() {
     tokenManagement = Mockito.mock(TokenManagement::class.java)
     cocktailService = Mockito.mock(CocktailService::class.java)
     groupService = Mockito.mock(GroupService::class.java)
-      getCocktails = GetCocktails(tokenManagement, cocktailService, groupService)
+    getCocktails = GetCocktails(tokenManagement, cocktailService, groupService)
   }
 
   @Test
   fun `test handleBusinessLogic with valid input`() {
     // Given
     val groupId = "group1"
-    val cocktailsList = listOf(CocktailInfo("cocktail1", "Cocktail Name", "Description"))
+    val cocktailsList = listOf(
+      CocktailInfo(
+        "cocktail1", "Cocktail Name", "Description",
+        listOf(Ingredient("ingredient name 1", "1cl"), Ingredient("ingredient name 2", "1cl"))
+      )
+    )
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer token"),
       "pathParameters" to mapOf("groupId" to groupId)
@@ -54,7 +60,6 @@ class GetCocktailsTest : BaseTest() {
 
     // Then
     assertEquals(HttpStatusCode.OK.code, response.statusCode)
-    // Optionally, assert the contents of the response
   }
 
   @Test

@@ -17,13 +17,6 @@ data class Cocktail(
 data class CocktailInfo(
   val cocktailId: String,
   val name: String,
-  val method: String?
-)
-
-@Serializable
-data class CocktailIngredients(
-  val cocktailId: String,
-  val name: String,
   val method: String,
   val ingredients: List<Ingredient>
 )
