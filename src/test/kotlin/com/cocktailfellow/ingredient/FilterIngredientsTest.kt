@@ -3,7 +3,7 @@ package com.cocktailfellow.ingredient
 import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.BaseTest
 import com.cocktailfellow.cocktail.CocktailService
-import com.cocktailfellow.cocktail.model.CocktailIngredients
+import com.cocktailfellow.cocktail.model.CocktailInfo
 import com.cocktailfellow.common.BadRequestException
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
@@ -62,8 +62,8 @@ class FilterIngredientsTest : BaseTest() {
   ): List<Ingredient> =
     listOf(Ingredient(ingredient1, "1cl"), Ingredient(ingredient2, "1cl"))
 
-  private fun createCocktails(ingredients: List<Ingredient>, vararg cocktailNames: String): List<CocktailIngredients> =
-    cocktailNames.map { name -> CocktailIngredients(name, name, method, ingredients) }
+  private fun createCocktails(ingredients: List<Ingredient>, vararg cocktailNames: String): List<CocktailInfo> =
+    cocktailNames.map { name -> CocktailInfo(name, name, method, ingredients) }
 
 
   @Test
@@ -88,8 +88,8 @@ class FilterIngredientsTest : BaseTest() {
       TokenManagementData(username, "token")
     )
     `when`(userGroupLinkService.getGroups(username)).thenReturn(groups)
-    `when`(cocktailService.getCocktailsIngredients("group1")).thenReturn(cocktails1)
-    `when`(cocktailService.getCocktailsIngredients("group2")).thenReturn(cocktails2)
+    `when`(cocktailService.getCocktails("group1")).thenReturn(cocktails1)
+    `when`(cocktailService.getCocktails("group2")).thenReturn(cocktails2)
 
     // When
     val response = filterIngredients.handleBusinessLogic(input, context)
@@ -103,8 +103,8 @@ class FilterIngredientsTest : BaseTest() {
     assertEquals(expectedCocktailsForBothGroups, actualCocktails)
 
     Mockito.verify(userGroupLinkService, Mockito.atLeastOnce()).getGroups(username)
-    Mockito.verify(cocktailService).getCocktailsIngredients("group1")
-    Mockito.verify(cocktailService).getCocktailsIngredients("group2")
+    Mockito.verify(cocktailService).getCocktails("group1")
+    Mockito.verify(cocktailService).getCocktails("group2")
   }
 
   @Test
@@ -118,7 +118,7 @@ class FilterIngredientsTest : BaseTest() {
     val ingredients = createIngredients()
     val cocktails = createCocktails(ingredients, "cocktail1", "cocktail2")
 
-    `when`(cocktailService.getCocktailsIngredients(groupId)).thenReturn(cocktails)
+    `when`(cocktailService.getCocktails(groupId)).thenReturn(cocktails)
 
     // When
     val response = filterIngredients.handleBusinessLogic(input, context)
@@ -131,7 +131,7 @@ class FilterIngredientsTest : BaseTest() {
     val actualCocktails = responseObj?.result?.cocktails!!
     assertEquals(cocktails, actualCocktails)
 
-    Mockito.verify(cocktailService).getCocktailsIngredients(groupId)
+    Mockito.verify(cocktailService).getCocktails(groupId)
 
     Mockito.verify(userGroupLinkService, Mockito.never()).getGroups(any())
   }
@@ -223,7 +223,7 @@ class FilterIngredientsTest : BaseTest() {
       {"result":{"cocktails":[]},"loginToken":"Bearer token"}
       """.trimIndent()
     `when`(userGroupLinkService.getGroups("username")).thenReturn(groups)
-    `when`(cocktailService.getCocktailsIngredients(any())).thenReturn(emptyList())
+    `when`(cocktailService.getCocktails(any())).thenReturn(emptyList())
 
     // When
     val response = filterIngredients.handleBusinessLogic(input, context)
