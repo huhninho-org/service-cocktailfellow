@@ -8,7 +8,6 @@ data class Cocktail(
   val cocktailId: String,
   val name: String,
   val method: String?,
-  val story: String?,
   val notes: String?,
   val ingredients: List<Ingredient>
 )

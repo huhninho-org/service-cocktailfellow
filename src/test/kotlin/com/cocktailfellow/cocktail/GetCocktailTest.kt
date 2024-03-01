@@ -39,7 +39,7 @@ class GetCocktailTest : BaseTest() {
     // Given
     val groupId = "group1"
     val cocktailId = "cocktail1"
-    val cocktail = Cocktail(cocktailId, "Cocktail Name", "Method", "Story", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
+    val cocktail = Cocktail(cocktailId, "Cocktail Name", "Method", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer token"),
       "pathParameters" to mapOf("groupId" to groupId, "cocktailId" to cocktailId)

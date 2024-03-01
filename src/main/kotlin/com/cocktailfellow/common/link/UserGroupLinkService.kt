@@ -37,4 +37,14 @@ class UserGroupLinkService {
   fun getGroups(username: String): List<MutableMap<String, AttributeValue>> {
     return userGroupLinkRepository.getGroups(username)
   }
+
+  fun addIbaDefaultGroup(username: String) {
+    val groupId = "default-iba-id"
+    val userGroupLink = String.format(ID_PATTERN, username, groupId)
+
+    if (userGroupLinkRepository.doesLinkAlreadyExist(userGroupLink)) {
+      throw LinkException("The user is already linked to the group.")
+    }
+    return userGroupLinkRepository.createUserToGroupLink(userGroupLink, username, groupId)
+  }
 }

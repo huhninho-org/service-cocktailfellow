@@ -51,7 +51,6 @@ class UpdateCocktail(
         cocktailId,
         request.name,
         request.method,
-        request.story,
         request.notes,
         request.ingredients
       )
@@ -62,7 +61,6 @@ class UpdateCocktail(
       cocktailId = cocktailId,
       name = request.name,
       method = request.method,
-      story = request.story,
       notes = request.notes,
       ingredients = request.ingredients
     )
@@ -84,10 +82,6 @@ data class UpdateCocktailRequest(
   )
   val method: String? = null,
   @field:Size(
-    max = MULTILINE_FIELDS, message = "'story' exceeds the limit of $MULTILINE_FIELDS characters."
-  )
-  val story: String? = null,
-  @field:Size(
     max = MULTILINE_FIELDS, message = "'notes' exceeds the limit of $MULTILINE_FIELDS characters."
   )
   val notes: String? = null,
@@ -100,7 +94,6 @@ data class UpdateCocktailResponse(
   val groupId: String,
   val name: String,
   val method: String?,
-  val story: String?,
   val notes: String?,
   val ingredients: List<Ingredient>
 )

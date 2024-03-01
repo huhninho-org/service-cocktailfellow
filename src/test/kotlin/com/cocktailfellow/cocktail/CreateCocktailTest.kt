@@ -50,7 +50,7 @@ class CreateCocktailTest : BaseTest() {
     // Given
     val groupId = "group1"
     val cocktailRequest =
-      CreateCocktailRequest("Cocktail", "Method", "Story", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
+      CreateCocktailRequest("Cocktail", "Method", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer token"),
       "pathParameters" to mapOf("groupId" to groupId),
@@ -74,7 +74,7 @@ class CreateCocktailTest : BaseTest() {
     // Given
     val groupId = "nonexistentGroup"
     val cocktailRequest =
-      CreateCocktailRequest("Cocktail", "Method", "Story", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
+      CreateCocktailRequest("Cocktail", "Method", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer token"),
       "pathParameters" to mapOf("groupId" to groupId),
@@ -125,7 +125,6 @@ class CreateCocktailTest : BaseTest() {
     val cocktailRequestWithoutIngredients = CreateCocktailRequest(
       name = "Cocktail",
       method = "Method",
-      story = "Story",
       notes = "Notes",
       ingredients = emptyList() // Missing ingredients
     )
@@ -163,18 +162,17 @@ class CreateCocktailTest : BaseTest() {
     )
 
     val cocktailRequest = when (field) {
-      "name" -> CreateCocktailRequest(value, "some name", "Some Story.", "Some Notes.", ingredients)
-      "method" -> CreateCocktailRequest("some name", value, "Some Story.", "Some Notes.", ingredients)
-      "story" -> CreateCocktailRequest("some name", "Some Method.", value, "Some Notes.", ingredients)
-      "notes" -> CreateCocktailRequest("some name", "Some Method.", "Some Story.", value, ingredients)
+      "name" -> CreateCocktailRequest(value, "some name", "Some Notes.", ingredients)
+      "method" -> CreateCocktailRequest("some name", value, "Some Notes.", ingredients)
+      "notes" -> CreateCocktailRequest("some name", "Some Method.", value, ingredients)
       "ingredient" -> CreateCocktailRequest(
-        "some name", "Some Method.", "Some Story.", "Some Notes.", listOf(
+        "some name", "Some Method.", "Some Notes.", listOf(
           Ingredient(value, "50ml")
         )
       )
 
       "amount" -> CreateCocktailRequest(
-        "some name", "Some Method.", "Some Story.", "Some Notes.", listOf(
+        "some name", "Some Method.", "Some Notes.", listOf(
           Ingredient("White Rum", value)
         )
       )
@@ -208,7 +206,6 @@ class CreateCocktailTest : BaseTest() {
       Arguments.of("name", "a".repeat(51), "'name' length should be within 3 to 50 characters."),
       Arguments.of("name", "12", "'name' length should be within 3 to 50 characters."),
       Arguments.of("method", "a".repeat(256), "'method' exceeds the limit of 255 characters."),
-      Arguments.of("story", "a".repeat(256), "'story' exceeds the limit of 255 characters."),
       Arguments.of("notes", "a".repeat(256), "'notes' exceeds the limit of 255 characters."),
       Arguments.of("ingredient", "", "must not be empty"),
       Arguments.of("ingredient", "a".repeat(51), "'ingredientName' exceeds the limit of 50 characters."),

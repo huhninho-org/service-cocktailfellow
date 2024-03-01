@@ -49,7 +49,6 @@ class UpdateCocktailTest {
     val updateRequest = UpdateCocktailRequest(
       name = "Updated Cocktail",
       method = "Updated Method",
-      story = "Updated Story",
       notes = "Updated Notes",
       ingredients = listOf(Ingredient("Ingredient 1", "2cl"))
     )
@@ -80,7 +79,6 @@ class UpdateCocktailTest {
     val updateRequest = UpdateCocktailRequest(
       name = "Updated Cocktail",
       method = "Updated Method",
-      story = "Updated Story",
       notes = "Updated Notes",
       ingredients = listOf(Ingredient("Ingredient 1", "2cl"))
     )
@@ -109,7 +107,8 @@ class UpdateCocktailTest {
     // Given
     val groupId = UUID.randomUUID().toString()
     val cocktailId = UUID.randomUUID().toString()
-    val updateCocktailRequest = UpdateCocktailRequest("Cocktail", "Method", "Story", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
+    val updateCocktailRequest =
+      UpdateCocktailRequest("Cocktail", "Method", "Notes", listOf(Ingredient("Ingredient 1", "1cl")))
     val input = mapOf(
       "headers" to mapOf("Authorization" to "Bearer token"),
       "pathParameters" to mapOf("groupId" to groupId, "cocktailId" to cocktailId),
@@ -139,7 +138,6 @@ class UpdateCocktailTest {
     val updateRequest = UpdateCocktailRequest(
       name = "Updated Cocktail",
       method = "Updated Method",
-      story = "Updated Story",
       notes = "Updated Notes",
       ingredients = emptyList()
     )
@@ -176,10 +174,10 @@ class UpdateCocktailTest {
     )
 
     val cocktailRequest = when (field) {
-      "name" -> CreateCocktailRequest(value , "some method", "Some Story.", "Some Notes.", ingredients)
-      "method" -> CreateCocktailRequest("some name", value, "Some Story.", "Some Notes.", ingredients)
-      "story" -> CreateCocktailRequest("some name", "Some Method.", value, "Some Notes.", ingredients)
-      "notes" -> CreateCocktailRequest("some name", "Some Method.", "Some Story.", value, ingredients)
+      "name" -> CreateCocktailRequest(value, "some method", "Some Notes.", ingredients)
+      "method" -> CreateCocktailRequest("some name", value, "Some Notes.", ingredients)
+      "story" -> CreateCocktailRequest("some name", value, "Some Notes.", ingredients)
+      "notes" -> CreateCocktailRequest("some name", "Some Method.", value, ingredients)
       else -> throw IllegalArgumentException("Invalid field for test")
     }
     val bodyJson = JsonConfig.instance.encodeToString(CreateCocktailRequest.serializer(), cocktailRequest)
@@ -209,7 +207,6 @@ class UpdateCocktailTest {
       Arguments.of("name", "a".repeat(51), "'name' length should be within 3 to 50 characters."),
       Arguments.of("name", "12", "'name' length should be within 3 to 50 characters."),
       Arguments.of("method", "a".repeat(256), "'method' exceeds the limit of 255 characters."),
-      Arguments.of("story", "a".repeat(256), "'story' exceeds the limit of 255 characters."),
       Arguments.of("notes", "a".repeat(256), "'notes' exceeds the limit of 255 characters.")
     )
   }
