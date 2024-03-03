@@ -34,6 +34,10 @@ class UpdateCocktail(
 
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
+    if (cocktailService.isProtected(cocktailId)) {
+      throw BadRequestException("Unable to update protected cocktail '$cocktailId'.")
+    }
+
     if (!userGroupLinkService.isMemberOfGroup(tokenManagementData.username, groupId)) {
       throw BadRequestException("User is not member of the given group.")
     }

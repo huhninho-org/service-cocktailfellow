@@ -9,7 +9,8 @@ data class Cocktail(
   val name: String,
   val method: String?,
   val notes: String?,
-  val ingredients: List<Ingredient>
+  val ingredients: List<Ingredient>,
+  var isProtected: Boolean? = false
 )
 
 @Serializable
@@ -17,5 +18,6 @@ data class CocktailInfo(
   val cocktailId: String,
   val name: String,
   val method: String,
-  val ingredients: List<Ingredient>
+  val ingredients: List<Ingredient>,
+  var isProtected: Boolean? = false
 )

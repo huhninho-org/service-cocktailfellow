@@ -24,6 +24,9 @@ class DeleteCocktail(
 
     val tokenManagementData: TokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
+    if (cocktailService.isProtected(cocktailId)) {
+      throw BadRequestException("Unable to delete protected cocktail '$cocktailId'.")
+    }
     if (!userGroupLinkService.isMemberOfGroup(tokenManagementData.username, groupId)) {
       throw BadRequestException("User is not member of the given group.")
     }

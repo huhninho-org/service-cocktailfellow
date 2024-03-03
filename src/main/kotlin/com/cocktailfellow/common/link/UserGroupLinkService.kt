@@ -1,11 +1,11 @@
 package com.cocktailfellow.common.link
 
 import com.cocktailfellow.common.LinkException
+import com.cocktailfellow.group.DefaultGroups
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 class UserGroupLinkService {
   private val userGroupLinkRepository: UserGroupLinkRepository = UserGroupLinkRepository()
-  private val ID_PATTERN: String = "%s-%s"
 
   fun deleteAllUserGroupLinks(username: String) {
     return userGroupLinkRepository.deleteAllLinksForUser(username)
@@ -16,12 +16,12 @@ class UserGroupLinkService {
   }
 
   fun isMemberOfGroup(username: String, groupId: String): Boolean {
-    val userGroupLink = String.format(ID_PATTERN, username, groupId)
+    val userGroupLink = String.format(Link.ID_PATTERN, username, groupId)
     return userGroupLinkRepository.isMemberOfGroup(userGroupLink)
   }
 
   fun createUserToGroupLink(username: String, groupId: String) {
-    val userGroupLink = String.format(ID_PATTERN, username, groupId)
+    val userGroupLink = String.format(Link.ID_PATTERN, username, groupId)
 
     if (userGroupLinkRepository.doesLinkAlreadyExist(userGroupLink)) {
       throw LinkException("The user is already linked to the group.")
@@ -30,7 +30,7 @@ class UserGroupLinkService {
   }
 
   fun deleteUserToGroupLink(username: String, groupId: String) {
-    val userGroupLink = String.format(ID_PATTERN, username, groupId)
+    val userGroupLink = String.format(Link.ID_PATTERN, username, groupId)
     return userGroupLinkRepository.deleteUserToGroupLink(userGroupLink)
   }
 
@@ -39,8 +39,8 @@ class UserGroupLinkService {
   }
 
   fun addIbaDefaultGroup(username: String) {
-    val groupId = "default-iba-id"
-    val userGroupLink = String.format(ID_PATTERN, username, groupId)
+    val groupId = DefaultGroups.DEFAULT_IBA_ID.toDashedLowerCase()
+    val userGroupLink = String.format(Link.ID_PATTERN, username, groupId)
 
     if (userGroupLinkRepository.doesLinkAlreadyExist(userGroupLink)) {
       throw LinkException("The user is already linked to the group.")

@@ -5,6 +5,7 @@ import com.cocktailfellow.UserBaseTest
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JsonConfig
 import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.link.UserGroupLinkService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,12 +22,14 @@ class CreateUserTestUser : UserBaseTest() {
   private lateinit var createUser: CreateUser
   private lateinit var context: Context
   private lateinit var userService: UserService
+  private lateinit var userGroupLinkService: UserGroupLinkService
 
   @BeforeEach
   fun setup() {
     context = Mockito.mock(Context::class.java)
     userService = Mockito.mock(UserService::class.java)
-    createUser = CreateUser(userService)
+    userGroupLinkService = Mockito.mock(UserGroupLinkService::class.java)
+    createUser = CreateUser(userService, userGroupLinkService)
   }
 
   @Test
@@ -42,8 +45,7 @@ class CreateUserTestUser : UserBaseTest() {
 
     // Then
     verify(userService).persistUser(argThat {
-      username == "testUser" &&
-          hashedPassword != "testPassword"
+      username == "testUser" && hashedPassword != "testPassword"
     })
     assertEquals(HttpStatusCode.CREATED.code, response.statusCode)
   }

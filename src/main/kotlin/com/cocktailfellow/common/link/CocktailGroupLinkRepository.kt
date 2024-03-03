@@ -14,10 +14,9 @@ class CocktailGroupLinkRepository(
   private val log: Logger = LogManager.getLogger(CocktailGroupLinkRepository::class.java)
 
   private val linkTable: String = System.getenv("COCKTAIL_GROUP_LINK_TABLE")
-  private val ID_PATTERN: String = "%s-%s"
 
   fun createCocktailToGroupLink(groupId: String, cocktailId: String) {
-    val cocktailGroupLink = String.format(ID_PATTERN, cocktailId, groupId)
+    val cocktailGroupLink = String.format(Link.ID_PATTERN, cocktailId, groupId)
 
     if (doesLinkAlreadyExist(cocktailGroupLink)) {
       throw LinkException("The cocktail is already linked to the group.")
@@ -48,7 +47,7 @@ class CocktailGroupLinkRepository(
   }
 
   fun isMemberOfGroup(cocktailId: String, groupId: String): Boolean {
-    val userGroupLink = String.format(ID_PATTERN, cocktailId, groupId)
+    val userGroupLink = String.format(Link.ID_PATTERN, cocktailId, groupId)
     print("DEBUG: userGroupLink: $userGroupLink")
     return doesLinkAlreadyExist(userGroupLink)
   }
@@ -76,7 +75,7 @@ class CocktailGroupLinkRepository(
   }
 
   fun deleteLink(cocktailId: String, groupId: String) {
-    val userGroupLink = String.format(ID_PATTERN, cocktailId, groupId)
+    val userGroupLink = String.format(Link.ID_PATTERN, cocktailId, groupId)
     val keyMap = mapOf(
       "id" to AttributeValue.builder().s(userGroupLink).build()
     )

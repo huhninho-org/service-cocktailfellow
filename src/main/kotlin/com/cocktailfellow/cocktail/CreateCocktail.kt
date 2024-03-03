@@ -4,10 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.model.Cocktail
-import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.NotFoundException
-import com.cocktailfellow.common.Type
-import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.*
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.validation.Validation
 import com.cocktailfellow.common.validation.Validation.DEFAULT_MAX
@@ -33,6 +30,10 @@ class CreateCocktail(
     val request = Validation.deserializeAndValidate(getBody(input), CreateCocktailRequest::class)
 
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
+
+    if (groupService.isProtected(groupId)) {
+      throw BadRequestException("Unable to add cocktail to protected group.")
+    }
 
     if (!groupService.doesGroupExist(groupId)) {
       throw NotFoundException(Type.GROUP)

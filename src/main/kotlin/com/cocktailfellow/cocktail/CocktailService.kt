@@ -20,6 +20,14 @@ class CocktailService {
     cocktailRepository.updateCocktail(cocktail)
   }
 
+  fun isProtected(cocktailId: String): Boolean {
+
+    val a = cocktailRepository.getCocktail(cocktailId).isProtected
+    print("DEBUG: isProtected:$a")
+
+    return cocktailRepository.getCocktail(cocktailId).isProtected ?: false
+  }
+
   fun getCocktail(cocktailId: String): Cocktail {
     return cocktailRepository.getCocktail(cocktailId)
   }
@@ -34,7 +42,8 @@ class CocktailService {
       CocktailInfo(cocktailId = cocktailResponse.cocktailId,
         name = cocktailResponse.name,
         method = cocktailResponse.method!!,
-        ingredients = cocktailResponse.ingredients)
+        ingredients = cocktailResponse.ingredients,
+        isProtected = cocktailResponse.isProtected)
     }
   }
 
