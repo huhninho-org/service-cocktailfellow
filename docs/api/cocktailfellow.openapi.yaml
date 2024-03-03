@@ -685,6 +685,10 @@ components:
         method:
           type: string
           example: "In a cocktail shaker, muddle fresh basil leaves and sugar. Add lemon juice and gin to the shaker. Fill the shaker with ice cubes and shake vigorously. Strain the mixture into a chilled cocktail glass. Garnish with a fresh basil leaf."
+        isProtected:
+          type: boolean
+          description: "Whether the cocktail is protected and can't be modified or not."
+          example: true
     IngredientsOverview:
       type: object
       properties:
@@ -730,6 +734,10 @@ components:
           type: string
           description: Name of the group
           example: "my new group"
+        isProtected:
+          type: boolean
+          description: "Whether the group is protected and can't be modified or not."
+          example: false
   securitySchemes:
     apiKey:
       type: apiKey

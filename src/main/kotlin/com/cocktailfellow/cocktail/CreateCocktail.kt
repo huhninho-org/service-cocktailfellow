@@ -4,10 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.cocktailfellow.AbstractRequestHandler
 import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.cocktail.model.Cocktail
-import com.cocktailfellow.common.HttpStatusCode
-import com.cocktailfellow.common.NotFoundException
-import com.cocktailfellow.common.Type
-import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.common.*
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.validation.Validation
 import com.cocktailfellow.common.validation.Validation.DEFAULT_MAX
@@ -34,6 +31,10 @@ class CreateCocktail(
 
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
+    if (groupService.isProtected(groupId)) {
+      throw BadRequestException("Unable to add cocktail to protected group.")
+    }
+
     if (!groupService.doesGroupExist(groupId)) {
       throw NotFoundException(Type.GROUP)
     }
@@ -48,7 +49,6 @@ class CreateCocktail(
         cocktailId,
         request.name,
         request.method,
-        request.story,
         request.notes,
         request.ingredients
       )
@@ -59,7 +59,6 @@ class CreateCocktail(
       cocktailId = cocktailId,
       name = request.name,
       method = request.method,
-      story = request.story,
       notes = request.notes,
       ingredients = request.ingredients
     )
@@ -81,10 +80,6 @@ data class CreateCocktailRequest(
   )
   val method: String? = null,
   @field:Size(
-    max = MULTILINE_FIELDS, message = "'story' exceeds the limit of $MULTILINE_FIELDS characters."
-  )
-  val story: String? = null,
-  @field:Size(
     max = MULTILINE_FIELDS, message = "'notes' exceeds the limit of $MULTILINE_FIELDS characters."
   )
   val notes: String? = null,
@@ -98,7 +93,6 @@ data class CreateCocktailResponse(
   val groupId: String,
   val name: String,
   val method: String?,
-  val story: String?,
   val notes: String?,
   val ingredients: List<Ingredient>
 )

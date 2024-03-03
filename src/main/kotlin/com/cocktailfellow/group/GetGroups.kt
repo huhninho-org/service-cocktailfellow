@@ -7,6 +7,7 @@ import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
+import com.cocktailfellow.group.model.Group
 import kotlinx.serialization.Serializable
 
 class GetGroups(
@@ -25,8 +26,7 @@ class GetGroups(
     val responseGroups = if (groups.isNotEmpty()) {
       groups.map { item ->
         val groupId = item["groupId"]?.s() ?: throw ValidationException("GroupId is missing")
-        val groupName = groupService.getGroupName(groupId)
-        mapOf("groupId" to groupId, "groupName" to groupName)
+        groupService.getGroup(groupId)
       }
     } else {
       emptyList()
@@ -42,5 +42,5 @@ class GetGroups(
 
 @Serializable
 data class GetGroupsResponse(
-  val groups: List<Map<String, String>>?
+  val groups: List<Group>?
 )

@@ -6,6 +6,7 @@ import com.cocktailfellow.ApiGatewayResponse
 import com.cocktailfellow.common.ErrorType
 import com.cocktailfellow.common.HttpStatusCode
 import com.cocktailfellow.common.JwtTokenException
+import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.validation.Validation
 import com.cocktailfellow.common.validation.Validation.CREDENTIALS_MAX
 import com.cocktailfellow.common.validation.Validation.PASSWORD_MIN
@@ -16,7 +17,10 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import javax.validation.constraints.Size
 
-class CreateUser(private val userService: UserService = UserService()) : AbstractRequestHandler() {
+class CreateUser(
+  private val userService: UserService = UserService(),
+  private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
+) : AbstractRequestHandler() {
   private val log: Logger = LogManager.getLogger(CreateUser::class.java)
 
   private val requiredApiKey: String = System.getenv("APP_API_KEY")
@@ -42,6 +46,7 @@ class CreateUser(private val userService: UserService = UserService()) : Abstrac
     userService.persistUser(createUser)
     log.info("User '${createUser.username}' created.")
 
+    userGroupLinkService.addIbaDefaultGroup(createUser.username)
     return generateResponse(HttpStatusCode.CREATED.code)
   }
 }

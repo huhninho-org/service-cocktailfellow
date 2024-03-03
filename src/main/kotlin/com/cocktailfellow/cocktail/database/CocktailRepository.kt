@@ -68,9 +68,12 @@ class CocktailRepository(
 
     val item = dynamoDbClient.getItem(itemRequest).item()
     val cocktailJson = item["data"]?.s()
+    val isProtected: Boolean = item["isProtected"]?.bool() ?: false
 
     return if (cocktailJson != null) {
-      JsonConfig.instance.decodeFromString(cocktailJson)
+      val cocktail: Cocktail = JsonConfig.instance.decodeFromString(cocktailJson)
+      cocktail.isProtected = isProtected
+      cocktail
     } else {
       throw NotFoundException(Type.COCKTAIL)
     }
@@ -81,14 +84,33 @@ class CocktailRepository(
       "cocktailId" to AttributeValue.builder().s(cocktailId).build()
     )
 
+    val conditionExpression = "attribute_not_exists(isProtected) OR isProtected = :falseValue"
+
+    val expressionAttributeValues = mapOf(
+      ":falseValue" to AttributeValue.builder().bool(false).build()
+    )
+
     val deleteItemRequest = DeleteItemRequest.builder()
       .tableName(cocktailTable)
       .key(keyMap)
+      .conditionExpression(conditionExpression)
+      .expressionAttributeValues(expressionAttributeValues)
       .build()
 
     try {
       dynamoDbClient.deleteItem(deleteItemRequest)
       log.info("Cocktail with id '$cocktailId' deleted.")
+    } catch (e: DynamoDbException) {
+      if (e.statusCode() == 400 && e.awsErrorDetails().errorCode() == "ConditionalCheckFailedException") {
+        log.info("Deletion skipped for protected cocktail with id '$cocktailId'.")
+      } else {
+        log.error(
+          "Failed to delete cocktail with id '$cocktailId'. AWS error code: ${
+            e.awsErrorDetails().errorCode()
+          }, Message: ${e.message}"
+        )
+        throw e
+      }
     } catch (e: Exception) {
       log.error("Failed to delete cocktail with id '$cocktailId'. error: ${e.message}")
       throw Exception("Failed to delete cocktail with id '$cocktailId'.")

@@ -1,15 +1,12 @@
 package com.cocktailfellow.group.database
 
 import com.cocktailfellow.common.DynamoDbClientProvider
-import com.cocktailfellow.common.NotFoundException
-import com.cocktailfellow.common.Type
+import com.cocktailfellow.common.ValidationException
+import com.cocktailfellow.group.model.Group
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest
-import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
-import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
+import software.amazon.awssdk.services.dynamodb.model.*
 
 class GroupRepository(
   private val dynamoDbClient: DynamoDbClient = DynamoDbClientProvider.get()
@@ -33,7 +30,7 @@ class GroupRepository(
     log.info("Group '${groupName}' created.")
   }
 
-  fun getGroupName(groupId: String): String {
+  fun getGroup(groupId: String): Group {
     val itemRequest = GetItemRequest.builder()
       .tableName(groupTable)
       .key(mapOf("groupId" to AttributeValue.builder().s(groupId).build()))
@@ -42,8 +39,14 @@ class GroupRepository(
     val response = dynamoDbClient.getItem(itemRequest)
     val groupItem = response.item()
 
-    val groupName = groupItem["groupname"]?.s()
-    return groupName ?: throw NotFoundException(Type.GROUP)
+    val groupName = groupItem["groupname"]?.s() ?: throw ValidationException("Group name is missing")
+    val isProtected = groupItem["isProtected"]?.bool() ?: false
+
+    return Group(
+      groupId = groupId,
+      groupName = groupName,
+      isProtected = isProtected
+    )
   }
 
   fun doesGroupExist(groupId: String): Boolean {
@@ -61,14 +64,33 @@ class GroupRepository(
       "groupId" to AttributeValue.builder().s(groupId).build()
     )
 
+    val conditionExpression = "attribute_not_exists(isProtected) OR isProtected = :falseValue"
+
+    val expressionAttributeValues = mapOf(
+      ":falseValue" to AttributeValue.builder().bool(false).build()
+    )
+
     val deleteItemRequest = DeleteItemRequest.builder()
       .tableName(groupTable)
       .key(keyMap)
+      .conditionExpression(conditionExpression)
+      .expressionAttributeValues(expressionAttributeValues)
       .build()
 
     try {
       dynamoDbClient.deleteItem(deleteItemRequest)
       log.info("Group with id '$groupId' deleted.")
+    } catch (e: DynamoDbException) {
+      if (e.statusCode() == 400 && e.awsErrorDetails().errorCode() == "ConditionalCheckFailedException") {
+        log.info("Deletion skipped for protected group with id '$groupId'.")
+      } else {
+        log.error(
+          "Failed to delete group with id '$groupId'. AWS error code: ${
+            e.awsErrorDetails().errorCode()
+          }, Message: ${e.message}"
+        )
+        throw e
+      }
     } catch (e: Exception) {
       log.error("Failed to delete group with id '$groupId'. error: ${e.message}")
       throw Exception("Failed to delete group with id '$groupId'.")

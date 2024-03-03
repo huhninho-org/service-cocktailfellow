@@ -33,9 +33,9 @@ class GetCocktail(
       cocktailId = cocktail.cocktailId,
       name = cocktail.name,
       method = cocktail.method,
-      story = cocktail.story,
       notes = cocktail.notes,
-      ingredients = cocktail.ingredients
+      ingredients = cocktail.ingredients,
+      isProtected = cocktail.isProtected
     )
 
     return generateResponse(HttpStatusCode.OK.code, response, tokenManagementData.loginToken)
@@ -47,7 +47,7 @@ data class GetCocktailResponse(
   val cocktailId: String,
   val name: String,
   val method: String?,
-  val story: String?,
   val notes: String?,
-  val ingredients: List<Ingredient>
+  val ingredients: List<Ingredient>,
+  var isProtected: Boolean? = false
 )

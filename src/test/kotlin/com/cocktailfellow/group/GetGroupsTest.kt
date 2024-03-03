@@ -8,6 +8,7 @@ import com.cocktailfellow.common.ValidationException
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
+import com.cocktailfellow.group.model.Group
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -48,16 +49,16 @@ class GetGroupsTest : BaseTest() {
     )
 
     val expectedGroups = listOf(
-      mutableMapOf("groupId" to "group1", "groupName" to "Group 1"),
-      mutableMapOf("groupId" to "group2", "groupName" to "Group 2")
+      Group(groupId = "group1", groupName = "Group 1"),
+      Group(groupId = "group2", groupName = "Group 2")
     )
 
     `when`(tokenManagement.validateTokenAndGetData(ArgumentMatchers.any())).thenReturn(
       TokenManagementData("username", "token")
     )
     `when`(userGroupLinkService.getGroups("username")).thenReturn(groups)
-    `when`(groupService.getGroupName("group1")).thenReturn("Group 1")
-    `when`(groupService.getGroupName("group2")).thenReturn("Group 2")
+    `when`(groupService.getGroup("group1")).thenReturn(Group(groupId = "group1", groupName = "Group 1"))
+    `when`(groupService.getGroup("group2")).thenReturn(Group(groupId = "group2", groupName = "Group 2"))
 
     // When
     val response = getGroups.handleBusinessLogic(input, context)
@@ -75,7 +76,7 @@ class GetGroupsTest : BaseTest() {
     // Given
     val input = mapOf("headers" to mapOf("Authorization" to "Bearer valid-token"))
     `when`(tokenManagement.validateTokenAndGetData(ArgumentMatchers.any())).thenReturn(
-        TokenManagementData("username", "token")
+      TokenManagementData("username", "token")
     )
     `when`(userGroupLinkService.getGroups("username")).thenReturn(emptyList())
 
