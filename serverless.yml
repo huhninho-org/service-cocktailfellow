@@ -82,9 +82,11 @@ functions:
         Action:
           - dynamodb:PutItem
           - dynamodb:Query
+          - dynamodb:GetItem
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}/index/username-index
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
   updatePasswordUser:
     handler: com.cocktailfellow.user.UpdatePasswordUser
     events:
