@@ -64,14 +64,14 @@ class LoginUser(
       throw throwJwtTokenException()
     }
   }
-}
-
-private fun throwJwtTokenException(): Throwable {
-  throw JwtTokenException(
-    "${HttpStatusCode.UNAUTHORIZED.reason}. Invalid credentials.",
-    ErrorType.JWT_INVALID_EXCEPTION,
-    HttpStatusCode.UNAUTHORIZED
-  )
+  private fun throwJwtTokenException(): Throwable {
+    log.error("Invalid credentials.")
+    throw JwtTokenException(
+      "${HttpStatusCode.UNAUTHORIZED.reason}. Invalid credentials.",
+      ErrorType.JWT_INVALID_EXCEPTION,
+      HttpStatusCode.UNAUTHORIZED
+    )
+  }
 }
 
 @Serializable

@@ -16,6 +16,8 @@ import com.cocktailfellow.common.validation.Validation.DEFAULT_MIN
 import com.cocktailfellow.common.validation.Validation.MULTILINE_FIELDS
 import com.cocktailfellow.ingredient.model.Ingredient
 import kotlinx.serialization.Serializable
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import javax.validation.constraints.Size
 
 class UpdateCocktail(
@@ -24,6 +26,7 @@ class UpdateCocktail(
   private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService(),
   private val cocktailGroupLinkService: CocktailGroupLinkService = CocktailGroupLinkService()
 ) : AbstractRequestHandler() {
+  private val log: Logger = LogManager.getLogger(UpdateCocktail::class.java)
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -34,19 +37,24 @@ class UpdateCocktail(
 
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
 
+    log.info("Update cocktail '$cocktailId'.")
     if (cocktailService.isProtected(cocktailId)) {
+      log.info("Unable to update protected cocktail '$cocktailId'.")
       throw BadRequestException("Unable to update protected cocktail '$cocktailId'.")
     }
 
     if (!userGroupLinkService.isMemberOfGroup(tokenManagementData.username, groupId)) {
+      log.error("User '${tokenManagementData.username}' is not member of group '$groupId'.")
       throw BadRequestException("User is not member of the given group.")
     }
 
     if (!cocktailGroupLinkService.isMemberOfGroup(cocktailId, groupId)) {
+      log.error("Cocktail '$cocktailId' is not member of group '$groupId'.")
       throw BadRequestException("Cocktail is not member of the given group.")
     }
 
     if (request.ingredients.isEmpty()) {
+      log.error("Ingredients list cannot be empty for cocktail '$cocktailId'.")
       throw ValidationException("Ingredients list cannot be empty.")
     }
 
@@ -68,6 +76,7 @@ class UpdateCocktail(
       notes = request.notes,
       ingredients = request.ingredients
     )
+    log.info("Cocktail '$cocktailId' updated.")
 
     return generateResponse(HttpStatusCode.CREATED.code, response, tokenManagementData.loginToken)
   }

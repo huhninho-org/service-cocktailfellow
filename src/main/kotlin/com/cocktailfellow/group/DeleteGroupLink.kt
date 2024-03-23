@@ -10,6 +10,8 @@ import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.common.token.TokenManagementData
 import com.cocktailfellow.user.UserService
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 class DeleteGroupLink(
     private val tokenManagement: TokenManagement = TokenManagement(),
@@ -17,6 +19,7 @@ class DeleteGroupLink(
     private val userService: UserService = UserService(),
     private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
 ) : AbstractRequestHandler() {
+  private val log: Logger = LogManager.getLogger(DeleteGroupLink::class.java)
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -33,6 +36,7 @@ class DeleteGroupLink(
     }
 
     userGroupLinkService.deleteUserToGroupLink(username, groupId)
+    log.info("Link from user '$username' to group '$groupId' deleted.")
 
     return generateResponse(HttpStatusCode.OK.code, tokenManagementData.loginToken)
   }

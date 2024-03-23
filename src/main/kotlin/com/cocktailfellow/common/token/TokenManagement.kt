@@ -23,7 +23,6 @@ class TokenManagement {
     val bearerLoginToken = extractBearer(loginToken)
     validateToken(bearerLoginToken)
     val username = getUsername(bearerLoginToken)
-    log.info("Valid login for token $bearerLoginToken")
     return TokenManagementData(
       username = username,
       loginToken = createLoginToken(username)
@@ -65,10 +64,13 @@ class TokenManagement {
         .body
         .get("username", String::class.java)
     } catch (exception: SignatureException) {
+      log.error("Invalid token signature. Exception: $exception")
       throw JwtTokenException("Invalid token signature. Please try again lager", ErrorType.JWT_INVALID_SIGNATURE_EXCEPTION)
     } catch (exception: ExpiredJwtException) {
+      log.error("Session expired. Please log in again. Exception: $exception")
       throw JwtTokenException("Session expired. Please log in again.", ErrorType.JWT_EXPIRED_EXCEPTION)
     } catch (exception: Exception) {
+      log.error("Invalid Token. Exception: $exception")
       throw JwtTokenException("Invalid Token.", ErrorType.JWT_INVALID_EXCEPTION)
     }
   }

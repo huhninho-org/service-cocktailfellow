@@ -14,6 +14,8 @@ import com.cocktailfellow.common.validation.Validation.CREDENTIALS_MAX
 import com.cocktailfellow.common.validation.Validation.USERNAME_MIN
 import com.cocktailfellow.user.UserService
 import kotlinx.serialization.Serializable
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import javax.validation.constraints.Size
 
 class CreateGroupLink(
@@ -22,6 +24,8 @@ class CreateGroupLink(
   private val userService: UserService = UserService(),
   private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
 ) : AbstractRequestHandler() {
+  private val log: Logger = LogManager.getLogger(CreateGroupLink::class.java)
+
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -38,6 +42,7 @@ class CreateGroupLink(
     }
 
     userGroupLinkService.createUserToGroupLink(usernameToBeLinked, groupId)
+    log.info("User '$usernameToBeLinked' linked to group '$groupId'.")
 
     return generateResponse(HttpStatusCode.CREATED.code, tokenManagementData.loginToken)
   }
