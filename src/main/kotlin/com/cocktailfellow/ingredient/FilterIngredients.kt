@@ -12,12 +12,15 @@ import com.cocktailfellow.common.Type
 import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import kotlinx.serialization.Serializable
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 class FilterIngredients(
   private val tokenManagement: TokenManagement = TokenManagement(),
   private val cocktailService: CocktailService = CocktailService(),
   private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService()
 ) : AbstractRequestHandler() {
+  private val log: Logger = LogManager.getLogger(FilterIngredients::class.java)
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -27,6 +30,7 @@ class FilterIngredients(
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
     val username = tokenManagementData.username
 
+    log.info("Filter cocktails for user '$username'.")
     val unfilteredCocktails = if (filterGroupId.isNullOrEmpty()) {
       val groups = userGroupLinkService.getGroups(username)
       if (groups.isEmpty())
@@ -49,6 +53,7 @@ class FilterIngredients(
     val response = SearchCocktailsByIngredientsResponse(
       cocktails = filteredCocktails
     )
+    log.info("Cocktails filtered for user '$username'.")
 
     return generateResponse(HttpStatusCode.OK.code, response, tokenManagementData.loginToken)
   }

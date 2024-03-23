@@ -9,12 +9,15 @@ import com.cocktailfellow.common.link.UserGroupLinkService
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.group.model.Group
 import kotlinx.serialization.Serializable
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 class GetGroups(
   private val tokenManagement: TokenManagement = TokenManagement(),
   private val userGroupLinkService: UserGroupLinkService = UserGroupLinkService(),
   private val groupService: GroupService = GroupService()
 ) : AbstractRequestHandler() {
+  private val log: Logger = LogManager.getLogger(GetGroups::class.java)
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -35,6 +38,7 @@ class GetGroups(
     val response = GetGroupsResponse(
       groups = responseGroups
     )
+    log.info("Groups fetched for user '$username'.")
 
     return generateResponse(HttpStatusCode.OK.code, response, tokenManagementData.loginToken)
   }

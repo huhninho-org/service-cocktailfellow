@@ -43,10 +43,11 @@ class CreateUser(
       hashedPassword = hashedPassword
     )
 
+    log.info("Create user '${createUser.username}'.")
     userService.persistUser(createUser)
+    userGroupLinkService.addIbaDefaultGroup(createUser.username)
     log.info("User '${createUser.username}' created.")
 
-    userGroupLinkService.addIbaDefaultGroup(createUser.username)
     return generateResponse(HttpStatusCode.CREATED.code)
   }
 }

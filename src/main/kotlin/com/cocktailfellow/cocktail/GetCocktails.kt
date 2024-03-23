@@ -10,12 +10,15 @@ import com.cocktailfellow.common.Type
 import com.cocktailfellow.common.token.TokenManagement
 import com.cocktailfellow.group.GroupService
 import kotlinx.serialization.Serializable
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 class GetCocktails(
   private val tokenManagement: TokenManagement = TokenManagement(),
   private val cocktailService: CocktailService = CocktailService(),
   private val groupService: GroupService = GroupService()
 ) : AbstractRequestHandler() {
+  private val log: Logger = LogManager.getLogger(GetCocktails::class.java)
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -32,6 +35,7 @@ class GetCocktails(
       cocktails = cocktails
     )
 
+    log.info("Cocktails fetched for group '$groupId'.")
     return generateResponse(HttpStatusCode.OK.code, response, tokenManagementData.loginToken)
   }
 }

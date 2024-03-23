@@ -17838,3 +17838,7 @@ replay_pid*
 /.vscode/
 /.dynamodb/dynamodb-local-metadata.json
 /.serverless/
+/build/
+/node_modules/
+/.idea/
+/.gradle/

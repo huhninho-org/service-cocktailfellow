@@ -13,6 +13,8 @@ import com.cocktailfellow.common.validation.Validation.MULTILINE_FIELDS
 import com.cocktailfellow.group.GroupService
 import com.cocktailfellow.ingredient.model.Ingredient
 import kotlinx.serialization.Serializable
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import java.util.*
 import javax.validation.Valid
 import javax.validation.constraints.Size
@@ -22,6 +24,7 @@ class CreateCocktail(
   private val cocktailService: CocktailService = CocktailService(),
   private val groupService: GroupService = GroupService()
 ) : AbstractRequestHandler() {
+  private val log: Logger = LogManager.getLogger(CreateCocktail::class.java)
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
     val authorization = getAuthorizationHeader(input)
@@ -30,20 +33,24 @@ class CreateCocktail(
     val request = Validation.deserializeAndValidate(getBody(input), CreateCocktailRequest::class)
 
     val tokenManagementData = tokenManagement.validateTokenAndGetData(authorization)
+    val cocktailId = UUID.randomUUID().toString()
 
+    log.info("Create cocktail '$cocktailId'.")
     if (groupService.isProtected(groupId)) {
+      log.info("Unable to create cocktail due to protected group.")
       throw BadRequestException("Unable to add cocktail to protected group.")
     }
 
     if (!groupService.doesGroupExist(groupId)) {
+      log.error("Group not found '$groupId' for cocktail '$cocktailId'.")
       throw NotFoundException(Type.GROUP)
     }
 
     if (request.ingredients.isEmpty()) {
+      log.error("Ingredients list cannot be empty for cocktail '$cocktailId'.")
       throw ValidationException("Ingredients list cannot be empty.")
     }
 
-    val cocktailId = UUID.randomUUID().toString()
     cocktailService.createCocktail(
       groupId, Cocktail(
         cocktailId,
@@ -63,6 +70,7 @@ class CreateCocktail(
       ingredients = request.ingredients
     )
 
+    log.info("Cocktail '$cocktailId' created.")
     return generateResponse(HttpStatusCode.CREATED.code, response, tokenManagementData.loginToken)
   }
 }

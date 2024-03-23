@@ -21,10 +21,6 @@ class CocktailService {
   }
 
   fun isProtected(cocktailId: String): Boolean {
-
-    val a = cocktailRepository.getCocktail(cocktailId).isProtected
-    print("DEBUG: isProtected:$a")
-
     return cocktailRepository.getCocktail(cocktailId).isProtected ?: false
   }
 
