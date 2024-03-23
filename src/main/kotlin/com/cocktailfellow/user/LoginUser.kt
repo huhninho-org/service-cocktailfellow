@@ -34,9 +34,8 @@ class LoginUser(
     log.info("User '$username' is trying to log in")
     val user = getUserOrThrow(loginRequest.username)
     validatePassword(loginRequest.password, user.hashedPassword)
-
-    log.info("User '$username' login successful")
     val loginToken = tokenManagement.createLoginToken(loginRequest.username)
+    log.info("User '$username' login successful")
 
     return generateResponse(HttpStatusCode.OK.code, loginToken)
   }
