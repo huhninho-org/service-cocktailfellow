@@ -10,13 +10,12 @@ import io.jsonwebtoken.security.SignatureException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.security.Key
+import java.time.Instant
 import java.util.*
 
 class TokenManagement {
 
   private val key: Key = Keys.hmacShaKeyFor(TokenManagementConfig.appSecretKey.toByteArray())
-  private val nowMillis = System.currentTimeMillis()
-  private val now = Date(nowMillis)
   private val log: Logger = LogManager.getLogger(TokenManagement::class.java)
 
   fun validateTokenAndGetData(loginToken: String?): TokenManagementData {
@@ -30,10 +29,13 @@ class TokenManagement {
   }
 
   fun createLoginToken(username: String): String {
+    val nowUtc = Instant.now()
+    val expirationUtc = nowUtc.plusMillis(TokenManagementConfig.jwtTtl)
+
     return Jwts.builder()
       .setSubject(username)
-      .setIssuedAt(now)
-      .setExpiration(Date(nowMillis + TokenManagementConfig.jwtTtl))
+      .setIssuedAt(Date.from(nowUtc))
+      .setExpiration(Date.from(expirationUtc))
       .claim("username", username)
       .signWith(key, SignatureAlgorithm.HS256)
       .compact()
