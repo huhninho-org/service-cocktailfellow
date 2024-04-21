@@ -75,7 +75,12 @@ only the setup of serverless and a local development environment will be discuss
 
 ### Prerequisites
 
-To get the app running locally, the following packages are required:
+To set up the project locally for development and testing, you need the following installed:#
+- **Kotlin**
+- **Gradle**
+- **Node.js** and **npm**
+
+Install Serverless CLI and plugins:
 
 ##### Serverless
 
