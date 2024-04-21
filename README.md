@@ -59,10 +59,12 @@ The Service uses the following technologies:
 
 ## Secrets Management
 
-Secrets are stored in Serverless.com's [secrets store](https://www.serverless.com/secrets). The secrets are injected as
-environment variables into the Lambda functions at deployment time. Therefore, the secrets are not stored in the
-repository and are not visible in the code. You will not have access to the secrets store unless you are granted access
-by the project owner.
+Secrets are stored both in Serverless.com's [secrets store](https://www.serverless.com/secrets) and [GitHub Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions).
+
+- **Serverless Parameters**: Secrets such as `jwt-ttl` and `app-secret-key` are stored in the serverless.yaml file as
+parameters. These parameters are injected into Lambda functions at deployment time.
+- **GitHub Secrets**: Secrets like `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are stored as GitHub Secrets. These
+secrets are used during the deployment process to authenticate with AWS.
 
 ## Local Development
 
