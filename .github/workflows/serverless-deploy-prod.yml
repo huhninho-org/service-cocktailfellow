@@ -1,10 +1,10 @@
 # https://www.serverless.com/framework/docs/guides/cicd/running-in-your-own-cicd
-name: Serverless Deploy DEV
+name: Serverless Deploy PROD
 
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
   deploy:
@@ -36,9 +36,9 @@ jobs:
       - name: Build Jar
         run: ./gradlew clean build
 
-      - name: Deploy to AWS dev
+      - name: Deploy to AWS prod
         env:
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: serverless deploy --stage dev
+          SERVERLESS_ACCESS_KEY: ${{ secrets.PROD_SERVERLESS_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+        run: serverless deploy --stage prod
