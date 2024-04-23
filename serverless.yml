@@ -281,6 +281,7 @@ functions:
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktailGroupLink}
 
 # ingredients
