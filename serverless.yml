@@ -2,7 +2,7 @@ org: lhoerhan
 app: cocktail-fellow
 service: cocktail-fellow
 
-frameworkVersion: "3.38.0"
+frameworkVersion: "4.2.1"
 
 custom:
   teamPrefix: cocktail_fellow
