@@ -2,8 +2,6 @@ org: lhoerhan
 app: cocktail-fellow
 service: cocktail-fellow
 
-frameworkVersion: "3.38.0"
-
 custom:
   teamPrefix: cocktail_fellow
   stage: ${opt:stage, self:provider.stage}
@@ -409,7 +407,6 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
-
 
 plugins:
   - serverless-iam-roles-per-function

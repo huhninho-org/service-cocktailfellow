@@ -75,7 +75,7 @@ only the setup of serverless and a local development environment will be discuss
 
 ### Prerequisites
 
-To set up the project locally for development and testing, you need the following installed:#
+To set up the project locally for development and testing, you need the following installed:
 - **Kotlin**
 - **Gradle**
 - **Node.js** and **npm**
