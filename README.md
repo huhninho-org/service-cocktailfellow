@@ -13,7 +13,6 @@ accessing cocktail recipes effectively.
 - [Key Technologies](#key-technologies)
 - [Secrets Management](#secrets-management)
 - [Local Development](#local-development)
-- [Contact](#contact)
 
 ## Features
 
@@ -182,12 +181,3 @@ curl --location 'http://localhost:3000/local/groups' \
     "groupName":"my-group"
 }'
 ```
-
-## Contact
-
-For support or to engage in community discussions, feel free to reach out:
-
-- **Cocktail Fellow GitHub Issues**: Visit
-  our [GitHub issues](https://github.com/huhninho/service-cocktailfellow/issues) to report issues.
-
-We welcome your questions, feedback, and contributions!
