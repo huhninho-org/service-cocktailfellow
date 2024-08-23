@@ -42,15 +42,15 @@ custom:
       migrate: true
       seed: true
       convertEmptyValues: true
-  officeHoursWarmer:
-    enabled: ${self:provider.stage} == 'prod'
-    events:
-      - schedule: cron(0/5 17-23 ? * MON-FRI *)   # Monday to Friday 17:00 to 23:55
-      - schedule: cron(0/5 0-2 ? * FRI-SAT *)     # Friday to Saturday 00:00 to 02:55
-      - schedule: cron(0/5 13-23 ? * SAT-SUN *)   # Saturday and Sunday 13:00 to 23:55
-    concurrency: 2
-    verbose: false
-    logRetentionInDays: 14
+  warmup:
+    officeHoursWarmer:
+      events:
+        - schedule: cron(0/5 14-23 ? * MON-FRI *)   # Monday to Friday 14:00 to 23:55
+        - schedule: cron(0/5 0-2 ? * FRI-SAT *)     # Friday to Saturday 00:00 to 02:55
+        - schedule: cron(0/5 13-23 ? * SAT-SUN *)   # Saturday and Sunday 13:00 to 23:55
+      concurrency: 2
+      verbose: false
+      logRetentionInDays: 14
 
 provider:
   name: aws
@@ -96,6 +96,9 @@ functions:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}/index/username-index
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
+    warmup:
+      default:
+        enabled: prod
   updatePasswordUser:
     handler: com.cocktailfellow.user.UpdatePasswordUser
     events:
@@ -142,6 +145,9 @@ functions:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
+    warmup:
+      default:
+        enabled: prod
   getGroups:
     handler: com.cocktailfellow.group.GetGroups
     events:
@@ -158,6 +164,9 @@ functions:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
+    warmup:
+      default:
+        enabled: prod
   createGroupLink:
     handler: com.cocktailfellow.group.CreateGroupLink
     events:
@@ -226,6 +235,9 @@ functions:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktailGroupLink}
+    warmup:
+      default:
+        enabled: prod
   updateCocktail:
     handler: com.cocktailfellow.cocktail.UpdateCocktail
     events:
@@ -244,6 +256,9 @@ functions:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktailGroupLink}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
+    warmup:
+      default:
+        enabled: prod
   getCocktails:
     handler: com.cocktailfellow.cocktail.GetCocktails
     events:
@@ -260,6 +275,9 @@ functions:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktailGroupLink}
+    warmup:
+      default:
+        enabled: prod
   getCocktail:
     handler: com.cocktailfellow.cocktail.GetCocktail
     events:
@@ -274,6 +292,9 @@ functions:
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.group}
+    warmup:
+      default:
+        enabled: prod
   deleteCocktail:
     handler: com.cocktailfellow.cocktail.DeleteCocktail
     events:
@@ -312,6 +333,9 @@ functions:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.userGroupLink}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktailGroupLink}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.cocktail}
+    warmup:
+      default:
+        enabled: prod
 
 # login
   login:
@@ -327,6 +351,9 @@ functions:
           - dynamodb:Scan
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tables.user}
+    warmup:
+      default:
+        enabled: prod
 
 resources:
   Resources:
