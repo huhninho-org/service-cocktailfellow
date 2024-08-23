@@ -1,10 +1,9 @@
-# https://www.serverless.com/framework/docs/guides/cicd/running-in-your-own-cicd
 name: Serverless Deploy PROD
 
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:

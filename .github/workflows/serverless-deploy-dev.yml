@@ -1,10 +1,9 @@
-# https://www.serverless.com/framework/docs/guides/cicd/running-in-your-own-cicd
 name: Serverless Deploy DEV
 
 on:
   push:
-    branches:
-      - develop
+    branches-ignore:
+      - master
 
 jobs:
   deploy:
@@ -42,3 +41,14 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: serverless deploy --stage dev
+
+      - name: Create Pull Request to Master
+        if: success()
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: ${{ github.ref_name }}
+          destination_branch: master
+          pr_title: 'Merge ${{ github.ref_name }} into master'
+          pr_body: 'Automated pull request to merge changes from ${{ github.ref_name }} into master.'
+          pr_assignee: ''
+          github_token: ${{ secrets.GITHUB_TOKEN }}
