@@ -41,8 +41,3 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: serverless deploy --stage dev
-
-      - name: Create Pull Request
-        run: gh pr create --base master --head update-readme --title 'Merge ${{ github.ref_name }} into master' --body 'Automated pull request to merge changes from ${{ github.ref_name }} into master.'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
