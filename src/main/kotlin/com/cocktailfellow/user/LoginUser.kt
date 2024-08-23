@@ -27,6 +27,11 @@ class LoginUser(
   private val log: Logger = LogManager.getLogger(LoginUser::class.java)
 
   override fun handleBusinessLogic(input: Map<String, Any>, context: Context): ApiGatewayResponse {
+    if (isWarmupRequest(input)) {
+      log.info("Warmup - Login is warm!")
+      return generateResponse(HttpStatusCode.OK.code)
+    }
+
     validateApiKey(getApiKeyHeader(input))
     val loginRequest = Validation.deserializeAndValidate(getBody(input), LoginRequest::class)
     val username = loginRequest.username
@@ -38,6 +43,10 @@ class LoginUser(
     log.info("User '$username' login successful")
 
     return generateResponse(HttpStatusCode.OK.code, loginToken)
+  }
+
+  private fun isWarmupRequest(input: Map<String, Any>): Boolean {
+    return input["source"] == "serverless-plugin-warmup"
   }
 
   private fun validateApiKey(apiKey: String?) {
