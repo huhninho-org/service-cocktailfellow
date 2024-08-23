@@ -42,6 +42,15 @@ custom:
       migrate: true
       seed: true
       convertEmptyValues: true
+  officeHoursWarmer:
+    enabled: ${self:provider.stage} == 'prod'
+    events:
+      - schedule: cron(0/5 17-23 ? * MON-FRI *)   # Monday to Friday 17:00 to 23:55
+      - schedule: cron(0/5 0-2 ? * FRI-SAT *)     # Friday to Saturday 00:00 to 02:55
+      - schedule: cron(0/5 13-23 ? * SAT-SUN *)   # Saturday and Sunday 13:00 to 23:55
+    concurrency: 2
+    verbose: false
+    logRetentionInDays: 14
 
 provider:
   name: aws
